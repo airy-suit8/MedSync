@@ -1,10 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Placeholder in the shape of a dashboard (header, stat row, two panels) while data loads.
-export default function DashboardSkeleton({ label = "Loading dashboard" }: { label?: string }) {
+export default function DashboardSkeleton() {
   return (
     <div className="min-h-screen p-6 md:p-12 max-w-7xl mx-auto" aria-busy="true">
-      <span className="sr-only" role="status">{label}</span>
+      <span className="sr-only" role="status">Loading dashboard</span>
       <div className="border-b border-black/10 pb-8 mb-10 space-y-3">
         <Skeleton className="h-3 w-32 rounded-none bg-black/[0.06]" />
         <Skeleton className="h-10 w-72 rounded-none bg-black/[0.06]" />
