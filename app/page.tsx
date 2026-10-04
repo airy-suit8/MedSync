@@ -233,8 +233,12 @@ export default function HomePage() {
               />
               <span className="font-bold tracking-tight">MedSync</span>
             </div>
+            <nav aria-label="Legal" className="flex gap-6 text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            </nav>
             <div className="text-[10px] text-white/50 font-mono uppercase tracking-[0.2em]">
-              © 2025 MedSync Platform / All Rights Reserved
+              © {new Date().getFullYear()} MedSync Platform / All Rights Reserved
             </div>
           </div>
         </div>
