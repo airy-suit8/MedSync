@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
+import { pressable } from "@/lib/utils"
 
 interface Message {
   id: string
@@ -583,7 +584,7 @@ export default function PatientChatPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between flex-shrink-0">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Dashboard Node</span>
           </Link>
@@ -593,7 +594,7 @@ export default function PatientChatPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Link Status
           </span>
           <span className="text-xl font-mono border-b-2 border-green-500 inline-flex items-center gap-2">
@@ -608,7 +609,7 @@ export default function PatientChatPage() {
         <div className="w-80 flex flex-col gap-8 flex-shrink-0">
           <div className="border border-black/10 bg-white flex flex-col min-h-0 h-full">
             <div className="p-6 border-b border-black/10 bg-black/[0.02]">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-4 flex items-center gap-2">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-4 flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Contact Directory
               </h3>
@@ -618,7 +619,7 @@ export default function PatientChatPage() {
                     key={tab}
                     onClick={() => handleTabChange(tab)}
                     className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-widest transition-all ${
-                      activeTab === tab ? 'bg-white text-black shadow-sm' : 'text-black/40 hover:text-black'
+                      activeTab === tab ? 'bg-white text-black shadow-sm' : 'text-black/55 hover:text-black'
                     }`}
                   >
                     {tab}
@@ -634,14 +635,14 @@ export default function PatientChatPage() {
                     <Activity className="h-6 w-6 animate-spin mx-auto text-black/20" />
                   </div>
                 ) : getActiveContacts().length === 0 ? (
-                  <div className="p-8 text-center text-[10px] font-mono uppercase text-black/40">
+                  <div className="p-8 text-center text-[10px] font-mono uppercase text-black/55">
                     No active nodes found
                   </div>
                 ) : (
                   getActiveContacts().map((contact) => (
                     <div
                       key={contact.id}
-                      onClick={() => setSelectedContact(contact)}
+                      {...pressable(() => setSelectedContact(contact))}
                       className={`p-6 cursor-pointer transition-all relative group ${
                         selectedContact?.id === contact.id ? 'bg-black/[0.02]' : 'hover:bg-black/[0.01]'
                       }`}
@@ -657,7 +658,7 @@ export default function PatientChatPage() {
                               <span className="h-1.5 w-1.5 bg-green-500 rounded-full"></span>
                             )}
                           </div>
-                          <p className="text-[10px] font-mono uppercase text-black/40">{contact.specialty || contact.role}</p>
+                          <p className="text-[10px] font-mono uppercase text-black/55">{contact.specialty || contact.role}</p>
                         </div>
                         {getUnreadCount(contact.id) > 0 && (
                           <div className="h-5 w-5 bg-red-600 text-white text-[10px] font-black flex items-center justify-center">
@@ -686,15 +687,15 @@ export default function PatientChatPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black uppercase tracking-tight">{selectedContact.name}</h3>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-black/40">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-black/55">
                       Channel active • {selectedContact.role}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                   <span className="text-[10px] font-mono text-black/40 uppercase">E2EE ACTIVE</span>
+                   <span className="text-[10px] font-mono text-black/55 uppercase">E2EE ACTIVE</span>
                    <div className="h-8 w-8 border border-black/10 flex items-center justify-center hover:border-black cursor-pointer transition-colors">
-                     <Clock className="h-4 w-4 text-black/40" />
+                     <Clock className="h-4 w-4 text-black/55" />
                    </div>
                 </div>
               </div>
@@ -720,7 +721,7 @@ export default function PatientChatPage() {
                       >
                         {message.content}
                       </div>
-                      <div className="mt-2 flex items-center gap-3 justify-end text-[10px] font-mono text-black/40 uppercase">
+                      <div className="mt-2 flex items-center gap-3 justify-end text-[10px] font-mono text-black/55 uppercase">
                         <span>{formatTime(message.created_at)}</span>
                         {message.sender_id === currentUserId && (
                           message.is_read ? <CheckCheck className="h-3 w-3 text-green-500" /> : <Check className="h-3 w-3" />
@@ -768,7 +769,7 @@ export default function PatientChatPage() {
                <div className="max-w-xs">
                  <MessageSquare className="h-16 w-16 text-black/10 mx-auto mb-6" />
                  <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Comms Offline</h3>
-                 <p className="text-xs font-mono uppercase tracking-widest text-black/40 leading-loose">
+                 <p className="text-xs font-mono uppercase tracking-widest text-black/55 leading-loose">
                    Select a clinical node from the directory to establish a secure uplink.
                  </p>
                </div>

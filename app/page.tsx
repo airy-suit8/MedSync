@@ -24,16 +24,16 @@ export default function HomePage() {
             <span className="text-xl font-bold tracking-tight">MedSync</span>
           </div>
           <div className="flex items-center space-x-6">
-            <Link href="/login">
-              <Button variant="ghost" className="text-sm font-medium">
+            <Button variant="ghost" className="text-sm font-medium" asChild>
+              <Link href="/login">
                 Sign In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-black hover:bg-black/90 text-white text-sm font-medium px-6">
+              </Link>
+            </Button>
+            <Button className="bg-black hover:bg-black/90 text-white text-sm font-medium px-6" asChild>
+              <Link href="/signup">
                 GET STARTED →
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -60,9 +60,9 @@ export default function HomePage() {
         <div className="container mx-auto px-6 lg:px-12 py-20 lg:py-32">
           {/* Section Label */}
           <div className="mb-16">
-            <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+            <h2 className="text-xs font-mono tracking-widest text-black/55 uppercase">
                &quot;CORE FUNCTIONALITY&quot;
-            </span>
+            </h2>
           </div>
 
           {/* 3x2 Grid with borders */}
@@ -80,7 +80,6 @@ export default function HomePage() {
               title='"REAL-TIME"' 
               description="Instant communication between doctors, labs, and patients. Live notifications and synchronized dashboards."
               tag="WEBSOCKET"
-              delay={0.1}
             />
             <FeatureCard 
               index="03" 
@@ -88,7 +87,6 @@ export default function HomePage() {
               title='"SECURE"' 
               description="Role-based access control with audit trails and encrypted data storage."
               tag="RLS + JWT"
-              delay={0.2}
             />
             <FeatureCard 
               index="04" 
@@ -96,7 +94,6 @@ export default function HomePage() {
               title='"DOCTORS"' 
               description="Complete patient management with AI diagnostic support. Review reports, schedule consultations, communicate."
               tag="DASHBOARD"
-              delay={0.3}
             />
             <FeatureCard 
               index="05" 
@@ -104,7 +101,6 @@ export default function HomePage() {
               title='"PATIENTS"' 
               description="Access health records and communicate with healthcare providers. AI assistant for medication information."
               tag="PORTAL"
-              delay={0.4}
             />
             <FeatureCard 
               index="06" 
@@ -112,7 +108,6 @@ export default function HomePage() {
               title='"LABS"' 
               description="Sample management and result uploads with automatic AI processing. Coordinate directly with physicians."
               tag="INTERFACE"
-              delay={0.5}
             />
           </div>
         </div>
@@ -123,7 +118,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 lg:px-12 py-20 lg:py-32 text-center">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
-              <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+              <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
                  &quot;TECHNICAL ARCHITECTURE&quot;
               </span>
             </div>
@@ -131,7 +126,7 @@ export default function HomePage() {
             <h2 className="text-5xl lg:text-6xl font-bold tracking-tight mb-8 uppercase">
               Built for
               <br />
-              <span className="text-black/40">Scale</span>
+              <span className="text-black/55">Scale</span>
             </h2>
 
             <p className="text-xl text-black/60 mb-16 font-light max-w-2xl mx-auto">
@@ -141,23 +136,23 @@ export default function HomePage() {
             {/* Tech Stack Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-[1px] bg-black/10">
               <div className="bg-white p-8 hover:bg-black/[0.02] transition-colors">
-                <div className="text-sm font-mono text-black/40 mb-2 uppercase">Frontend</div>
+                <div className="text-sm font-mono text-black/55 mb-2 uppercase">Frontend</div>
                 <div className="font-bold">Next.js 15</div>
               </div>
               <div className="bg-white p-8 hover:bg-black/[0.02] transition-colors">
-                <div className="text-sm font-mono text-black/40 mb-2 uppercase">Backend</div>
+                <div className="text-sm font-mono text-black/55 mb-2 uppercase">Backend</div>
                 <div className="font-bold">Supabase</div>
               </div>
               <div className="bg-white p-8 hover:bg-black/[0.02] transition-colors">
-                <div className="text-sm font-mono text-black/40 mb-2 uppercase">AI/ML</div>
+                <div className="text-sm font-mono text-black/55 mb-2 uppercase">AI/ML</div>
                 <div className="font-bold">Gemini API</div>
               </div>
               <div className="bg-white p-8 hover:bg-black/[0.02] transition-colors">
-                <div className="text-sm font-mono text-black/40 mb-2 uppercase">Video</div>
+                <div className="text-sm font-mono text-black/55 mb-2 uppercase">Video</div>
                 <div className="font-bold">Custom WebRTC</div>
               </div>
               <div className="bg-white p-8 hover:bg-black/[0.02] transition-colors">
-                <div className="text-sm font-mono text-black/40 mb-2 uppercase">Signaling</div>
+                <div className="text-sm font-mono text-black/55 mb-2 uppercase">Signaling</div>
                 <div className="font-bold">Supabase Realtime</div>
               </div>
             </div>
@@ -172,7 +167,7 @@ export default function HomePage() {
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12">
               <div>
                 <div className="mb-6">
-                  <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+                  <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
                      &quot;GET ACCESS&quot;
                   </span>
                 </div>
@@ -186,15 +181,15 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="flex flex-col items-start gap-4">
-                <Link href="/signup">
-                  <Button
+                <Button
                     size="lg"
                     className="bg-black hover:bg-black/90 text-white px-10 py-6 text-base font-medium"
-                  >
+                   asChild>
+                  <Link href="/signup">
                     CREATE ACCOUNT →
-                  </Button>
-                </Link>
-                <span className="text-sm text-black/40 font-mono">
+                  </Link>
+                </Button>
+                <span className="text-sm text-black/55 font-mono">
                   {'// FREE TRIAL AVAILABLE'}
                 </span>
               </div>
@@ -208,7 +203,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 lg:px-12 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
             <div>
-              <div className="text-xs font-mono text-white/40 mb-4 tracking-widest uppercase">
+              <div className="text-xs font-mono text-white/50 mb-4 tracking-widest uppercase">
                 About MedSync
               </div>
               <p className="text-sm text-white/80 max-w-sm leading-relaxed">
@@ -216,7 +211,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="md:text-right">
-              <div className="text-xs font-mono text-white/40 mb-4 tracking-widest uppercase">
+              <div className="text-xs font-mono text-white/50 mb-4 tracking-widest uppercase">
                 Social
               </div>
               <ul className="space-y-3 text-sm text-white/80">
@@ -238,7 +233,7 @@ export default function HomePage() {
               />
               <span className="font-bold tracking-tight">MedSync</span>
             </div>
-            <div className="text-[10px] text-white/40 font-mono uppercase tracking-[0.2em]">
+            <div className="text-[10px] text-white/50 font-mono uppercase tracking-[0.2em]">
               © 2025 MedSync Platform / All Rights Reserved
             </div>
           </div>

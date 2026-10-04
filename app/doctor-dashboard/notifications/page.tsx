@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { format } from "date-fns"
+import { pressable } from "@/lib/utils"
 
 interface Notification {
   id: string
@@ -137,7 +138,7 @@ export default function DoctorNotificationsPage() {
       case 'patient_message':
         return 'border-emerald-600 text-emerald-600 bg-emerald-50'
       default:
-        return 'border-black/20 text-black/40 bg-black/[0.02]'
+        return 'border-black/20 text-black/55 bg-black/[0.02]'
     }
   }
 
@@ -171,7 +172,7 @@ export default function DoctorNotificationsPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Return to Hub</span>
           </Link>
@@ -181,7 +182,7 @@ export default function DoctorNotificationsPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Uplink Status
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600 inline-flex items-center gap-2">
@@ -221,14 +222,14 @@ export default function DoctorNotificationsPage() {
               className={`border border-black/10 bg-white p-6 relative overflow-hidden group hover:border-black/30 transition-all cursor-pointer ${
                 !notification.is_read ? 'shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]' : 'opacity-60'
               }`}
-              onClick={() => handleNotificationAction(notification)}
+              {...pressable(() => handleNotificationAction(notification))}
             >
               {!notification.is_read && (
                 <div className="absolute left-0 top-0 h-full w-0.5 bg-indigo-600"></div>
               )}
               
               <div className="flex items-start gap-6">
-                <div className={`p-3 border border-black/10 ${!notification.is_read ? 'bg-black text-white' : 'bg-black/5 text-black/40'}`}>
+                <div className={`p-3 border border-black/10 ${!notification.is_read ? 'bg-black text-white' : 'bg-black/5 text-black/55'}`}>
                   {getNotificationIcon(notification.type)}
                 </div>
                 
@@ -242,7 +243,7 @@ export default function DoctorNotificationsPage() {
                         {notification.type.replace('_', ' ')}
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-black/40 uppercase">
+                    <span className="text-[10px] font-mono text-black/55 uppercase">
                       {format(new Date(notification.created_at), 'MMM dd, HH:mm')}
                     </span>
                   </div>
@@ -252,7 +253,7 @@ export default function DoctorNotificationsPage() {
                   </p>
                   
                   {notification.data && (
-                    <div className="flex gap-4 p-3 bg-black/[0.02] border border-black/5 text-[10px] font-mono text-black/40 uppercase">
+                    <div className="flex gap-4 p-3 bg-black/[0.02] border border-black/5 text-[10px] font-mono text-black/55 uppercase">
                       {notification.type === 'ml_suggestion' && (
                         <span>PT_ID: {notification.data.patient_id} <span className="mx-2">|</span> TEST: {notification.data.test_type}</span>
                       )}

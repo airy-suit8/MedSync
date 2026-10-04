@@ -128,7 +128,7 @@ export default function PatientReportsPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -138,7 +138,7 @@ export default function PatientReportsPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Secure Access
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600 inline-flex items-center gap-2">
@@ -154,9 +154,9 @@ export default function PatientReportsPage() {
             <FileText className="h-12 w-12 text-black/20 mx-auto mb-6" />
             <h3 className="text-2xl font-black uppercase tracking-tight mb-2">No Reports Found</h3>
             <p className="text-black/60 font-light mb-8 max-w-sm mx-auto uppercase text-xs tracking-widest leading-loose">Your medical records will appear here once finalized by your clinical team.</p>
-            <Link href="/patient-dashboard">
-              <Button className="bg-black text-white rounded-none px-8 h-12 uppercase font-mono text-xs">Return to Dashboard</Button>
-            </Link>
+            <Button className="bg-black text-white rounded-none px-8 h-12 uppercase font-mono text-xs" asChild>
+              <Link href="/patient-dashboard">Return to Dashboard</Link>
+            </Button>
           </div>
         ) : (
           <div className="grid gap-8">
@@ -245,7 +245,7 @@ export default function PatientReportsPage() {
                 <h3 className="text-xl font-black uppercase tracking-tight">
                   {viewingReport?.original_name || 'Medical Report'}
                 </h3>
-                <p className="text-[10px] font-mono text-black/40 uppercase mt-1">Source Authentication Node: SEC-882</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mt-1">Source Authentication Node: SEC-882</p>
               </div>
               <div className="flex gap-4">
                 <Button

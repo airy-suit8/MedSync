@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import { pressable } from "@/lib/utils"
 
 interface Message {
   id: string
@@ -624,7 +625,7 @@ Severity: ${suggestion.severity}`
         {/* Header */}
         <header className="border-b border-black/10 pb-4 flex items-end justify-between">
           <div>
-            <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+            <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
               <ArrowLeft className="h-3 w-3" />
               <span>Back to Dashboard</span>
             </Link>
@@ -642,7 +643,7 @@ Severity: ${suggestion.severity}`
               {showSuggestions ? 'Hide' : 'Show'} AI
             </Button>
             <div className="text-right">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
                 Portal Status
               </span>
               <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -685,7 +686,7 @@ Severity: ${suggestion.severity}`
                       {patients.map((patient) => (
                         <div
                           key={patient.id}
-                          onClick={() => setSelectedContact(patient)}
+                          {...pressable(() => setSelectedContact(patient))}
                           className={`p-4 border-b border-black/5 cursor-pointer transition-colors ${selectedContact?.id === patient.id
                             ? 'bg-black text-white'
                             : 'bg-white hover:bg-black/[0.02]'
@@ -726,7 +727,7 @@ Severity: ${suggestion.severity}`
                       {labTechs.map((lab) => (
                         <div
                           key={lab.id}
-                          onClick={() => setSelectedContact(lab)}
+                          {...pressable(() => setSelectedContact(lab))}
                           className={`p-4 border-b border-black/5 cursor-pointer transition-colors ${selectedContact?.id === lab.id
                             ? 'bg-black text-white'
                             : 'bg-white hover:bg-black/[0.02]'
@@ -816,7 +817,7 @@ Severity: ${suggestion.severity}`
                                 {message.is_read ? (
                                   <CheckCheck className="h-3 w-3 text-blue-400" />
                                 ) : (
-                                  <Check className="h-3 w-3 text-white/40" />
+                                  <Check className="h-3 w-3 text-white/50" />
                                 )}
                               </div>
                             )}
@@ -846,7 +847,7 @@ Severity: ${suggestion.severity}`
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="ENTER MESSAGE..."
-                        className="flex-1 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/30 h-12"
+                        className="flex-1 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/55 h-12"
                         disabled={sending}
                       />
                       <Button
@@ -863,7 +864,7 @@ Severity: ${suggestion.severity}`
                 <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                   <MessageSquare className="h-12 w-12 text-black/20 mb-4" />
                   <h2 className="text-xl font-bold uppercase mb-2">No Contact Selected</h2>
-                  <p className="text-xs font-mono text-black/40 uppercase">Select a patient or lab technician to start messaging</p>
+                  <p className="text-xs font-mono text-black/55 uppercase">Select a patient or lab technician to start messaging</p>
                 </div>
               )}
             </div>
@@ -890,7 +891,7 @@ Severity: ${suggestion.severity}`
                   {mlSuggestions.length === 0 ? (
                     <div className="text-center py-8">
                       <Brain className="h-8 w-8 mx-auto mb-2 text-black/20" />
-                      <p className="text-[10px] font-mono text-black/40 uppercase">No pending suggestions</p>
+                      <p className="text-[10px] font-mono text-black/55 uppercase">No pending suggestions</p>
                     </div>
                   ) : (
                     mlSuggestions.map((suggestion) => (
@@ -900,7 +901,7 @@ Severity: ${suggestion.severity}`
                           ? 'border-black bg-black/[0.02]'
                           : 'border-black/10 hover:border-black/30'
                           }`}
-                        onClick={() => setSelectedSuggestion(suggestion)}
+                        {...pressable(() => setSelectedSuggestion(suggestion))}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center space-x-2">
@@ -909,7 +910,7 @@ Severity: ${suggestion.severity}`
                               {suggestion.severity}
                             </span>
                           </div>
-                          <span className="text-[10px] font-mono text-black/40 uppercase">
+                          <span className="text-[10px] font-mono text-black/55 uppercase">
                             {new Date(suggestion.processed_at).toLocaleDateString()}
                           </span>
                         </div>
@@ -968,27 +969,27 @@ Severity: ${suggestion.severity}`
               <div className="flex-1 overflow-y-auto p-8 space-y-8">
                 <div className="grid grid-cols-2 gap-px bg-black/10 border border-black/10">
                   <div className="p-4 bg-white">
-                    <label className="text-[10px] font-mono uppercase text-black/40 block mb-1">Patient ID</label>
+                    <label className="text-[10px] font-mono uppercase text-black/55 block mb-1">Patient ID</label>
                     <p className="text-sm font-bold uppercase">{selectedSuggestion.patient_id || 'Unknown'}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <label className="text-[10px] font-mono uppercase text-black/40 block mb-1">Test Type</label>
+                    <label className="text-[10px] font-mono uppercase text-black/55 block mb-1">Test Type</label>
                     <p className="text-sm font-mono uppercase">{(selectedSuggestion.test_type || 'Unknown Test').replace('_', ' ')}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <label className="text-[10px] font-mono uppercase text-black/40 block mb-1">Severity</label>
+                    <label className="text-[10px] font-mono uppercase text-black/55 block mb-1">Severity</label>
                     <span className="text-[10px] font-mono font-bold uppercase border border-black px-1.5 py-0.5 inline-block">
                       {selectedSuggestion.severity || 'Unknown'}
                     </span>
                   </div>
                   <div className="p-4 bg-white">
-                    <label className="text-[10px] font-mono uppercase text-black/40 block mb-1">Confidence</label>
+                    <label className="text-[10px] font-mono uppercase text-black/55 block mb-1">Confidence</label>
                     <p className="text-sm font-mono font-bold">{((selectedSuggestion.confidence || 0) * 100).toFixed(1)}%</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-mono uppercase text-black/40 block mb-2">Findings</label>
+                  <label className="text-[10px] font-mono uppercase text-black/55 block mb-2">Findings</label>
                   <div className="p-4 bg-black/[0.02] border border-black/10">
                     <p className="text-sm font-mono leading-relaxed">
                       {selectedSuggestion.findings || 'No findings available'}
@@ -997,7 +998,7 @@ Severity: ${suggestion.severity}`
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-mono uppercase text-black/40 block mb-2">Recommendations</label>
+                  <label className="text-[10px] font-mono uppercase text-black/55 block mb-2">Recommendations</label>
                   <div className="p-4 bg-black/[0.02] border border-black/10">
                     <p className="text-sm font-mono leading-relaxed">
                       {selectedSuggestion.recommendations || 'No recommendations available'}

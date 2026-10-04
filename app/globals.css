@@ -92,3 +92,27 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Landing reveals in CSS (no JS animation library), so the hero paints before hydration. */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-y, 20px));
+  }
+}
+.reveal {
+  animation: reveal-up var(--reveal-duration, 0.5s) ease-out var(--reveal-delay, 0s) both;
+}
+@supports (animation-timeline: view()) {
+  .reveal-on-scroll {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 60%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-on-scroll {
+    animation: none;
+  }
+}

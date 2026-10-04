@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { format, parseISO } from "date-fns"
 import Link from "next/link"
+import { pressable } from "@/lib/utils"
 
 interface Patient {
   id: string
@@ -270,7 +271,7 @@ export default function MedicalRecordsPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-6 mb-8 flex-shrink-0 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -282,7 +283,7 @@ export default function MedicalRecordsPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             System Status
           </span>
           <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -331,12 +332,12 @@ export default function MedicalRecordsPage() {
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/40 h-4 w-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/55 h-4 w-4" />
             <Input
               placeholder="SEARCH PATIENTS, DIAGNOSES..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/30 h-12"
+              className="pl-12 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/55 h-12"
             />
           </div>
         </div>
@@ -381,7 +382,7 @@ export default function MedicalRecordsPage() {
               <div 
                 key={patient.id} 
                 className="group border border-black/10 p-6 bg-white hover:border-black cursor-pointer transition-colors"
-                onClick={() => viewPatientDetails(patient)}
+                {...pressable(() => viewPatientDetails(patient))}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
@@ -426,7 +427,7 @@ export default function MedicalRecordsPage() {
                 <div 
                   key={record.id} 
                   className="group border border-black/10 p-6 bg-white hover:border-black cursor-pointer transition-colors"
-                  onClick={() => viewRecordDetails(record)}
+                  {...pressable(() => viewRecordDetails(record))}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -449,7 +450,7 @@ export default function MedicalRecordsPage() {
             ) : (
               <div className="text-center py-12 border border-black/10 bg-black/[0.02]">
                 <FileText className="h-8 w-8 mx-auto mb-4 text-black/20" />
-                <p className="font-mono text-xs uppercase tracking-widest text-black/40">NO RECORDS FOUND</p>
+                <p className="font-mono text-xs uppercase tracking-widest text-black/55">NO RECORDS FOUND</p>
               </div>
             )}
           </div>
@@ -472,26 +473,26 @@ export default function MedicalRecordsPage() {
             {/* Patient Info */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10">
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Name</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Name</p>
                 <p className="font-bold uppercase text-sm">{selectedPatient?.name}</p>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Demographics</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Demographics</p>
                 <p className="font-bold uppercase text-sm">{selectedPatient?.age}Y • {selectedPatient?.gender}</p>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Email</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Email</p>
                 <p className="font-bold uppercase text-sm truncate" title={selectedPatient?.email}>{selectedPatient?.email}</p>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Phone</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Phone</p>
                 <p className="font-bold uppercase text-sm">{selectedPatient?.phone}</p>
               </div>
             </div>
 
             {/* Medical Info */}
             <div>
-              <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Primary Condition</p>
+              <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Primary Condition</p>
               <div className="border border-black/10 p-4 bg-black/[0.02]">
                 <p className="font-mono text-sm uppercase">{selectedPatient?.primary_condition || 'NONE SPECIFIED'}</p>
               </div>
@@ -500,7 +501,7 @@ export default function MedicalRecordsPage() {
             {/* Medications */}
             {selectedPatient?.medications && selectedPatient.medications.length > 0 && (
               <div>
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Current Medications</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Current Medications</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedPatient.medications.map((med, index) => (
                     <span key={index} className="border border-black px-2 py-1 font-mono text-[10px] uppercase bg-white">
@@ -514,7 +515,7 @@ export default function MedicalRecordsPage() {
             {/* Allergies */}
             {selectedPatient?.allergies && selectedPatient.allergies.length > 0 && (
               <div>
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Known Allergies</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Known Allergies</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedPatient.allergies.map((allergy, index) => (
                     <span key={index} className="border border-red-500 text-red-600 bg-red-50 px-2 py-1 font-mono text-[10px] uppercase font-bold">
@@ -579,23 +580,23 @@ export default function MedicalRecordsPage() {
             {/* Record Info */}
             <div className="grid grid-cols-2 gap-px bg-black/10 border border-black/10">
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Patient</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Patient</p>
                 <p className="font-bold uppercase text-sm">{selectedRecord?.patient_name}</p>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Type</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Type</p>
                 <div className="mt-1">
                   {selectedRecord && getRecordTypeBadge(selectedRecord.record_type)}
                 </div>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Date</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Date</p>
                 <p className="font-bold uppercase text-sm font-mono">
                   {selectedRecord?.date && format(parseISO(selectedRecord.date), 'dd MMM yyyy')}
                 </p>
               </div>
               <div className="bg-white p-4">
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-1">Attending</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-1">Attending</p>
                 <p className="font-bold uppercase text-sm">{selectedRecord?.doctor_name}</p>
               </div>
             </div>
@@ -603,7 +604,7 @@ export default function MedicalRecordsPage() {
             {/* Diagnosis */}
             {selectedRecord?.diagnosis && (
               <div>
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Diagnosis</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Diagnosis</p>
                 <div className="border border-black p-4 bg-white relative">
                   <span className="absolute -top-2.5 left-4 bg-white px-2 font-bold text-[10px] tracking-widest uppercase">Dx</span>
                   <p className="font-mono text-sm leading-relaxed">{selectedRecord.diagnosis}</p>
@@ -614,7 +615,7 @@ export default function MedicalRecordsPage() {
             {/* Treatment */}
             {selectedRecord?.treatment && (
               <div>
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Treatment Plan</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Treatment Plan</p>
                 <div className="border border-black/20 p-4 bg-black/[0.02]">
                   <p className="font-mono text-sm leading-relaxed">{selectedRecord.treatment}</p>
                 </div>
@@ -624,7 +625,7 @@ export default function MedicalRecordsPage() {
             {/* Notes */}
             {selectedRecord?.notes && (
               <div>
-                <p className="text-[10px] font-mono text-black/40 uppercase mb-2">Clinical Notes</p>
+                <p className="text-[10px] font-mono text-black/55 uppercase mb-2">Clinical Notes</p>
                 <div className="border border-black/20 p-4 bg-black/[0.02]">
                   <p className="font-mono text-sm leading-relaxed">{selectedRecord.notes}</p>
                 </div>

@@ -11,6 +11,7 @@ import Link from "next/link"
 import Sidebar from "@/components/medical/navigation/Sidebar"
 import StatusBadge from "@/components/medical/common/StatusBadge"
 import ErrorBoundary from "@/components/error-boundary"
+import DashboardSkeleton from "@/components/medical/common/DashboardSkeleton"
 
 interface LabStats {
   pending: number
@@ -83,14 +84,7 @@ export default function LabDashboard() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <div className="flex flex-col items-center">
-          <Activity className="h-8 w-8 animate-spin mb-4" />
-          <span className="text-xs font-mono uppercase tracking-widest text-black/60">System Initializing...</span>
-        </div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   return (
@@ -105,7 +99,7 @@ export default function LabDashboard() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/40">
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/55">
                   Laboratory Node Active
                 </span>
               </div>
@@ -118,7 +112,7 @@ export default function LabDashboard() {
             </div>
             {shortId && (
               <div className="text-right">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
                   Technician Hash
                 </span>
                 <span className="text-2xl font-mono border-b-2 border-black tracking-tighter">
@@ -137,7 +131,7 @@ export default function LabDashboard() {
                 <span className="text-[10px] font-mono uppercase tracking-widest text-black/20">01</span>
               </div>
               <div className="text-4xl font-black mb-1 tracking-tighter">{stats.pending}</div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/40">Pending Tests</div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/55">Pending Tests</div>
             </div>
 
             <div className="bg-white p-8 hover:bg-black/[0.02] transition-all group cursor-pointer relative overflow-hidden">
@@ -147,7 +141,7 @@ export default function LabDashboard() {
                 <span className="text-[10px] font-mono uppercase tracking-widest text-black/20">02</span>
               </div>
               <div className="text-4xl font-black mb-1 tracking-tighter">{stats.completed}</div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/40">Completed Cycle</div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/55">Completed Cycle</div>
             </div>
 
             <div className="bg-white p-8 hover:bg-black/[0.02] transition-all group cursor-pointer relative overflow-hidden">
@@ -167,7 +161,7 @@ export default function LabDashboard() {
                 <span className="text-[10px] font-mono uppercase tracking-widest text-black/20">04</span>
               </div>
               <div className="text-4xl font-black mb-1 tracking-tighter">{stats.total}</div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/40">Total Uploaded</div>
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/55">Total Uploaded</div>
             </div>
           </div>
 
@@ -186,12 +180,12 @@ export default function LabDashboard() {
                   </div>
                   <h3 className="text-2xl font-black uppercase tracking-tight mb-3">{feature.title}</h3>
                   <p className="text-black/50 mb-10 text-sm font-mono uppercase leading-relaxed">{feature.desc}</p>
-                  <Link href={feature.href}>
-                    <Button className="w-full bg-black text-white rounded-none hover:bg-indigo-600 font-mono uppercase text-[10px] tracking-[0.2em] h-14 flex items-center justify-between px-8 transition-all">
+                  <Button className="w-full bg-black text-white rounded-none hover:bg-indigo-600 font-mono uppercase text-[10px] tracking-[0.2em] h-14 flex items-center justify-between px-8 transition-all" asChild>
+                    <Link href={feature.href}>
                       <span>Establish Link</span>
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -217,7 +211,7 @@ export default function LabDashboard() {
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-2">
-                        <span className="font-black font-mono text-xs text-black/40">#{item.id}</span>
+                        <span className="font-black font-mono text-xs text-black/55">#{item.id}</span>
                         <StatusBadge status={item.badge as any} size="sm" />
                       </div>
                       <p className="font-bold text-lg uppercase tracking-tight mb-1">{item.test_type || item.original_name || 'Medical report'}</p>
@@ -225,7 +219,7 @@ export default function LabDashboard() {
                     </div>
                   </div>
                 ))}
-                {recentReports.filter((report: any) => ['urgent', 'critical', 'high'].includes((report.priority || '').toLowerCase())).length === 0 && <p className="text-sm font-mono text-black/40">No urgent uploads.</p>}
+                {recentReports.filter((report: any) => ['urgent', 'critical', 'high'].includes((report.priority || '').toLowerCase())).length === 0 && <p className="text-sm font-mono text-black/55">No urgent uploads.</p>}
               </div>
             </div>
 
@@ -247,14 +241,14 @@ export default function LabDashboard() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-2">
                         <span className="font-bold text-lg uppercase tracking-tight">{item.test_type || item.original_name || 'Medical report'}</span>
-                        <span className="text-[10px] font-mono text-black/40 uppercase tracking-widest">{item.patient_id}</span>
+                        <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{item.patient_id}</span>
                       </div>
                       <p className="text-[10px] font-mono text-black/50 uppercase leading-relaxed">Uploaded {item.uploaded_at ? new Date(item.uploaded_at).toLocaleDateString() : 'date unavailable'}</p>
                     </div>
                     <StatusBadge status={item.status || 'pending'} size="sm" />
                   </div>
                 ))}
-                {recentReports.length === 0 && <p className="text-sm font-mono text-black/40">No reports uploaded yet.</p>}
+                {recentReports.length === 0 && <p className="text-sm font-mono text-black/55">No reports uploaded yet.</p>}
               </div>
             </div>
           </div>

@@ -345,7 +345,7 @@ export default function ConsultationsPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -355,7 +355,7 @@ export default function ConsultationsPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Portal Status
           </span>
           <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -550,21 +550,21 @@ export default function ConsultationsPage() {
             {/* Patient Info */}
             <div className="grid grid-cols-2 gap-px bg-black/10 border border-black/10">
               <div className="p-4 bg-white">
-                <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Patient Name</p>
+                <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Patient Name</p>
                 <p className="text-sm font-bold uppercase">{selectedConsultation?.patient_name}</p>
               </div>
               <div className="p-4 bg-white">
-                <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Type</p>
+                <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Type</p>
                 <p className="text-sm font-mono uppercase">{getConsultationTypeLabel(selectedConsultation?.consultation_type || 'video')}</p>
               </div>
               <div className="p-4 bg-white">
-                <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Date & Time</p>
+                <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Date & Time</p>
                 <p className="text-sm font-mono">
                   {selectedConsultation?.appointment_date && format(parseISO(selectedConsultation.appointment_date), 'MMM d, yyyy')} | {selectedConsultation?.start_time}
                 </p>
               </div>
               <div className="p-4 bg-white">
-                <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Status</p>
+                <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Status</p>
                 <span className={`px-2 py-0.5 text-[10px] font-mono uppercase font-bold border border-black`}>
                   {selectedConsultation?.status}
                 </span>
@@ -574,7 +574,7 @@ export default function ConsultationsPage() {
             {/* Symptoms */}
             {selectedConsultation?.symptoms && (
               <div>
-                <p className="text-[10px] font-mono uppercase text-black/40 mb-2">Reported Symptoms</p>
+                <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Reported Symptoms</p>
                 <div className="p-4 border border-black/10 bg-black/[0.02]">
                   <p className="text-sm font-mono">{selectedConsultation.symptoms}</p>
                 </div>
@@ -583,36 +583,36 @@ export default function ConsultationsPage() {
 
             {/* Consultation Notes */}
             <div>
-              <p className="text-[10px] font-mono uppercase text-black/40 mb-2">Consultation Notes</p>
+              <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Consultation Notes</p>
               <Textarea
                 placeholder="ENTER CONSULTATION NOTES..."
                 value={consultationNotes}
                 onChange={(e) => setConsultationNotes(e.target.value)}
                 rows={4}
-                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/30 resize-none"
+                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/55 resize-none"
               />
             </div>
 
             {/* Diagnosis */}
             <div>
-              <p className="text-[10px] font-mono uppercase text-black/40 mb-2">Diagnosis</p>
+              <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Diagnosis</p>
               <Input
                 placeholder="ENTER DIAGNOSIS..."
                 value={diagnosis}
                 onChange={(e) => setDiagnosis(e.target.value)}
-                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/30"
+                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/55"
               />
             </div>
 
             {/* Prescription */}
             <div>
-              <p className="text-[10px] font-mono uppercase text-black/40 mb-2">Prescription</p>
+              <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Prescription</p>
               <Textarea
                 placeholder="ENTER PRESCRIPTION DETAILS..."
                 value={prescription}
                 onChange={(e) => setPrescription(e.target.value)}
                 rows={3}
-                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/30 resize-none"
+                className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/55 resize-none"
               />
             </div>
 

@@ -99,7 +99,7 @@ export default function PatientAIAssistantPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -109,7 +109,7 @@ export default function PatientAIAssistantPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Portal Status
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600 inline-flex items-center gap-2">
@@ -168,7 +168,7 @@ export default function PatientAIAssistantPage() {
                   <p className="text-sm font-mono leading-relaxed">
                     <strong>SYSTEM:</strong> Hello. I am your AI Health Assistant. I can provide data on medication timing, side effects, and cost-effective alternatives. How may I assist your health goals today?
                   </p>
-                  <p className="text-[10px] font-mono text-black/40 uppercase mt-4">INITIALIZING SYNC...</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase mt-4">INITIALIZING SYNC...</p>
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export default function PatientAIAssistantPage() {
                     <p className="text-sm font-mono leading-relaxed">
                       <strong>{message.sender.toUpperCase()}:</strong> {message.text}
                     </p>
-                    <p className={`text-[10px] font-mono uppercase mt-4 ${message.isPatient ? 'text-white/40' : 'text-black/40'}`}>
+                    <p className={`text-[10px] font-mono uppercase mt-4 ${message.isPatient ? 'text-white/50' : 'text-black/55'}`}>
                       {new Date(message.timestamp).toLocaleTimeString()}
                     </p>
                   </div>

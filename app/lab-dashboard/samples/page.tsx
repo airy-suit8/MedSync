@@ -233,7 +233,7 @@ export default function LabSamplesPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Return to Node</span>
           </Link>
@@ -243,7 +243,7 @@ export default function LabSamplesPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Active Technician
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600">
@@ -314,14 +314,14 @@ export default function LabSamplesPage() {
              <FlaskConical className="h-6 w-6" />
              Registry Logs
            </h3>
-           <span className="text-[10px] font-mono text-black/40 uppercase tracking-widest">{filteredSamples.length} PACKETS FOUND</span>
+           <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{filteredSamples.length} PACKETS FOUND</span>
         </div>
 
         <div className="space-y-6">
           {filteredSamples.length === 0 ? (
             <div className="text-center py-20 bg-black/[0.01] border border-dashed border-black/10">
               <FlaskConical className="h-12 w-12 mx-auto mb-4 text-black/10" />
-              <p className="text-xs font-mono uppercase text-black/40">NO SPECIMEN DETECTED IN CURRENT NODE</p>
+              <p className="text-xs font-mono uppercase text-black/55">NO SPECIMEN DETECTED IN CURRENT NODE</p>
             </div>
           ) : (
             filteredSamples.map((sample) => (
@@ -333,12 +333,12 @@ export default function LabSamplesPage() {
                     </div>
                     <div>
                       <p className="font-black text-lg uppercase tracking-tight">{sample.patient_name}</p>
-                      <p className="text-[10px] font-mono text-black/40 uppercase">ID: {sample.patient_id}</p>
+                      <p className="text-[10px] font-mono text-black/55 uppercase">ID: {sample.patient_id}</p>
                     </div>
                   </div>
                   <div>
                     <p className="font-bold text-sm uppercase">{sample.sample_type}</p>
-                    <p className="text-[10px] font-mono text-black/40 uppercase">
+                    <p className="text-[10px] font-mono text-black/55 uppercase">
                       COLLECTED: {new Date(sample.collection_date).toLocaleDateString()}
                     </p>
                   </div>
@@ -349,7 +349,7 @@ export default function LabSamplesPage() {
                     sample.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                     sample.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
                     sample.status === 'processing' ? 'border-indigo-600 text-indigo-600 bg-indigo-50' :
-                    'border-black/20 text-black/40 bg-black/[0.02]'
+                    'border-black/20 text-black/55 bg-black/[0.02]'
                   }`}>
                     {sample.status}
                   </span>
@@ -357,7 +357,7 @@ export default function LabSamplesPage() {
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 border uppercase tracking-tighter ${
                     sample.priority === 'critical' ? 'border-red-600 text-red-600 bg-red-50' :
                     sample.priority === 'high' ? 'border-amber-600 text-amber-600 bg-amber-50' :
-                    'border-black/20 text-black/40 bg-black/[0.02]'
+                    'border-black/20 text-black/55 bg-black/[0.02]'
                   }`}>
                     {sample.priority}
                   </span>
@@ -390,7 +390,7 @@ export default function LabSamplesPage() {
               
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Patient Node Hash</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Patient Node Hash</label>
                   <Input
                     value={addForm.patient_id}
                     onChange={(e) => setAddForm({...addForm, patient_id: e.target.value})}
@@ -399,7 +399,7 @@ export default function LabSamplesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Full Legal Name</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Full Legal Name</label>
                   <Input
                     value={addForm.patient_name}
                     onChange={(e) => setAddForm({...addForm, patient_name: e.target.value})}
@@ -408,7 +408,7 @@ export default function LabSamplesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Biological Type</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Biological Type</label>
                   <Select value={addForm.sample_type} onValueChange={(value) => setAddForm({...addForm, sample_type: value})}>
                     <SelectTrigger className="rounded-none border-black h-12 font-mono text-sm uppercase focus:ring-0">
                       <SelectValue placeholder="SELECT TYPE..." />
@@ -426,7 +426,7 @@ export default function LabSamplesPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Collection Timestamp</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Collection Timestamp</label>
                     <Input
                       type="datetime-local"
                       value={addForm.collection_date}
@@ -435,7 +435,7 @@ export default function LabSamplesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Priority Level</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Priority Level</label>
                     <Select value={addForm.priority} onValueChange={(value) => setAddForm({...addForm, priority: value})}>
                       <SelectTrigger className="rounded-none border-black h-12 font-mono text-sm uppercase focus:ring-0">
                         <SelectValue />
@@ -478,32 +478,32 @@ export default function LabSamplesPage() {
                 <div className="grid md:grid-cols-2 gap-10 mb-10">
                   <div className="space-y-6">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Packet Hash</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Packet Hash</p>
                       <p className="font-mono text-xl uppercase tracking-tighter">{selectedSample.id}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Biological Type</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Biological Type</p>
                       <p className="font-mono text-xl uppercase tracking-tighter">{selectedSample.sample_type}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Collection Node</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Collection Node</p>
                       <p className="font-mono text-sm uppercase text-black/60">{new Date(selectedSample.collection_date).toLocaleString()}</p>
                     </div>
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Process Status</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Process Status</p>
                     <span className={`text-[10px] font-mono font-bold px-3 py-1 border uppercase tracking-widest inline-block ${
                       selectedSample.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                       selectedSample.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
                       selectedSample.status === 'processing' ? 'border-indigo-600 text-indigo-600 bg-indigo-50' :
-                      'border-black/20 text-black/40 bg-black/[0.02]'
+                      'border-black/20 text-black/55 bg-black/[0.02]'
                     }`}>
                       {selectedSample.status}
                     </span>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Priority Sequence</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Priority Sequence</p>
                       <p className="font-black text-xl uppercase text-red-600">{selectedSample.priority}</p>
                     </div>
                   </div>
@@ -511,7 +511,7 @@ export default function LabSamplesPage() {
 
                 {selectedSample.notes && (
                   <div className="p-6 bg-black/[0.02] border border-black/5 mb-10">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-2">Technical Observations</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-2">Technical Observations</p>
                     <p className="text-sm font-mono uppercase text-black/70 leading-relaxed italic">{selectedSample.notes}</p>
                   </div>
                 )}

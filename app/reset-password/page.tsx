@@ -104,11 +104,11 @@ export default function ResetPasswordPage() {
               <p className="text-black/60 mb-6">
                 Your password has been successfully updated. Redirecting to login...
               </p>
-              <Link href="/login">
-                <Button className="bg-black hover:bg-black/90">
+              <Button className="bg-black hover:bg-black/90" asChild>
+                <Link href="/login">
                   Go to Login →
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
           </Link>
 
           <div className="mb-2">
-            <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+            <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
                &quot;PASSWORD RESET&quot;
             </span>
           </div>
@@ -175,6 +175,7 @@ export default function ResetPasswordPage() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -232,6 +233,7 @@ export default function ResetPasswordPage() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>

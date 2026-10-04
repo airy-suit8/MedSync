@@ -207,26 +207,26 @@ function ConfirmContent() {
                 <p className="text-sm text-medical-gray-600 mb-4">
                   Redirecting to login...
                 </p>
-                <Link href="/login">
-                  <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white">
+                <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white" asChild>
+                  <Link href="/login">
                     Continue to Login
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
             
             {status === 'error' && (
               <div className="space-y-3">
-                <Link href="/reset-password">
-                  <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white">
+                <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white" asChild>
+                  <Link href="/reset-password">
                     Request New Link
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button variant="outline" className="w-full border-medical-gray-300 text-medical-gray-600 hover:bg-medical-gray-50">
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full border-medical-gray-300 text-medical-gray-600 hover:bg-medical-gray-50" asChild>
+                  <Link href="/login">
                     Back to Login
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
 

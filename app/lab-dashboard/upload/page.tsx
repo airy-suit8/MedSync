@@ -510,7 +510,7 @@ export default function LabUploadPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Return to Node</span>
           </Link>
@@ -520,7 +520,7 @@ export default function LabUploadPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Portal Mode
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600">
@@ -567,7 +567,7 @@ export default function LabUploadPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Patient Identification</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Patient Identification</label>
                   <div className="relative">
                     <Input
                       placeholder="ENTER SHORT ID / UUID"
@@ -594,7 +594,7 @@ export default function LabUploadPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Ordering Physician</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Ordering Physician</label>
                   <div className="relative">
                     <Input
                       placeholder="ENTER DOCTOR ID"
@@ -623,7 +623,7 @@ export default function LabUploadPage() {
 
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Diagnostic Protocol</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Diagnostic Protocol</label>
                   <select 
                     className="w-full h-12 border border-black rounded-none bg-white font-mono text-sm uppercase px-4 focus:outline-none focus:border-indigo-600"
                     value={formData.testType}
@@ -643,7 +643,7 @@ export default function LabUploadPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Priority Sequence</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Priority Sequence</label>
                   <select 
                     className="w-full h-12 border border-black rounded-none bg-white font-mono text-sm uppercase px-4 focus:outline-none focus:border-indigo-600"
                     value={formData.priority}
@@ -657,7 +657,7 @@ export default function LabUploadPage() {
               </div>
 
               <div className="space-y-4">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Technician Observations</label>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Technician Observations</label>
                 <Textarea
                   placeholder="ADD ANY CLINICAL NOTES OR OBSERVATIONS..."
                   value={formData.notes}
@@ -668,7 +668,7 @@ export default function LabUploadPage() {
               </div>
 
               <div className="space-y-4">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-black/40">Binary Payload (File)</label>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Binary Payload (File)</label>
                 <div className="border-2 border-dashed border-black/10 p-8 text-center hover:border-black/30 transition-all cursor-pointer relative bg-black/[0.01] group">
                    <input
                     type="file"
@@ -682,7 +682,7 @@ export default function LabUploadPage() {
                     <p className="text-xs font-mono uppercase text-black/60">
                       {file ? file.name : "DROP FILE OR CLICK TO BROWSE"}
                     </p>
-                    <p className="text-[10px] font-mono uppercase text-black/30 mt-2">PDF, JPG, PNG, DICOM (MAX 10MB)</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mt-2">PDF, JPG, PNG, DICOM (MAX 10MB)</p>
                   </div>
                 </div>
               </div>
@@ -756,12 +756,12 @@ export default function LabUploadPage() {
             
             <div className="space-y-8">
               <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-4">Identification</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-4">Identification</h4>
                 <div className="p-4 bg-black/[0.02] border border-black/5 space-y-4">
                   <p className="text-[10px] font-mono uppercase text-black/60 leading-relaxed">
                     Use Short ID (preferred) or UUID to ensure data packet routing to correct node.
                   </p>
-                  <ul className="text-[10px] font-mono text-black/40 uppercase space-y-2">
+                  <ul className="text-[10px] font-mono text-black/55 uppercase space-y-2">
                     <li>• Resolve ID from patient profile</li>
                     <li>• Verify Physician Node ID</li>
                   </ul>
@@ -769,7 +769,7 @@ export default function LabUploadPage() {
               </div>
 
               <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-4">Payload Constraints</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-4">Payload Constraints</h4>
                 <ul className="text-[10px] font-mono uppercase text-black/60 space-y-3">
                   <li className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 bg-black/20"></span>
@@ -806,7 +806,7 @@ export default function LabUploadPage() {
                 <div key={i} className="p-4 border border-black/5 flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-tight">{item.label}</p>
-                    <p className="text-[10px] font-mono text-black/40 uppercase">{item.type} • {item.time}</p>
+                    <p className="text-[10px] font-mono text-black/55 uppercase">{item.type} • {item.time}</p>
                   </div>
                   <span className={`text-[9px] font-black px-2 py-0.5 border ${
                     item.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200'

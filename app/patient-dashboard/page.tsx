@@ -11,6 +11,8 @@ import Sidebar from "@/components/medical/navigation/Sidebar"
 import StatusBadge from "@/components/medical/common/StatusBadge"
 import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
+import { pressable } from "@/lib/utils"
+import DashboardSkeleton from "@/components/medical/common/DashboardSkeleton"
 
 interface PatientActivity {
   id: string
@@ -50,32 +52,28 @@ export default function PatientDashboard() {
     setDataLoading(true)
 
     try {
-      let actualPatientId = patientId
-
-      // 2. Fetch Appointments
+      // Upcoming appointments, recent reports and recent messages load in one round trip.
       const today = format(new Date(), 'yyyy-MM-dd')
-      const { data: appointments } = await supabase
-        .from('appointments')
-        .select('*')
-        .or(`patient_id.eq.${actualPatientId},patient_id.eq.${patientId}`)
-        .gte('appointment_date', today)
-        .order('appointment_date', { ascending: true })
-
-      // 3. Fetch Reports
-      const { data: reports } = await supabase
-        .from('reports')
-        .select('*')
-        .or(`patient_id.eq.${actualPatientId},patient_id.eq.${patientId}`)
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      // 4. Fetch Messages
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`sender_id.eq.${patientId},receiver_id.eq.${patientId}`)
-        .order('created_at', { ascending: false })
-        .limit(10)
+      const [{ data: appointments }, { data: reports }, { data: messages }] = await Promise.all([
+        supabase
+          .from('appointments')
+          .select('*')
+          .eq('patient_id', patientId)
+          .gte('appointment_date', today)
+          .order('appointment_date', { ascending: true }),
+        supabase
+          .from('reports')
+          .select('*')
+          .eq('patient_id', patientId)
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('messages')
+          .select('*')
+          .or(`sender_id.eq.${patientId},receiver_id.eq.${patientId}`)
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ])
 
       // 5. Map Activity
       const activities: PatientActivity[] = []
@@ -143,14 +141,7 @@ export default function PatientDashboard() {
   }
 
   if (authLoading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <div className="flex flex-col items-center">
-          <Activity className="h-8 w-8 animate-spin mb-4" />
-          <span className="text-xs font-mono uppercase tracking-widest text-black/60">Loading Dashboard...</span>
-        </div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   return (
@@ -165,7 +156,7 @@ export default function PatientDashboard() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">
                   System Online
                 </span>
               </div>
@@ -178,7 +169,7 @@ export default function PatientDashboard() {
             </div>
             {shortId && (
               <div className="text-right">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
                   Patient ID
                 </span>
                 <span className="text-xl font-mono border-b border-black">
@@ -190,30 +181,30 @@ export default function PatientDashboard() {
 
           {/* Stats Grid - "Deconstructed" */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-black/10 border border-black/10 mb-16">
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/patient-dashboard/reports')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/patient-dashboard/reports'))}>
               <div className="flex justify-between items-start mb-4">
-                <FileText className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">01</span>
+                <FileText className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">01</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.recentReports}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Recent Reports</div>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600"></div>
             </div>
 
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/patient-dashboard/video-consultations')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/patient-dashboard/video-consultations'))}>
               <div className="flex justify-between items-start mb-4">
-                <Calendar className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">02</span>
+                <Calendar className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">02</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.upcomingAppointments}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Upcoming Visits</div>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-600"></div>
             </div>
 
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/patient-dashboard/chat')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/patient-dashboard/chat'))}>
               <div className="flex justify-between items-start mb-4">
-                <MessageSquare className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">03</span>
+                <MessageSquare className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">03</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.unreadMessages}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Unread Messages</div>
@@ -276,14 +267,14 @@ export default function PatientDashboard() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-mono text-black/40 block mb-1">
+                        <span className="text-xs font-mono text-black/55 block mb-1">
                           {format(parseISO(activity.date), 'MMM dd')}
                         </span>
                       </div>
                     </div>
                   ))}
                   {recentActivity.length === 0 && (
-                    <div className="py-8 text-center text-black/40 font-mono text-xs uppercase">
+                    <div className="py-8 text-center text-black/55 font-mono text-xs uppercase">
                       No recent activity recorded.
                     </div>
                   )}
@@ -297,10 +288,10 @@ export default function PatientDashboard() {
               {/* Telehealth Card */}
               <div className="border border-black/10 p-6 bg-white">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">
                     Telehealth
                   </span>
-                  <Video className="h-4 w-4 text-black/40" />
+                  <Video className="h-4 w-4 text-black/55" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">Video Consultations</h3>
                 <p className="text-sm text-black/60 mb-6 font-light">
@@ -318,7 +309,7 @@ export default function PatientDashboard() {
               {/* Quick Actions List */}
               <div className="border border-black/10 p-6 bg-white">
                 <div className="mb-6">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">
                     Quick Access
                   </span>
                 </div>
@@ -334,7 +325,7 @@ export default function PatientDashboard() {
                       className="w-full flex items-center justify-between p-4 border border-transparent hover:border-black/10 hover:bg-black/[0.02] transition-all group text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <action.icon className="h-4 w-4 text-black/40 group-hover:text-black" />
+                        <action.icon className="h-4 w-4 text-black/55 group-hover:text-black" />
                         <span className="text-sm font-medium">{action.label}</span>
                       </div>
                       <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />

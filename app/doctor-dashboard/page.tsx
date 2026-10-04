@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Activity, Users, FileText, Calendar, Brain,
+  Users, FileText, Calendar, Brain,
   AlertCircle, ArrowRight, Video, Clock,
   Sparkles
 } from "lucide-react"
@@ -17,6 +17,8 @@ import { format, parseISO } from "date-fns"
 import Sidebar from "@/components/medical/navigation/Sidebar"
 import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
+import { pressable } from "@/lib/utils"
+import DashboardSkeleton from "@/components/medical/common/DashboardSkeleton"
 
 interface UrgentReview {
   id: string
@@ -83,51 +85,31 @@ export default function DoctorDashboard() {
     const supabase = createClient()
     setDataLoading(true)
     try {
-      // 1. Resolve internal doctor ID
-      let actualDoctorId = authUserId
-      const { data: doctorData } = await supabase
-        .from('profile_directory')
-        .select('id')
-        .eq('id', authUserId)
-        .maybeSingle()
-      
-      if (doctorData) actualDoctorId = doctorData.id
-
-      // Reports can store doctor_id as auth UUID or short_id.
-      let doctorShortId: string | null = null
-      try {
-        const { data: shortIdData } = await supabase
-          .from('profile_directory')
-          .select('short_id')
-          .eq('id', authUserId)
-          .maybeSingle()
-        doctorShortId = shortIdData?.short_id || null
-      } catch (shortIdError) {
-        console.warn('Could not fetch doctor short ID for dashboard:', shortIdError)
-      }
-
-      const doctorIdentifiers = [authUserId, actualDoctorId, doctorShortId].filter(
-        (value): value is string => Boolean(value)
-      )
-
       const today = format(new Date(), 'yyyy-MM-dd')
 
-      // 2. Fetch Today's Appointments
-      const { data: appts } = await supabase
-        .from('appointments')
-        .select('*')
-        .eq('doctor_id', actualDoctorId)
-        .eq('appointment_date', today)
-        .order('start_time', { ascending: true })
+      // Today's appointments, the doctor's reports and pending AI insights don't depend
+      // on each other, so they load in one round trip.
+      const [{ data: appts }, { data: reports }, suggestionsResult] = await Promise.all([
+        supabase
+          .from('appointments')
+          .select('*')
+          .eq('doctor_id', authUserId)
+          .eq('appointment_date', today)
+          .order('start_time', { ascending: true }),
+        supabase
+          .from('reports')
+          .select('*')
+          .eq('doctor_id', authUserId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('ml_suggestions')
+          .select('id, test_type, findings, confidence, severity, processed_at')
+          .eq('status', 'pending_review')
+          .order('processed_at', { ascending: false })
+          .limit(5),
+      ])
 
       setTodayAppointments(appts || [])
-
-      // 3. Fetch Pending Reports (Reviews)
-      const { data: reports } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('doctor_id', actualDoctorId)
-        .order('created_at', { ascending: false })
 
       // 4. Keep only truly pending reports for dashboard review widgets
       const pendingReports = (reports || []).filter((report: any) =>
@@ -169,14 +151,10 @@ export default function DoctorDashboard() {
       
       setUrgentReviews(reviews)
 
-      // Fetch real AI insights from ml_suggestions table
+      // Real AI insights from the ml_suggestions query above
       try {
-        const { data: suggestions } = await supabase
-          .from('ml_suggestions')
-          .select('id, test_type, findings, confidence, severity, processed_at')
-          .eq('status', 'pending_review')
-          .order('processed_at', { ascending: false })
-          .limit(5)
+        const { data: suggestions, error: suggestionsError } = suggestionsResult
+        if (suggestionsError) throw suggestionsError
 
         if (suggestions && suggestions.length > 0) {
           setAiInsights(suggestions.map((s: any) => ({
@@ -211,14 +189,7 @@ export default function DoctorDashboard() {
   }
 
   if (authLoading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <div className="flex flex-col items-center">
-          <Activity className="h-8 w-8 animate-spin mb-4" />
-          <span className="text-xs font-mono uppercase tracking-widest text-black/60">System Initializing...</span>
-        </div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   const urgentCount = urgentReviews.filter(r => r.priority === 'urgent').length
@@ -237,7 +208,7 @@ export default function DoctorDashboard() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">
                   System Online
                 </span>
               </div>
@@ -250,7 +221,7 @@ export default function DoctorDashboard() {
             </div>
             {shortId && (
               <div className="text-right">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
                   Physician ID
                 </span>
                 <span className="text-xl font-mono border-b border-black">
@@ -295,40 +266,40 @@ export default function DoctorDashboard() {
 
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10 mb-16">
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/doctor-dashboard/reports')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/doctor-dashboard/reports'))}>
               <div className="flex justify-between items-start mb-4">
-                <Users className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">01</span>
+                <Users className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">01</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.activePatients}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Active Patients</div>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600"></div>
             </div>
 
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/doctor-dashboard/reports')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/doctor-dashboard/reports'))}>
               <div className="flex justify-between items-start mb-4">
-                <FileText className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">02</span>
+                <FileText className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">02</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.pendingReviews}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Pending Reports</div>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600"></div>
             </div>
 
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/doctor-dashboard/consultations')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/doctor-dashboard/consultations'))}>
               <div className="flex justify-between items-start mb-4">
-                <Video className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">03</span>
+                <Video className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">03</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.consultations}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">Consultations</div>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyan-600"></div>
             </div>
 
-            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" onClick={() => router.push('/doctor-dashboard/ai-assistant')}>
+            <div className="bg-white p-6 hover:bg-black/[0.02] transition-colors group cursor-pointer relative" {...pressable(() => router.push('/doctor-dashboard/ai-assistant'))}>
               <div className="flex justify-between items-start mb-4">
-                <Brain className="h-5 w-5 text-black/40 group-hover:text-black transition-colors" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/40">04</span>
+                <Brain className="h-5 w-5 text-black/55 group-hover:text-black transition-colors" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">04</span>
               </div>
               <div className="text-3xl font-bold mb-1">{stats.aiInsights}</div>
               <div className="text-xs font-mono uppercase tracking-wider text-black/60">AI Insights</div>
@@ -380,12 +351,12 @@ export default function DoctorDashboard() {
                   <h3 className="text-xl font-bold mb-2 uppercase tracking-tight">{action.title}</h3>
                   <p className="text-black/60 font-light text-sm">{action.desc}</p>
                 </div>
-                <Link href={action.href} className="relative z-10 mt-auto">
-                  <Button className="w-full bg-black text-white rounded-none hover:bg-black/80 font-mono uppercase text-xs h-10 flex items-center justify-between px-4">
+                <Button className="w-full bg-black text-white rounded-none hover:bg-black/80 font-mono uppercase text-xs h-10 flex items-center justify-between px-4" asChild>
+                  <Link href={action.href} className="relative z-10 mt-auto">
                     <span>Access Now</span>
                     <ArrowRight className="h-3 w-3" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             ))}
           </div>
@@ -420,7 +391,7 @@ export default function DoctorDashboard() {
                           <div>
                             <div className="font-bold text-lg mb-1 uppercase">{apt.patient_name}</div>
                             <div className="text-sm text-black/60 uppercase">{apt.consultation_type} Consultation</div>
-                            <div className="text-xs font-mono mt-1 text-black/40 uppercase">
+                            <div className="text-xs font-mono mt-1 text-black/55 uppercase">
                               {apt.status === 'confirmed' ? 'Ready' : apt.status}
                             </div>
                           </div>
@@ -486,7 +457,7 @@ export default function DoctorDashboard() {
                     <div
                       key={review.id}
                       className="flex items-start justify-between p-4 border border-black/5 hover:bg-black/[0.02] cursor-pointer transition-colors group"
-                      onClick={() => setSelectedReview(review)}
+                      {...pressable(() => setSelectedReview(review))}
                     >
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
@@ -499,13 +470,13 @@ export default function DoctorDashboard() {
                           </span>
                         </div>
                         <p className="text-xs text-black/60 mb-1">{review.report_type}</p>
-                        <p className="text-[11px] font-mono text-black/40">{format(parseISO(review.created_at), 'MMM d, yyyy')}</p>
+                        <p className="text-[11px] font-mono text-black/55">{format(parseISO(review.created_at), 'MMM d, yyyy')}</p>
                       </div>
                       <ArrowRight className="h-4 w-4 ml-3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   ))}
                   {urgentReviews.length === 0 && (
-                     <div className="text-center py-8 text-black/40 font-mono text-xs uppercase">No pending reviews</div>
+                     <div className="text-center py-8 text-black/55 font-mono text-xs uppercase">No pending reviews</div>
                   )}
                 </div>
               </div>
@@ -524,10 +495,10 @@ export default function DoctorDashboard() {
                       <div
                         key={insight.id}
                         className="p-4 border border-black/5 hover:bg-black/[0.02] cursor-pointer transition-colors"
-                        onClick={() => setSelectedInsight(insight)}
+                        {...pressable(() => setSelectedInsight(insight))}
                       >
                         <div className="flex items-start gap-2 mb-2">
-                          <Brain className="h-4 w-4 mt-0.5 text-black/40" />
+                          <Brain className="h-4 w-4 mt-0.5 text-black/55" />
                           <h4 className="font-bold text-sm">{insight.title}</h4>
                         </div>
                         <p className="text-xs text-black/60 line-clamp-2">{insight.description}</p>
@@ -560,15 +531,15 @@ export default function DoctorDashboard() {
           </div>
           <div className="p-6 space-y-6">
             <div className="border border-black/5 p-4 bg-black/[0.02]">
-              <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">Report Type</p>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">Report Type</p>
               <p className="text-lg font-bold">{selectedReview?.report_type}</p>
             </div>
             <div className="border border-black/5 p-4 bg-black/[0.02]">
-              <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">Description</p>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">Description</p>
               <p className="text-sm">{selectedReview?.description}</p>
             </div>
             <div className="border border-black/5 p-4 bg-black/[0.02]">
-              <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">Date</p>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">Date</p>
               <p className="text-sm font-mono">
                 {selectedReview ? format(parseISO(selectedReview.created_at), 'MMMM d, yyyy') : ''}
               </p>

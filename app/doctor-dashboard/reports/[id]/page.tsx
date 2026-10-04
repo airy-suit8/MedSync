@@ -64,9 +64,9 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-semibold text-center">Report not found</h1>
         <div className="text-center mt-4">
-          <Link href="/doctor-dashboard/reports">
-            <Button>Back to Reports</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/doctor-dashboard/reports">Back to Reports</Link>
+          </Button>
         </div>
       </div>
     )
@@ -143,7 +143,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
       case 'reviewed': return 'border-emerald-600 text-emerald-600 bg-emerald-50'
       case 'accepted': return 'border-indigo-600 text-indigo-600 bg-indigo-50'
       case 'rejected': return 'border-red-600 text-red-600 bg-red-50'
-      default: return 'border-black/20 text-black/40 bg-black/[0.02]'
+      default: return 'border-black/20 text-black/55 bg-black/[0.02]'
     }
   }
 
@@ -154,7 +154,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
       case 'moderate': return 'border-amber-600 text-amber-600 bg-amber-50'
       case 'mild':
       case 'none': return 'border-emerald-600 text-emerald-600 bg-emerald-50'
-      default: return 'border-black/20 text-black/40 bg-black/[0.02]'
+      default: return 'border-black/20 text-black/55 bg-black/[0.02]'
     }
   }
 
@@ -162,7 +162,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
     <div className="min-h-screen bg-transparent p-6 md:p-12 max-w-[1600px] mx-auto">
       <header className="border-b border-black/10 pb-6 mb-8 flex-shrink-0 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard/reports" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard/reports" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Reports</span>
           </Link>
@@ -174,7 +174,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-3">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-3">
             System Status
           </span>
           <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2 mb-6">
@@ -264,17 +264,17 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="border border-black/10 p-4 bg-white text-center">
-                  <h4 className="text-[11px] font-mono uppercase text-black/40 mb-2">Confidence Score</h4>
+                  <h4 className="text-[11px] font-mono uppercase text-black/55 mb-2">Confidence Score</h4>
                   <p className="text-3xl font-bold font-mono">{(confidence * 100).toFixed(1)}%</p>
                 </div>
                 
                 <div className="border border-black/10 p-4 bg-white text-center">
-                  <h4 className="text-[11px] font-mono uppercase text-black/40 mb-2">Severity Level</h4>
+                  <h4 className="text-[11px] font-mono uppercase text-black/55 mb-2">Severity Level</h4>
                   <p className="text-xl font-bold uppercase mt-2">{severity}</p>
                 </div>
                 
                 <div className="border border-black/10 p-4 bg-white text-center">
-                  <h4 className="text-[11px] font-mono uppercase text-black/40 mb-2">Analysis Status</h4>
+                  <h4 className="text-[11px] font-mono uppercase text-black/55 mb-2">Analysis Status</h4>
                   <p className="text-lg font-bold uppercase mt-2">{status.replace('_', ' ')}</p>
                 </div>
               </div>
@@ -310,55 +310,55 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               <div className="border border-black/10 bg-black/[0.02]">
                 <div className="grid grid-cols-1 divide-y divide-black/10">
                   <div className="flex justify-between p-3 bg-white">
-                    <span className="text-[11px] font-mono uppercase text-black/40">Patient ID</span>
+                    <span className="text-[11px] font-mono uppercase text-black/55">Patient ID</span>
                     <span className="text-xs font-bold uppercase">{patientId}</span>
                   </div>
                   
                   {fullName !== 'Not provided' && (
                     <div className="flex justify-between p-3 bg-white">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Full Name</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Full Name</span>
                       <span className="text-xs font-bold uppercase">{fullName}</span>
                     </div>
                   )}
                   
                   {age !== 'Not provided' && (
                     <div className="flex justify-between p-3 bg-white">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Age / Gender</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Age / Gender</span>
                       <span className="text-xs font-bold uppercase">{age}Y / {gender}</span>
                     </div>
                   )}
                   
                   {phoneNumber !== 'Not provided' && (
                     <div className="flex justify-between p-3 bg-white">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Phone</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Phone</span>
                       <span className="text-xs font-bold font-mono">{phoneNumber}</span>
                     </div>
                   )}
 
                   {eyeSide && (
                     <div className="flex justify-between p-3 bg-white border-t border-black/5">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Eye Side</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Eye Side</span>
                       <span className="text-xs font-bold uppercase">{eyeSide}</span>
                     </div>
                   )}
 
                   {familyHistory && (
                     <div className="p-3 bg-white flex flex-col gap-1 border-t border-black/5">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Family History</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Family History</span>
                       <span className="text-xs font-mono">{familyHistory}</span>
                     </div>
                   )}
 
                   {previousDiagnosis && (
                     <div className="p-3 bg-white flex flex-col gap-1 border-t-2 border-black/10">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Previous Diagnosis</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Previous Diagnosis</span>
                       <span className="text-xs font-mono">{previousDiagnosis}</span>
                     </div>
                   )}
                   
                   {ongoingTreatments && (
                     <div className="p-3 bg-white flex flex-col gap-1">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Ongoing Treatments</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Ongoing Treatments</span>
                       <span className="text-xs font-mono">{ongoingTreatments}</span>
                     </div>
                   )}
@@ -373,29 +373,29 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               <div className="border border-black/10 bg-black/[0.02]">
                 <div className="grid grid-cols-1 divide-y divide-black/10">
                   <div className="flex justify-between p-3 bg-white">
-                    <span className="text-[10px] font-mono uppercase text-black/40">Test Type</span>
+                    <span className="text-[10px] font-mono uppercase text-black/55">Test Type</span>
                     <span className="text-xs font-bold uppercase">{testType}</span>
                   </div>
                   <div className="flex justify-between p-3 bg-white">
-                    <span className="text-[10px] font-mono uppercase text-black/40">Priority</span>
+                    <span className="text-[10px] font-mono uppercase text-black/55">Priority</span>
                     <span className={`text-xs font-bold uppercase px-1.5 py-0.5 border ${report.priority === 'urgent' || report.priority === 'critical' ? 'border-red-500 text-red-600 bg-red-50' : 'border-black'}`}>{report.priority || 'Normal'}</span>
                   </div>
                   <div className="flex flex-col gap-1 p-3 bg-white">
-                    <span className="text-[10px] font-mono uppercase text-black/40">File Name</span>
+                    <span className="text-[10px] font-mono uppercase text-black/55">File Name</span>
                     <span className="text-[10px] font-mono truncate">{report.original_name || 'Unknown'}</span>
                   </div>
                   <div className="flex justify-between p-3 bg-white">
-                    <span className="text-[10px] font-mono uppercase text-black/40">Uploaded</span>
+                    <span className="text-[10px] font-mono uppercase text-black/55">Uploaded</span>
                     <span className="text-[10px] font-mono">{report.uploaded_at ? new Date(report.uploaded_at).toLocaleDateString() : 'Unknown'}</span>
                   </div>
                   <div className="flex flex-col gap-1 p-3 bg-white">
-                    <span className="text-[10px] font-mono uppercase text-black/40">Report ID</span>
+                    <span className="text-[10px] font-mono uppercase text-black/55">Report ID</span>
                     <span className="text-[10px] font-mono text-black/60">{report.id}</span>
                   </div>
                   
                   {report.notes && (
                     <div className="flex flex-col gap-1 p-3 bg-white border-t-2 border-black/10">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Physician Notes</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Physician Notes</span>
                       <span className="text-sm font-mono">{report.notes}</span>
                     </div>
                   )}

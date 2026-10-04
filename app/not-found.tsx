@@ -18,7 +18,7 @@ export default function NotFound() {
 
       <div className="max-w-2xl w-full relative z-10 text-center">
         <div className="mb-8">
-          <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+          <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
              &quot;SYSTEM ERROR&quot;
           </span>
         </div>
@@ -38,12 +38,12 @@ export default function NotFound() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/">
-            <Button className="bg-black hover:bg-black/90 text-white rounded-none px-8 py-6 font-mono text-sm uppercase tracking-wide">
+          <Button className="bg-black hover:bg-black/90 text-white rounded-none px-8 py-6 font-mono text-sm uppercase tracking-wide" asChild>
+            <Link href="/">
               <Home className="h-4 w-4 mr-2" />
               Return Home
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <Button
             variant="outline"
             onClick={() => window.history.back()}

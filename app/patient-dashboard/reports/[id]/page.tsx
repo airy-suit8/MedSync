@@ -81,12 +81,12 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
         <div className="border border-black p-12 text-center max-w-md bg-white">
           <h1 className="text-3xl font-bold uppercase mb-4 tracking-tighter">Access Denied</h1>
           <p className="text-black/60 font-mono text-xs uppercase mb-8 leading-relaxed">{error || 'The requested medical report could not be located in the secure database.'}</p>
-          <Link href="/patient-dashboard/reports">
-            <Button className="bg-black text-white rounded-none px-8 h-12 uppercase font-mono text-xs tracking-widest">
+          <Button className="bg-black text-white rounded-none px-8 h-12 uppercase font-mono text-xs tracking-widest" asChild>
+            <Link href="/patient-dashboard/reports">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Return to Archives
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     )
@@ -97,23 +97,23 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard/reports" className="print:hidden inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/patient-dashboard/reports" className="print:hidden inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Archive Index</span>
           </Link>
           <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Report Detail</h1>
           <div className="flex items-center gap-4">
-            <p className="text-black/40 font-mono text-[10px] uppercase tracking-widest">
+            <p className="text-black/55 font-mono text-[10px] uppercase tracking-widest">
               UUID: {report.id}
             </p>
             <span className="h-1 w-1 bg-black/20 rounded-full"></span>
-            <p className="text-black/40 font-mono text-[10px] uppercase tracking-widest">
+            <p className="text-black/55 font-mono text-[10px] uppercase tracking-widest">
               TS: {new Date(report.uploaded_at).toISOString()}
             </p>
           </div>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-3">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-3">
             Data Integrity
           </span>
           <span className="text-xl font-mono border-b-2 border-green-500 inline-flex items-center gap-2 mb-6">
@@ -147,7 +147,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
               <div className="space-y-8">
                 {report.result?.findings && (
                   <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-3">Diagnostic Findings</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-3">Diagnostic Findings</h3>
                     <div className="p-6 bg-black/[0.02] border border-black/5">
                       <p className="text-sm font-mono text-black leading-relaxed uppercase">
                         {report.result.findings}
@@ -158,7 +158,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 
                 {report.result?.recommendations && (
                   <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-3">Action Plan</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-3">Action Plan</h3>
                     <div className="p-6 bg-emerald-50 border border-emerald-500/20">
                       <p className="text-sm font-mono text-emerald-900 leading-relaxed uppercase">
                         {report.result.recommendations}
@@ -169,11 +169,11 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
 
                 <div className="grid grid-cols-2 gap-8 pt-4 border-t border-black/5">
                   <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-2">Confidence</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-2">Confidence</h3>
                     <span className="text-2xl font-mono">{typeof report.result?.confidence === 'number' ? `${Math.round(report.result.confidence * 100)}%` : '—'}</span>
                   </div>
                   <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-2">Severity</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-2">Severity</h3>
                     <span className={`text-2xl font-mono uppercase ${
                       ['critical', 'severe'].includes(report.result?.severity) ? 'text-red-600 border-b-2 border-red-600'
                         : report.result?.severity === 'moderate' ? 'text-amber-600 border-b-2 border-amber-600'
@@ -204,7 +204,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                     <FileText className="h-8 w-8" />
                   </div>
                   <p className="text-xs font-mono uppercase tracking-widest text-black/60 mb-2">Non-Rasterized Document</p>
-                  <p className="text-[10px] font-mono uppercase text-black/40">File Type: PDF / Dicom</p>
+                  <p className="text-[10px] font-mono uppercase text-black/55">File Type: PDF / Dicom</p>
                 </div>
               )}
             </div>
@@ -214,7 +214,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
         {/* Sidebar Info */}
         <div className="space-y-8">
           <div className="border border-black/10 bg-white p-8">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-6">Technical Metadata</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-6">Technical Metadata</h3>
             <div className="space-y-6">
               {[
                 { label: 'Test Type', value: report.test_type },
@@ -223,7 +223,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 { label: 'Status', value: 'Finalized' }
               ].map((item, i) => (
                 <div key={i}>
-                  <p className="text-[10px] font-mono text-black/40 uppercase mb-1">{item.label}</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase mb-1">{item.label}</p>
                   <p className="text-sm font-bold uppercase tracking-tight">{item.value}</p>
                 </div>
               ))}
@@ -232,7 +232,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
 
           <div className="border border-black/10 bg-white p-8 relative overflow-hidden">
              <div className="absolute left-0 top-0 h-full w-0.5 bg-indigo-600"></div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-6">Patient Context</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-6">Patient Context</h3>
             <div className="space-y-6">
               {[
                 { label: 'ID', value: report.patient_info?.patientId || report.patient_id },
@@ -240,7 +240,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 { label: 'Age Group', value: report.patient_info?.age || 'N/A' }
               ].map((item, i) => (
                 <div key={i}>
-                  <p className="text-[10px] font-mono text-black/40 uppercase mb-1">{item.label}</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase mb-1">{item.label}</p>
                   <p className="text-sm font-bold uppercase tracking-tight">{item.value}</p>
                 </div>
               ))}
@@ -249,7 +249,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
 
           {report.notes && (
             <div className="border border-black/10 bg-white p-8">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-4">Clinical Notes</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-4">Clinical Notes</h3>
               <p className="text-xs font-mono text-black/60 uppercase leading-relaxed">
                 {report.notes}
               </p>

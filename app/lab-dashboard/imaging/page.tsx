@@ -255,7 +255,7 @@ export default function LabImagingPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Return to Node</span>
           </Link>
@@ -265,7 +265,7 @@ export default function LabImagingPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             System Hash
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600">
@@ -337,14 +337,14 @@ export default function LabImagingPage() {
             <Camera className="h-6 w-6" />
             Capture Logs
           </h3>
-          <span className="text-[10px] font-mono text-black/40 uppercase tracking-widest">{filteredStudies.length} STUDIES FOUND</span>
+          <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{filteredStudies.length} STUDIES FOUND</span>
         </div>
 
         <div className="space-y-6">
           {filteredStudies.length === 0 ? (
             <div className="text-center py-20 bg-black/[0.01] border border-dashed border-black/10">
               <Camera className="h-12 w-12 mx-auto mb-4 text-black/10" />
-              <p className="text-xs font-mono uppercase text-black/40">NO IMAGING DATA IN CURRENT NODE</p>
+              <p className="text-xs font-mono uppercase text-black/55">NO IMAGING DATA IN CURRENT NODE</p>
             </div>
           ) : (
             filteredStudies.map((study) => (
@@ -356,12 +356,12 @@ export default function LabImagingPage() {
                     </div>
                     <div>
                       <p className="font-black text-lg uppercase tracking-tight">{study.patient_name}</p>
-                      <p className="text-[10px] font-mono text-black/40 uppercase">ID: {study.patient_id}</p>
+                      <p className="text-[10px] font-mono text-black/55 uppercase">ID: {study.patient_id}</p>
                     </div>
                   </div>
                   <div>
                     <p className="font-bold text-sm uppercase">{study.study_type} - {study.body_part}</p>
-                    <p className="text-[10px] font-mono text-black/40 uppercase">
+                    <p className="text-[10px] font-mono text-black/55 uppercase">
                       SCHEDULED: {new Date(study.scheduled_date).toLocaleDateString()}
                     </p>
                   </div>
@@ -372,7 +372,7 @@ export default function LabImagingPage() {
                     study.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                     study.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
                     study.status === 'in_progress' ? 'border-indigo-600 text-indigo-600 bg-indigo-50' :
-                    'border-black/20 text-black/40 bg-black/[0.02]'
+                    'border-black/20 text-black/55 bg-black/[0.02]'
                   }`}>
                     {study.status.replace('_', ' ')}
                   </span>
@@ -380,7 +380,7 @@ export default function LabImagingPage() {
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 border uppercase tracking-tighter ${
                     study.priority === 'critical' ? 'border-red-600 text-red-600 bg-red-50' :
                     study.priority === 'high' ? 'border-amber-600 text-amber-600 bg-amber-50' :
-                    'border-black/20 text-black/40 bg-black/[0.02]'
+                    'border-black/20 text-black/55 bg-black/[0.02]'
                   }`}>
                     {study.priority}
                   </span>
@@ -425,7 +425,7 @@ export default function LabImagingPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Patient ID</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Patient ID</label>
                     <Input
                       value={scheduleForm.patient_id}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, patient_id: e.target.value })}
@@ -434,7 +434,7 @@ export default function LabImagingPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Patient Name</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Patient Name</label>
                     <Input
                       value={scheduleForm.patient_name}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, patient_name: e.target.value })}
@@ -446,7 +446,7 @@ export default function LabImagingPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Study Type</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Study Type</label>
                     <Select value={scheduleForm.study_type} onValueChange={(value) => setScheduleForm({ ...scheduleForm, study_type: value })}>
                       <SelectTrigger className="rounded-none border-black h-12 font-mono text-sm uppercase focus:ring-0">
                         <SelectValue placeholder="SELECT..." />
@@ -461,7 +461,7 @@ export default function LabImagingPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Body Part</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Body Part</label>
                     <Input
                       value={scheduleForm.body_part}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, body_part: e.target.value })}
@@ -472,7 +472,7 @@ export default function LabImagingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Scheduled Timestamp</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Scheduled Timestamp</label>
                   <Input
                     type="text"
                     value={scheduleForm.scheduled_date}
@@ -484,7 +484,7 @@ export default function LabImagingPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Priority</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Priority</label>
                     <Select value={scheduleForm.priority} onValueChange={(value) => setScheduleForm({ ...scheduleForm, priority: value })}>
                       <SelectTrigger className="rounded-none border-black h-12 font-mono text-sm uppercase focus:ring-0">
                         <SelectValue />
@@ -498,7 +498,7 @@ export default function LabImagingPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40">Radiologist</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Radiologist</label>
                     <Input
                       value={scheduleForm.radiologist}
                       onChange={(e) => setScheduleForm({ ...scheduleForm, radiologist: e.target.value })}
@@ -536,32 +536,32 @@ export default function LabImagingPage() {
               <div className="grid md:grid-cols-2 gap-10 mb-10">
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Study Hash</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Study Hash</p>
                     <p className="font-mono text-xl uppercase tracking-tighter">{selectedStudy.id}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Type / Region</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Type / Region</p>
                     <p className="font-mono text-xl uppercase tracking-tighter">{selectedStudy.study_type} - {selectedStudy.body_part}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Scheduled Date</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Scheduled Date</p>
                     <p className="font-mono text-sm uppercase text-black/60">{new Date(selectedStudy.scheduled_date).toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Status</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Status</p>
                     <span className={`text-[10px] font-mono font-bold px-3 py-1 border uppercase tracking-widest inline-block ${
                       selectedStudy.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                       selectedStudy.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
                       selectedStudy.status === 'in_progress' ? 'border-indigo-600 text-indigo-600 bg-indigo-50' :
-                      'border-black/20 text-black/40 bg-black/[0.02]'
+                      'border-black/20 text-black/55 bg-black/[0.02]'
                     }`}>
                       {selectedStudy.status.replace('_', ' ')}
                     </span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Assigned Radiologist</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Assigned Radiologist</p>
                     <p className="font-black text-xl uppercase text-indigo-600">{selectedStudy.radiologist || 'UNASSIGNED'}</p>
                   </div>
                 </div>
@@ -569,7 +569,7 @@ export default function LabImagingPage() {
 
               {selectedStudy.notes && (
                 <div className="p-6 bg-black/[0.02] border border-black/5 mb-10">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-2">Technical Observations</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-2">Technical Observations</p>
                   <p className="text-sm font-mono uppercase text-black/70 leading-relaxed italic">{selectedStudy.notes}</p>
                 </div>
               )}
@@ -613,9 +613,9 @@ export default function LabImagingPage() {
 
               <div className="space-y-6">
                 <div className="p-4 bg-black/[0.02] border border-black/5 mb-6">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Target Study</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Target Study</p>
                   <p className="font-bold text-sm uppercase">{selectedStudy.study_type} - {selectedStudy.body_part}</p>
-                  <p className="text-[10px] font-mono text-black/40 uppercase">NODE: {selectedStudy.patient_name}</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase">NODE: {selectedStudy.patient_name}</p>
                 </div>
 
                 <div className="border-2 border-dashed border-black/10 p-10 text-center hover:border-black/30 transition-all group cursor-pointer relative">
@@ -626,8 +626,8 @@ export default function LabImagingPage() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={e => setSelectedFiles(e.target.files)}
                   />
-                  <Upload className="h-10 w-10 text-black/10 mx-auto mb-4 group-hover:text-black/30" />
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-black/40">Initialize Local Link or Drag Files</p>
+                  <Upload className="h-10 w-10 text-black/10 mx-auto mb-4 group-hover:text-black/55" />
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-black/55">Initialize Local Link or Drag Files</p>
 
                   {selectedFiles && selectedFiles.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-black/5 text-left">

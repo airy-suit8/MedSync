@@ -122,10 +122,10 @@ export default function LoginPage() {
           <div className="w-full max-w-lg">
             {/* Label */}
             <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-2">
-              <span className="text-[10px] font-mono tracking-[0.2em] text-black/40 uppercase">
+              <span className="text-[10px] font-mono tracking-[0.2em] text-black/55 uppercase">
                  &quot;SECURE ENTRY&quot;
               </span>
-              <span className="text-[10px] font-mono text-black/40">
+              <span className="text-[10px] font-mono text-black/55">
                 v2.0.25
               </span>
             </div>
@@ -180,7 +180,7 @@ export default function LoginPage() {
                       <Button
                         type="button"
                         variant="link"
-                        className="text-[10px] font-mono uppercase tracking-wide text-black/40 hover:text-black p-0 h-auto"
+                        className="text-[10px] font-mono uppercase tracking-wide text-black/55 hover:text-black p-0 h-auto"
                         onClick={() => setShowForgotPassword(true)}
                       >
                         Reset Key?
@@ -211,7 +211,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-8 pt-6 border-t border-black/10 text-center">
-                  <p className="text-xs font-mono text-black/40 uppercase tracking-wide">
+                  <p className="text-xs font-mono text-black/55 uppercase tracking-wide">
                     New User?{" "}
                     <Link href="/signup" className="text-black border-b border-black/20 hover:border-black pb-0.5 transition-all">
                       Create Account

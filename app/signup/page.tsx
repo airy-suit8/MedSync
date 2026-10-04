@@ -109,7 +109,7 @@ export default function SignUpPage() {
           </Link>
 
           <div className="mb-2">
-            <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+            <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
                &quot;CREATE ACCOUNT&quot;
             </span>
           </div>
@@ -137,11 +137,11 @@ export default function SignUpPage() {
                 <p className="text-sm text-black/60 mb-4">
                   Redirecting to login page...
                 </p>
-                <Link href="/login">
-                  <Button className="bg-black hover:bg-black/90">
+                <Button className="bg-black hover:bg-black/90" asChild>
+                  <Link href="/login">
                     Go to Login →
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

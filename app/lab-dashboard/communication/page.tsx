@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import { pressable } from "@/lib/utils"
 
 interface Message {
   id: string
@@ -383,7 +384,7 @@ export default function LabCommunicationPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Return to Node</span>
           </Link>
@@ -393,7 +394,7 @@ export default function LabCommunicationPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Uplink Status
           </span>
           <span className="text-xl font-mono border-b-2 border-emerald-500">
@@ -429,7 +430,7 @@ export default function LabCommunicationPage() {
                 {doctors.map((doctor) => (
                   <div
                     key={doctor.id}
-                    onClick={() => setSelectedContact(doctor)}
+                    {...pressable(() => setSelectedContact(doctor))}
                     className={`p-4 border transition-all cursor-pointer group relative ${
                       selectedContact?.id === doctor.id
                         ? 'border-indigo-600 bg-indigo-50/30'
@@ -442,7 +443,7 @@ export default function LabCommunicationPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div className={`p-2 ${selectedContact?.id === doctor.id ? 'bg-indigo-600 text-white' : 'bg-black/[0.03] text-black/40'}`}>
+                          <div className={`p-2 ${selectedContact?.id === doctor.id ? 'bg-indigo-600 text-white' : 'bg-black/[0.03] text-black/55'}`}>
                             <Stethoscope className="h-5 w-5" />
                           </div>
                           {onlineUsers.has(doctor.id) && (
@@ -451,7 +452,7 @@ export default function LabCommunicationPage() {
                         </div>
                         <div>
                           <p className="font-black text-xs uppercase tracking-tight">{doctor.name}</p>
-                          <p className="text-[10px] font-mono text-black/40 uppercase">{doctor.specialty || 'GENERAL'}</p>
+                          <p className="text-[10px] font-mono text-black/55 uppercase">{doctor.specialty || 'GENERAL'}</p>
                         </div>
                       </div>
                       {getUnreadCount(doctor.id) > 0 && (
@@ -468,7 +469,7 @@ export default function LabCommunicationPage() {
                 {patients.map((patient) => (
                   <div
                     key={patient.id}
-                    onClick={() => setSelectedContact(patient)}
+                    {...pressable(() => setSelectedContact(patient))}
                     className={`p-4 border transition-all cursor-pointer group relative ${
                       selectedContact?.id === patient.id
                         ? 'border-indigo-600 bg-indigo-50/30'
@@ -481,7 +482,7 @@ export default function LabCommunicationPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div className={`p-2 ${selectedContact?.id === patient.id ? 'bg-indigo-600 text-white' : 'bg-black/[0.03] text-black/40'}`}>
+                          <div className={`p-2 ${selectedContact?.id === patient.id ? 'bg-indigo-600 text-white' : 'bg-black/[0.03] text-black/55'}`}>
                             <User className="h-5 w-5" />
                           </div>
                           {onlineUsers.has(patient.id) && (
@@ -490,7 +491,7 @@ export default function LabCommunicationPage() {
                         </div>
                         <div>
                           <p className="font-black text-xs uppercase tracking-tight">{patient.name}</p>
-                          <p className="text-[10px] font-mono text-black/40 uppercase">{patient.specialty || 'NODE'}</p>
+                          <p className="text-[10px] font-mono text-black/55 uppercase">{patient.specialty || 'NODE'}</p>
                         </div>
                       </div>
                       {getUnreadCount(patient.id) > 0 && (
@@ -527,7 +528,7 @@ export default function LabCommunicationPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-black uppercase tracking-tighter">{selectedContact.name}</h2>
-                    <p className="text-[10px] font-mono text-black/40 uppercase tracking-widest">
+                    <p className="text-[10px] font-mono text-black/55 uppercase tracking-widest">
                       {selectedContact.role} • {selectedContact.specialty}
                     </p>
                   </div>
@@ -542,7 +543,7 @@ export default function LabCommunicationPage() {
                   >
                     <div className="max-w-[70%]">
                        <div className="flex items-center gap-2 mb-1 px-1">
-                          <span className="text-[9px] font-mono text-black/30 uppercase">
+                          <span className="text-[9px] font-mono text-black/55 uppercase">
                             {message.sender_id === currentUserId ? 'YOU' : message.sender_name}
                           </span>
                        </div>
@@ -603,7 +604,7 @@ export default function LabCommunicationPage() {
                 <div className="p-6 bg-black/[0.03] inline-block mb-6">
                   <MessageSquare className="h-12 w-12 text-black/10" />
                 </div>
-                <p className="text-xs font-mono uppercase text-black/30 tracking-[0.3em]">Select node to initialize comms</p>
+                <p className="text-xs font-mono uppercase text-black/55 tracking-[0.3em]">Select node to initialize comms</p>
               </div>
             </div>
           )}

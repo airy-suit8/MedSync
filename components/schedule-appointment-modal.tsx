@@ -268,7 +268,7 @@ export default function ScheduleAppointmentModal({
                     {/* Patient Identification */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="patientId" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40">
+                            <Label htmlFor="patientId" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/55">
                                 <Search className="h-3 w-3" />
                                 Patient ID / Short ID
                             </Label>
@@ -282,7 +282,7 @@ export default function ScheduleAppointmentModal({
                                 />
                                 {loadingProfile && (
                                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                        <Loader2 className="h-3 w-3 animate-spin text-black/40" />
+                                        <Loader2 className="h-3 w-3 animate-spin text-black/55" />
                                     </div>
                                 )}
                                 {patientProfile && !loadingProfile && (
@@ -293,7 +293,7 @@ export default function ScheduleAppointmentModal({
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="patientName" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40">
+                            <Label htmlFor="patientName" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/55">
                                 <User className="h-3 w-3" />
                                 Patient Name
                             </Label>
@@ -310,7 +310,7 @@ export default function ScheduleAppointmentModal({
                     {/* Date and Time */}
                     <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="date" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40">
+                            <Label htmlFor="date" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/55">
                                 <Calendar className="h-3 w-3" />
                                 Date
                             </Label>
@@ -327,7 +327,7 @@ export default function ScheduleAppointmentModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="startTime" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40">
+                            <Label htmlFor="startTime" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/55">
                                 <Clock className="h-3 w-3" />
                                 Start
                             </Label>
@@ -346,7 +346,7 @@ export default function ScheduleAppointmentModal({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="endTime" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/40">
+                            <Label htmlFor="endTime" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/55">
                                 <Clock className="h-3 w-3" />
                                 End
                             </Label>
@@ -367,7 +367,7 @@ export default function ScheduleAppointmentModal({
 
                     {/* Consultation Type */}
                     <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-black/40">Consultation Type</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-black/55">Consultation Type</Label>
                         <div className="flex gap-2">
                             {(['video', 'audio', 'chat'] as const).map(type => (
                                 <Button
@@ -388,7 +388,7 @@ export default function ScheduleAppointmentModal({
 
                     {/* Symptoms */}
                     <div className="space-y-2">
-                        <Label htmlFor="symptoms" className="text-[10px] font-black uppercase tracking-widest text-black/40">Symptoms / Reason</Label>
+                        <Label htmlFor="symptoms" className="text-[10px] font-black uppercase tracking-widest text-black/55">Symptoms / Reason</Label>
                         <Textarea
                             id="symptoms"
                             placeholder="Describe symptoms..."
@@ -401,7 +401,7 @@ export default function ScheduleAppointmentModal({
 
                     {/* Notes */}
                     <div className="space-y-2">
-                        <Label htmlFor="notes" className="text-[10px] font-black uppercase tracking-widest text-black/40">Notes (Optional)</Label>
+                        <Label htmlFor="notes" className="text-[10px] font-black uppercase tracking-widest text-black/55">Notes (Optional)</Label>
                         <Textarea
                             id="notes"
                             placeholder="Additional notes..."

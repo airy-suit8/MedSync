@@ -22,7 +22,7 @@ const statusConfig = {
   },
   low: {
     label: 'Low Priority',
-    className: 'border-black/10 text-black/40 bg-black/[0.01]'
+    className: 'border-black/10 text-black/55 bg-black/[0.01]'
   },
   completed: {
     label: 'Completed',

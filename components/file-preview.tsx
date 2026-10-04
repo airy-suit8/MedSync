@@ -197,7 +197,7 @@ export default function FilePreview({ fileName, originalName, patientId }: FileP
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <FileText className="h-16 w-16 text-gray-500 mx-auto mb-4" />
                   <p className="text-gray-600">Preview not available for this file type</p>
                 </div>
               )}

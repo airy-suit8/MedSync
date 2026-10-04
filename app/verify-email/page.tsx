@@ -58,7 +58,7 @@ function VerifyEmailContent() {
             <span className="text-3xl font-bold ml-3">MedSync</span>
           </div>
           <div className="mb-2">
-            <span className="text-xs font-mono tracking-widest text-black/40 uppercase">
+            <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
                &quot;EMAIL VERIFICATION&quot;
             </span>
           </div>
@@ -68,7 +68,7 @@ function VerifyEmailContent() {
           <CardHeader className="text-center pb-8">
             <div className="mx-auto mb-4">
               {status === 'loading' && (
-                <Loader2 className="h-12 w-12 animate-spin text-black/40" />
+                <Loader2 className="h-12 w-12 animate-spin text-black/55" />
               )}
               {status === 'success' && (
                 <CheckCircle className="h-12 w-12" />
@@ -94,26 +94,26 @@ function VerifyEmailContent() {
                 <p className="text-sm text-black/60 mb-4">
                   You will be redirected automatically in a few seconds.
                 </p>
-                <Link href="/login">
-                  <Button className="w-full bg-black hover:bg-black/90 text-white h-12">
+                <Button className="w-full bg-black hover:bg-black/90 text-white h-12" asChild>
+                  <Link href="/login">
                     Continue to Login →
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
 
             {status === 'error' && (
               <div className="space-y-3">
-                <Link href="/signup">
-                  <Button className="w-full bg-black hover:bg-black/90 text-white h-12">
+                <Button className="w-full bg-black hover:bg-black/90 text-white h-12" asChild>
+                  <Link href="/signup">
                     Sign Up Again →
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button variant="outline" className="w-full border-black/20 h-12">
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full border-black/20 h-12" asChild>
+                  <Link href="/login">
                     Back to Login
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
 
@@ -134,7 +134,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-black/40" />
+        <Loader2 className="h-12 w-12 animate-spin text-black/55" />
       </div>
     }>
       <VerifyEmailContent />

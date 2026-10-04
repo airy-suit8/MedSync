@@ -993,7 +993,7 @@ export default function MedicalVideoCall({
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
                     <div className="text-center">
                       <Users className="h-12 w-12 text-white/10 mx-auto mb-4" />
-                      <h3 className="text-sm font-mono text-white/40 uppercase tracking-widest">Waiting for Remote Participant</h3>
+                      <h3 className="text-sm font-mono text-white/50 uppercase tracking-widest">Waiting for Remote Participant</h3>
                     </div>
                   </div>
                 )}
@@ -1001,24 +1001,24 @@ export default function MedicalVideoCall({
                 {(hasLocalStream || isScreenSharing) && (
                   <div className="absolute top-4 right-4 w-48 h-36 bg-black rounded-none overflow-hidden border border-white/20 shadow-2xl">
                     <video ref={localVideoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${isVideoOn ? '' : 'hidden'}`} />
-                    {!isVideoOn && <div className="w-full h-full flex items-center justify-center bg-slate-800 text-[10px] font-mono text-white/40 uppercase tracking-widest">Feed Cut</div>}
+                    {!isVideoOn && <div className="w-full h-full flex items-center justify-center bg-slate-800 text-[10px] font-mono text-white/50 uppercase tracking-widest">Feed Cut</div>}
                     <div className="absolute bottom-2 left-2 bg-black/40 text-white text-[8px] font-mono uppercase px-1.5 py-0.5 tracking-tighter">LOCAL_FEED</div>
                   </div>
                 )}
 
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
                   <div className="flex items-center space-x-4 bg-black/40 backdrop-blur-md rounded-none px-6 py-3 border border-white/10 shadow-2xl">
-                    <Button variant={isAudioOn ? 'secondary' : 'destructive'} size="icon" className="rounded-none h-10 w-10" onClick={toggleAudio}>
+                    <Button variant={isAudioOn ? 'secondary' : 'destructive'} size="icon" className="rounded-none h-10 w-10" onClick={toggleAudio} aria-label={isAudioOn ? "Mute microphone" : "Unmute microphone"}>
                       {isAudioOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
                     </Button>
-                    <Button variant={isVideoOn ? 'secondary' : 'destructive'} size="icon" className="rounded-none h-10 w-10" onClick={toggleVideo}>
+                    <Button variant={isVideoOn ? 'secondary' : 'destructive'} size="icon" className="rounded-none h-10 w-10" onClick={toggleVideo} aria-label={isVideoOn ? "Turn camera off" : "Turn camera on"}>
                       {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
                     </Button>
-                    <Button variant={isScreenSharing ? 'default' : 'secondary'} size="icon" className="rounded-none h-10 w-10" onClick={() => void toggleScreenShare()}>
+                    <Button variant={isScreenSharing ? 'default' : 'secondary'} size="icon" className="rounded-none h-10 w-10" onClick={() => void toggleScreenShare()} aria-label={isScreenSharing ? "Stop sharing screen" : "Share screen"}>
                       {isScreenSharing ? <MonitorOff className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
                     </Button>
                     <div className="w-px h-6 bg-white/10 mx-2" />
-                    <Button variant="destructive" size="icon" className="rounded-none h-10 w-10" onClick={() => void leaveMeeting()}>
+                    <Button variant="destructive" size="icon" className="rounded-none h-10 w-10" onClick={() => void leaveMeeting()} aria-label="End call">
                       <PhoneOff className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1070,7 +1070,7 @@ export default function MedicalVideoCall({
                 <span>CIPHER: AES_GCM_256</span>
                 <span>STATUS: STABLE</span>
               </div>
-              <div className="text-white/40">MEDSYNC SECURE ENCOUNTER PROTOCOL V1.0</div>
+              <div className="text-white/50">MEDSYNC SECURE ENCOUNTER PROTOCOL V1.0</div>
             </div>
           )}
         </CardContent>

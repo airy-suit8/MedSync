@@ -145,7 +145,7 @@ export default function DoctorAIAssistantPage() {
       </div>
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -155,7 +155,7 @@ export default function DoctorAIAssistantPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Portal Status
           </span>
           <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -221,7 +221,7 @@ export default function DoctorAIAssistantPage() {
               <div className="flex justify-start">
                 <div className="bg-black/5 border border-black/10 p-4 max-w-[80%] rounded-none">
                    <p className="text-sm font-mono leading-relaxed"><strong>AI DIAGNOSTIC ASSISTANT:</strong> Hello! I&apos;m powered by Gemini AI and can help with differential diagnoses, treatment recommendations, and clinical decision support. What would you like to discuss?</p>
-                  <p className="text-[10px] font-mono text-black/40 uppercase mt-2">Just now</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase mt-2">Just now</p>
                 </div>
               </div>
 
@@ -229,7 +229,7 @@ export default function DoctorAIAssistantPage() {
                 <div key={message.id} className={`flex ${message.isDoctor ? 'justify-end' : 'justify-start'}`}>
                   <div className={`p-4 max-w-[80%] rounded-none ${message.isDoctor ? 'bg-black text-white' : 'bg-black/5 border border-black/10'}`}>
                     <p className="text-sm font-mono leading-relaxed"><strong>{message.sender.toUpperCase()}:</strong> {message.text}</p>
-                    <p className={`text-[10px] font-mono uppercase mt-2 ${message.isDoctor ? 'text-white/60' : 'text-black/40'}`}>
+                    <p className={`text-[10px] font-mono uppercase mt-2 ${message.isDoctor ? 'text-white/60' : 'text-black/55'}`}>
                       {new Date(message.timestamp).toLocaleTimeString()}
                     </p>
                   </div>
@@ -256,7 +256,7 @@ export default function DoctorAIAssistantPage() {
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
                   disabled={isLoading}
-                  className="rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/30 h-12"
+                  className="rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/55 h-12"
                 />
                 <Button 
                   onClick={sendMessage} 
@@ -285,7 +285,7 @@ export default function DoctorAIAssistantPage() {
             placeholder="ENTER PATIENT SYMPTOMS, LAB RESULTS, IMAGING FINDINGS, OR CLINICAL NOTES..."
             value={patientData}
             onChange={(e) => setPatientData(e.target.value)}
-            className="min-h-[150px] mb-4 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/30 resize-none p-4"
+            className="min-h-[150px] mb-4 rounded-none border-black/20 focus:border-black font-mono text-sm uppercase placeholder:text-black/55 resize-none p-4"
             disabled={isLoading}
           />
           <Button 

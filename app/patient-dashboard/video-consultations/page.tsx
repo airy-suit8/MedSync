@@ -170,7 +170,7 @@ export default function PatientVideoConsultationsPage() {
     <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Portal Exit</span>
           </Link>
@@ -197,7 +197,7 @@ export default function PatientVideoConsultationsPage() {
                   <div className="p-4 bg-black text-white"><Video className="h-6 w-6" /></div>
                   <div>
                     <h3 className="text-2xl font-black uppercase tracking-tight">{consultation.doctor_name}</h3>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-black/40 mt-1">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-black/55 mt-1">
                       {getConsultationTypeLabel(consultation.consultation_type)} • SYMPTOMS: {consultation.symptoms || 'NOT SPECIFIED'}
                     </p>
                   </div>
@@ -206,7 +206,7 @@ export default function PatientVideoConsultationsPage() {
                 <div className="flex items-center gap-4">
                    <div className="text-right mr-4">
                     <p className="text-sm font-bold uppercase tracking-tight">{format(parseISO(consultation.appointment_date), 'MMMM d, yyyy')}</p>
-                    <p className="text-[10px] font-mono text-black/40 uppercase tracking-widest">{consultation.start_time} PST</p>
+                    <p className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{consultation.start_time} PST</p>
                   </div>
                   <Button className="bg-black text-white rounded-none h-12 px-8 uppercase font-mono text-[10px] tracking-widest" onClick={() => startVideoCall(consultation)}>Establish Link</Button>
                 </div>

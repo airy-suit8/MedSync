@@ -68,6 +68,7 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -75,7 +76,7 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
         </div>
         {!collapsed && (
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 block mb-1">
               PORTAL ACCESS
             </span>
             <span className="text-xs font-mono text-white/80 border px-1 py-0.5 border-white/20 inline-block">
@@ -103,7 +104,7 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
                 `}>
                   <div className="relative">
                     {!collapsed && (
-                      <span className={`absolute -left-2 top-0 text-[0.5rem] font-mono ${isActive ? 'text-black/40' : 'text-white/20 opacity-0 group-hover:opacity-100'}`}>
+                      <span className={`absolute -left-2 top-0 text-[0.5rem] font-mono ${isActive ? 'text-black/55' : 'text-white/20 opacity-0 group-hover:opacity-100'}`}>
                         0{index + 1}
                       </span>
                     )}
@@ -125,7 +126,7 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
       <div className="p-6 border-t border-white/10 bg-white/5 flex-shrink-0">
         {!collapsed && userName && (
           <div className="mb-6">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">Logged in as</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/50 mb-2">Logged in as</p>
             <div className="text-sm font-bold text-white truncate border-l-2 border-white pl-3">
               {userName}
             </div>

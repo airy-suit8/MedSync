@@ -1,6 +1,3 @@
-"use client"
-
-import { motion } from "framer-motion"
 import { Activity, Zap, Shield, Users, FileText, Brain, LucideIcon } from "lucide-react"
 
 const iconMap: Record<string, LucideIcon> = {
@@ -18,22 +15,15 @@ interface FeatureCardProps {
   title: string
   description: string
   tag: string
-  delay?: number
 }
 
-export default function FeatureCard({ index, iconName, title, description, tag, delay = 0 }: FeatureCardProps) {
+export default function FeatureCard({ index, iconName, title, description, tag }: FeatureCardProps) {
   const Icon = iconMap[iconName] || Activity
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay }}
-      className="bg-white p-10 lg:p-12 group hover:bg-black/[0.02] transition-colors"
-    >
+    <div className="reveal-on-scroll bg-white p-10 lg:p-12 group hover:bg-black/[0.02] transition-colors">
       <div className="mb-8">
-        <span className="text-xs font-mono text-black/40">{index}</span>
+        <span className="text-xs font-mono text-black/55">{index}</span>
       </div>
       <div className="mb-6">
         <Icon className="h-8 w-8 stroke-[1.5]" />
@@ -42,9 +32,9 @@ export default function FeatureCard({ index, iconName, title, description, tag, 
       <p className="text-black/60 leading-relaxed mb-6">
         {description}
       </p>
-      <div className="flex items-center text-sm font-mono text-black/40">
+      <div className="flex items-center text-sm font-mono text-black/55">
         {tag} →
       </div>
-    </motion.div>
+    </div>
   )
 }

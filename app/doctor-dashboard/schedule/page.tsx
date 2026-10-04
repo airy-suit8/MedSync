@@ -128,7 +128,7 @@ export default function DoctorSchedulePage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-6 mb-8 flex-shrink-0 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -145,7 +145,7 @@ export default function DoctorSchedulePage() {
             New Appointment
           </Button>
           <div className="text-right">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
               System Status
             </span>
             <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function DoctorSchedulePage() {
             ) : (
               <div className="text-center py-12 border border-black/10 bg-black/[0.02]">
                 <CalendarDays className="h-8 w-8 mx-auto mb-4 text-black/20" />
-                <p className="font-mono text-xs uppercase tracking-widest text-black/40">NO APPOINTMENTS TODAY</p>
+                <p className="font-mono text-xs uppercase tracking-widest text-black/55">NO APPOINTMENTS TODAY</p>
               </div>
             )}
           </div>
@@ -221,7 +221,7 @@ export default function DoctorSchedulePage() {
                 ))
               ) : (
                 <div className="text-center py-8 border border-black/10 bg-black/[0.02]">
-                  <p className="font-mono text-xs uppercase tracking-widest text-black/40">NO UPCOMING APPOINTMENTS</p>
+                  <p className="font-mono text-xs uppercase tracking-widest text-black/55">NO UPCOMING APPOINTMENTS</p>
                 </div>
               )}
             </div>
@@ -263,7 +263,7 @@ export default function DoctorSchedulePage() {
               return (
                 <div key={index} className="bg-white">
                   <div className={`text-center py-4 border-b ${isToday ? 'border-black bg-black text-white' : 'border-black/10 bg-black/[0.02]'}`}>
-                    <p className={`text-[10px] font-mono uppercase tracking-wider mb-1 ${isToday ? 'text-white/60' : 'text-black/40'}`}>
+                    <p className={`text-[10px] font-mono uppercase tracking-wider mb-1 ${isToday ? 'text-white/60' : 'text-black/55'}`}>
                       {format(day, 'EEE')}
                     </p>
                     <p className={`text-xl font-bold`}>
@@ -277,7 +277,7 @@ export default function DoctorSchedulePage() {
                         className={`p-2 border group cursor-pointer ${
                           apt.status === 'confirmed' ? 'border-black bg-black text-white' :
                           apt.status === 'scheduled' ? 'border-black/20 bg-white hover:border-black text-black' :
-                          apt.status === 'completed' ? 'border-black/10 bg-black/5 text-black/40' :
+                          apt.status === 'completed' ? 'border-black/10 bg-black/5 text-black/55' :
                           'border-red-500 bg-red-50 text-red-700'
                         }`}
                       >

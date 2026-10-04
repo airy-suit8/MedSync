@@ -423,7 +423,7 @@ export default function DoctorPatientManagementPage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">
+          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
             <ArrowLeft className="h-3 w-3" />
             <span>Back to Dashboard</span>
           </Link>
@@ -433,7 +433,7 @@ export default function DoctorPatientManagementPage() {
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/40 block mb-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
             Portal Status
           </span>
           <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function DoctorPatientManagementPage() {
                   <p className="text-sm font-bold uppercase truncate">
                     {patient.patient_name || 'Unknown Patient'}
                   </p>
-                  <p className="text-[10px] font-mono text-black/40 uppercase">
+                  <p className="text-[10px] font-mono text-black/55 uppercase">
                     ID: {patient.patient_short_id || 'N/A'}
                   </p>
                 </div>
@@ -471,7 +471,7 @@ export default function DoctorPatientManagementPage() {
             ))}
           </div>
           {assignedPatients.length > 8 && (
-            <p className="text-[10px] font-mono text-black/40 uppercase mt-4">
+            <p className="text-[10px] font-mono text-black/55 uppercase mt-4">
               + {assignedPatients.length - 8} additional patients
             </p>
           )}
@@ -482,12 +482,12 @@ export default function DoctorPatientManagementPage() {
       <div className="grid md:grid-cols-4 gap-6 mb-12">
         <div className="md:col-span-3">
           <div className="relative h-full flex items-center">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/40 h-5 w-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/55 h-5 w-5" />
             <Input
               placeholder="SEARCH PATIENTS AND REPORTS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-14 pl-12 pr-4 bg-white border border-black/10 focus:border-black focus:outline-none font-mono text-sm placeholder:text-black/30 transition-colors uppercase rounded-none"
+              className="w-full h-14 pl-12 pr-4 bg-white border border-black/10 focus:border-black focus:outline-none font-mono text-sm placeholder:text-black/55 transition-colors uppercase rounded-none"
             />
           </div>
         </div>
@@ -545,7 +545,7 @@ export default function DoctorPatientManagementPage() {
       {/* Reports List */}
       <div className="space-y-6">
         {/* Debug Info */}
-        <div className="p-4 border border-black/5 bg-black/[0.02] text-xs font-mono text-black/40">
+        <div className="p-4 border border-black/5 bg-black/[0.02] text-xs font-mono text-black/55">
           <strong className="uppercase">Debug:</strong> Loaded {reports.length} reports. 
           {reports.length > 0 && ` Initial ID: ${reports[0].id}`}
         </div>
@@ -568,7 +568,7 @@ export default function DoctorPatientManagementPage() {
                 {(report.priority === 'urgent' || report.priority === 'critical') && (
                   <span className={`px-2 py-0.5 text-xs font-mono uppercase font-bold border tracking-tighter ${
                     report.priority === 'urgent' || report.priority === 'critical' ? 'border-red-600 text-red-600 bg-red-50' : 
-                    'border-black/10 text-black/40 bg-black/[0.02]'
+                    'border-black/10 text-black/55 bg-black/[0.02]'
                   }`}>
                     {report.priority}
                   </span>
@@ -585,15 +585,15 @@ export default function DoctorPatientManagementPage() {
             <div className="p-6">
               <div className="grid md:grid-cols-3 gap-px bg-black/5 border border-black/5 mb-6">
                 <div className="p-4 bg-white">
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">Patient ID</p>
+                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">Patient ID</p>
                   <p className="font-mono text-sm truncate">{report.patient_id}</p>
                 </div>
                 <div className="p-4 bg-white">
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">File Source</p>
+                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">File Source</p>
                   <p className="font-mono text-sm truncate">{report.original_name}</p>
                 </div>
                 <div className="p-4 bg-white">
-                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/40 mb-1">Review Status</p>
+                  <p className="text-[11px] font-mono uppercase tracking-widest text-black/55 mb-1">Review Status</p>
                   <p className="font-bold text-sm uppercase">
                     {report.ml_suggestion ? 'AI Complete' : 'Pending'}
                   </p>
@@ -618,7 +618,7 @@ export default function DoctorPatientManagementPage() {
                   
                   <div className="space-y-4">
                     <div className="p-4 bg-white border border-black/5">
-                      <p className="text-[11px] font-mono uppercase text-black/40 mb-2">Findings Summary</p>
+                      <p className="text-[11px] font-mono uppercase text-black/55 mb-2">Findings Summary</p>
                       <p className="text-sm leading-relaxed">
                         {report.ml_suggestion.findings}
                       </p>
@@ -626,7 +626,7 @@ export default function DoctorPatientManagementPage() {
                     
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center space-x-3 w-full sm:w-1/2">
-                        <span className="text-[11px] font-mono uppercase text-black/40 w-24">Confidence</span>
+                        <span className="text-[11px] font-mono uppercase text-black/55 w-24">Confidence</span>
                         <div className="flex-1 border border-black/10 h-2 bg-white">
                           <div 
                             className="bg-black h-full" 
@@ -639,7 +639,7 @@ export default function DoctorPatientManagementPage() {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <span className="text-[11px] font-mono uppercase text-black/40">Status:</span>
+                        <span className="text-[11px] font-mono uppercase text-black/55">Status:</span>
                         <span className="text-xs font-mono font-bold uppercase px-2 py-0.5 bg-black/[0.02] border border-black/10 tracking-tighter">
                           {report.ml_suggestion.status.replace('_', ' ')}
                         </span>
@@ -651,7 +651,7 @@ export default function DoctorPatientManagementPage() {
 
               {report.notes && (
                 <div className="p-4 border border-black/10 mb-6 bg-white">
-                  <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Physician Notes</p>
+                  <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Physician Notes</p>
                   <p className="text-sm font-mono">{report.notes}</p>
                 </div>
               )}
@@ -739,30 +739,30 @@ export default function DoctorPatientManagementPage() {
                 <h3 className="text-lg font-bold uppercase mb-4 pb-2 border-b border-black/10">Metadata</h3>
                 <div className="grid md:grid-cols-2 gap-px bg-black/10 border border-black/10">
                   <div className="p-4 bg-white">
-                    <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Patient ID</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Patient ID</p>
                     <p className="text-sm font-mono">{selectedReport.patient_id}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Test Type</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Test Type</p>
                     <p className="text-sm font-bold uppercase">{selectedReport.test_type?.replace('_', ' ')}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Source File</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Source File</p>
                     <p className="text-sm font-mono truncate">{selectedReport.original_name}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Upload Date</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Upload Date</p>
                     <p className="text-sm font-mono">{new Date(selectedReport.uploaded_at).toLocaleString()}</p>
                   </div>
                   <div className="p-4 bg-white">
-                    <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Priority</p>
+                    <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Priority</p>
                     <span className={`px-2 py-0.5 text-[10px] font-mono uppercase font-bold border ${selectedReport.priority === 'urgent' || selectedReport.priority === 'critical' ? 'border-red-500 text-red-600 bg-red-50' : 'border-black text-black'}`}>
                       {selectedReport.priority}
                     </span>
                   </div>
                   {selectedReport.notes && (
                     <div className="p-4 bg-white md:col-span-2">
-                      <p className="text-[10px] font-mono uppercase text-black/40 mb-1">Notes</p>
+                      <p className="text-[10px] font-mono uppercase text-black/55 mb-1">Notes</p>
                       <p className="text-sm font-mono">{selectedReport.notes}</p>
                     </div>
                   )}
@@ -794,7 +794,7 @@ export default function DoctorPatientManagementPage() {
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="p-6 border border-black/10">
-                        <p className="text-[10px] font-mono uppercase text-black/40 mb-4">Confidence Metric</p>
+                        <p className="text-[10px] font-mono uppercase text-black/55 mb-4">Confidence Metric</p>
                         <div className="flex items-center space-x-4">
                           <div className="flex-1 bg-black/5 h-2">
                             <div 
@@ -809,7 +809,7 @@ export default function DoctorPatientManagementPage() {
                       </div>
                       
                       <div className="p-6 border border-black/10">
-                        <p className="text-[10px] font-mono uppercase text-black/40 mb-2">Severity Impact</p>
+                        <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Severity Impact</p>
                         <p className="text-sm font-bold uppercase mt-2">
                           {selectedReport.ml_suggestion.severity === 'critical' ? 'Immediate Action' :
                            selectedReport.ml_suggestion.severity === 'severe' ? 'Urgent Review' :
@@ -820,14 +820,14 @@ export default function DoctorPatientManagementPage() {
                     </div>
 
                     <div className="p-6 border border-black/10">
-                      <p className="text-[10px] font-mono uppercase text-black/40 mb-4 pb-2 border-b border-black/5">Recommendations</p>
+                      <p className="text-[10px] font-mono uppercase text-black/55 mb-4 pb-2 border-b border-black/5">Recommendations</p>
                       <p className="text-sm leading-relaxed font-mono">
                         {selectedReport.ml_suggestion.recommendations}
                       </p>
                     </div>
                     
                     <div className="flex items-center space-x-4 pt-4 border-t border-black/10">
-                      <span className="text-[10px] font-mono uppercase text-black/40">Status:</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Status:</span>
                       <span className="text-sm font-bold uppercase px-3 py-1 border border-black flex items-center gap-2">
                         {selectedReport.ml_suggestion.status.replace('_', ' ')}
                       </span>
