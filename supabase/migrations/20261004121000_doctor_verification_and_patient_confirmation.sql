@@ -29,6 +29,39 @@ $function$;
 REVOKE EXECUTE ON FUNCTION public.is_verified_doctor() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.is_verified_doctor() TO authenticated;
 
+-- H2: doctors' "assigned patients" lists were always empty: this read the dropped
+-- user_short_ids table and its EXCEPTION handler returned nothing. Same signature and
+-- columns (still called by the doctor Reports and Medical Records pages), now reading
+-- profiles, only for the calling doctor, and only while that doctor is verified.
+CREATE OR REPLACE FUNCTION public.get_doctor_patients_bulletproof(doctor_uuid uuid)
+RETURNS TABLE (
+  patient_id uuid,
+  patient_short_id text,
+  patient_name text,
+  patient_email text,
+  assigned_at timestamp with time zone,
+  total_reports bigint
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+  SELECT dpa.patient_id,
+         p.short_id,
+         coalesce(p.name, 'Unknown Patient'),
+         p.email,
+         dpa.assigned_at,
+         (SELECT count(*) FROM public.reports r WHERE r.patient_id = dpa.patient_id)
+  FROM public.doctor_patient_assignments dpa
+  LEFT JOIN public.profiles p ON p.id = dpa.patient_id
+  WHERE dpa.doctor_id = doctor_uuid
+    AND doctor_uuid = auth.uid()
+    AND public.is_verified_doctor()
+    AND dpa.is_active = true
+  ORDER BY dpa.assigned_at DESC;
+$function$;
+
 -- 2. Users may edit their own profile row, but not their role or verification. API
 --    users run as anon/authenticated; the dashboard (postgres) and server (service_role)
 --    can still change both.
@@ -39,8 +72,13 @@ SECURITY INVOKER
 SET search_path = ''
 AS $function$
 BEGIN
-  IF (OLD.role IS DISTINCT FROM NEW.role OR OLD.verified IS DISTINCT FROM NEW.verified)
-     AND current_user IN ('anon', 'authenticated') THEN
+  IF current_user IN ('anon', 'authenticated') AND (
+       OLD.role IS DISTINCT FROM NEW.role
+       OR OLD.verified IS DISTINCT FROM NEW.verified
+       -- Patients see a verified doctor's name when confirming a request, so the name and
+       -- registration number the team checked stay fixed.
+       OR (OLD.verified AND (OLD.name IS DISTINCT FROM NEW.name OR OLD.license_number IS DISTINCT FROM NEW.license_number))
+     ) THEN
     RAISE EXCEPTION 'Profile roles and verification can only be changed by a trusted server'
       USING ERRCODE = '42501';
   END IF;
@@ -51,7 +89,7 @@ $function$;
 -- The original trigger fired only on UPDATE OF role, so a doctor could set verified = true.
 DROP TRIGGER IF EXISTS prevent_profile_role_change ON public.profiles;
 CREATE TRIGGER prevent_profile_role_change
-BEFORE UPDATE OF role, verified ON public.profiles
+BEFORE UPDATE OF role, verified, name, license_number ON public.profiles
 FOR EACH ROW
 EXECUTE FUNCTION public.prevent_profile_role_change();
 
@@ -101,6 +139,10 @@ CREATE POLICY "appointments_doctor_insert"
 ON public.appointments
 FOR INSERT TO authenticated
 WITH CHECK (doctor_id = auth.uid() AND public.get_auth_role() = 'doctor' AND public.is_verified_doctor());
+
+-- 4b. Patients could insert appointments with any doctor and then confirm them, assigning
+--     themselves to any doctor. No screen lets patients create appointments.
+DROP POLICY IF EXISTS "appointments_patient_insert" ON public.appointments;
 
 -- 5. Doctors can no longer create or re-point assignments themselves (an UPDATE could
 --    move an existing assignment to any patient). Assignments come only from a

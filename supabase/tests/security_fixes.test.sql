@@ -28,11 +28,24 @@ INSERT INTO public.reports (id, patient_id, test_type, original_name, file_name,
  ('a3000000-0000-4000-8000-000000000001','51111111-1111-4111-8111-111111111111','x_ray','x.png','x.png','55555555-5555-4555-8555-555555555555'),
  ('a3000000-0000-4000-8000-000000000002','52222222-2222-4222-8222-222222222222','x_ray','y.png','y.png','55555555-5555-4555-8555-555555555555');
 
+-- Report files in storage: x.png belongs to P1's report, orphan.png to no report.
+INSERT INTO storage.objects (bucket_id, name) VALUES ('reports','x.png'), ('reports','orphan.png');
+
+CREATE FUNCTION pg_temp.affected_rows(statement text) RETURNS integer
+LANGUAGE plpgsql AS $$
+DECLARE affected integer;
+BEGIN
+  EXECUTE statement;
+  GET DIAGNOSTICS affected = ROW_COUNT;
+  RETURN affected;
+END;
+$$;
+
 -- An assignment D2 got before verification existed (e.g. through the old insert policy).
 INSERT INTO public.doctor_patient_assignments (doctor_id, patient_id, is_active)
 VALUES ('54444444-4444-4444-8444-444444444444','52222222-2222-4222-8222-222222222222',true);
 
-SELECT plan(48);
+SELECT plan(56);
 
 -- Run as postgres: schema and backfill checks.
 SELECT lives_ok($$INSERT INTO public.ml_suggestions (report_id, patient_id, test_type, findings, confidence, severity)
@@ -69,8 +82,13 @@ SET LOCAL ROLE authenticated;
 -- C1: messages are visible only to their sender and receiver.
 SELECT set_config('request.jwt.claim.sub','52222222-2222-4222-8222-222222222222',true);
 SELECT is((SELECT count(*)::int FROM public.messages WHERE id = 'a2000000-0000-4000-8000-000000000001'), 0, 'P2 cannot read a D1-P1 message');
+SELECT is((SELECT count(*)::int FROM storage.objects WHERE bucket_id = 'reports' AND name IN ('x.png','orphan.png')), 0, 'P2 cannot read or list other patients'' report files');
 SELECT set_config('request.jwt.claim.sub','51111111-1111-4111-8111-111111111111',true);
 SELECT is((SELECT count(*)::int FROM public.messages WHERE id = 'a2000000-0000-4000-8000-000000000001'), 1, 'P1 reads own message');
+SELECT is((SELECT count(*)::int FROM storage.objects WHERE bucket_id = 'reports' AND name IN ('x.png','orphan.png')), 1, 'P1 reads only the file of their own report');
+SELECT throws_ok($$INSERT INTO storage.objects (bucket_id, name) VALUES ('reports','p1-upload.png')$$,'42501',NULL,'patients cannot upload into the reports bucket');
+SELECT throws_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time) VALUES ('53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 4,'09:00')$$,'42501',NULL,'patients cannot create appointments (and so cannot self-assign to a doctor)');
+SELECT is(pg_temp.affected_rows($$UPDATE public.profiles SET name = 'P One' WHERE id = '51111111-1111-4111-8111-111111111111'$$), 1, 'patients can still edit their own name');
 
 -- H1: browsers cannot create notifications (server routes use the service role).
 SELECT throws_ok($$INSERT INTO public.notifications(user_id,title,message,notification_type) VALUES ('52222222-2222-4222-8222-222222222222','x','x','general')$$,'42501',NULL,'P1 cannot notify P2');
@@ -94,6 +112,8 @@ SELECT throws_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appoi
 SELECT throws_ok($$UPDATE public.profiles SET verified = true WHERE id = '54444444-4444-4444-8444-444444444444'$$,'42501',NULL,'doctor cannot verify themselves');
 SELECT is((SELECT count(*)::int FROM public.reports WHERE id = 'a3000000-0000-4000-8000-000000000002'), 0,
   'an unverified doctor''s old assignment gives no access to the patient''s reports');
+SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('54444444-4444-4444-8444-444444444444')), 0,
+  'an unverified doctor''s old assignment does not list the patient either');
 
 SELECT set_config('request.jwt.claim.sub','53333333-3333-4333-8333-333333333333',true);
 SELECT is((SELECT diagnosis FROM public.appointments WHERE id = 'a1000000-0000-4000-8000-000000000001'), NULL, 'rejected updates left the diagnosis untouched');
@@ -101,6 +121,7 @@ SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000001',
 SELECT lives_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time) VALUES ('53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 3,'09:00')$$,'verified doctor can schedule');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"confirmed"}')->>'success','false','doctor cannot confirm on the patient''s behalf');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"completed"}')->>'success','true','doctor can still complete an appointment');
+SELECT throws_ok($$UPDATE public.profiles SET name = 'Another Doctor' WHERE id = '53333333-3333-4333-8333-333333333333'$$,'42501',NULL,'a verified doctor cannot change the name patients confirm against');
 SELECT throws_ok($$INSERT INTO public.doctor_patient_assignments (doctor_id, patient_id) VALUES ('53333333-3333-4333-8333-333333333333','52222222-2222-4222-8222-222222222222')$$,'42501',NULL,'doctor cannot assign a patient to themselves');
 SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN (
   '51111111-1111-4111-8111-111111111111','52222222-2222-4222-8222-222222222222','53333333-3333-4333-8333-333333333333',
@@ -126,6 +147,9 @@ SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('533
            WHERE patient_id = '51111111-1111-4111-8111-111111111111'), 1, 'D1''s assigned-patients list shows P1');
 SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('54444444-4444-4444-8444-444444444444')), 0,
   'a doctor cannot list another doctor''s patients');
+
+SELECT set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',true);
+SELECT lives_ok($$INSERT INTO storage.objects (bucket_id, name) VALUES ('reports','lab-upload.png')$$,'labs can upload report files');
 
 SELECT * FROM finish();
 ROLLBACK;

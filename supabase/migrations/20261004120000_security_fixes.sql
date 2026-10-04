@@ -73,37 +73,8 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $function$;
 
--- H2: doctors' "assigned patients" lists were always empty: this read the dropped
--- user_short_ids table and its EXCEPTION handler returned nothing. Same signature and
--- columns as before (still called by the doctor Reports and Medical Records pages),
--- now reading profiles, and only for the calling doctor.
-CREATE OR REPLACE FUNCTION public.get_doctor_patients_bulletproof(doctor_uuid uuid)
-RETURNS TABLE (
-  patient_id uuid,
-  patient_short_id text,
-  patient_name text,
-  patient_email text,
-  assigned_at timestamp with time zone,
-  total_reports bigint
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $function$
-  SELECT dpa.patient_id,
-         p.short_id,
-         coalesce(p.name, 'Unknown Patient'),
-         p.email,
-         dpa.assigned_at,
-         (SELECT count(*) FROM public.reports r WHERE r.patient_id = dpa.patient_id)
-  FROM public.doctor_patient_assignments dpa
-  LEFT JOIN public.profiles p ON p.id = dpa.patient_id
-  WHERE dpa.doctor_id = doctor_uuid
-    AND doctor_uuid = auth.uid()
-    AND dpa.is_active = true
-  ORDER BY dpa.assigned_at DESC;
-$function$;
+-- H2 (doctors' empty assigned-patient lists) is fixed in 20261004121000, which adds the
+-- is_verified_doctor() check the rewritten function needs.
 
 -- H3: SECURITY DEFINER functions were executable by anon. Functions are executable by
 -- PUBLIC by default, so revoke from PUBLIC as well as anon.
