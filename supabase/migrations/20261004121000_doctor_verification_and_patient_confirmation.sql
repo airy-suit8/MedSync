@@ -48,6 +48,13 @@ BEGIN
 END;
 $function$;
 
+-- The original trigger fired only on UPDATE OF role, so a doctor could set verified = true.
+DROP TRIGGER IF EXISTS prevent_profile_role_change ON public.profiles;
+CREATE TRIGGER prevent_profile_role_change
+BEFORE UPDATE OF role, verified ON public.profiles
+FOR EACH ROW
+EXECUTE FUNCTION public.prevent_profile_role_change();
+
 -- 3. Signup stores the registration number doctors enter (signup form, role = doctor).
 --    Otherwise identical to 20260926141000_fix_auth_profile_trigger.sql.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -135,7 +142,8 @@ BEGIN
   WHERE NOT EXISTS (
     SELECT 1 FROM public.doctor_patient_assignments
     WHERE doctor_id = a.doctor_id AND patient_id = a.patient_id AND is_active
-  );
+  )
+  ON CONFLICT DO NOTHING;
   RETURN 'confirmed';
 END;
 $function$;
@@ -159,3 +167,53 @@ WHERE p.id = auth.uid()
 
 REVOKE ALL ON public.profile_directory FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.profile_directory TO authenticated;
+
+-- 8. Un-verifying a doctor must cut access at once, even through assignments they already
+--    have (the existing policies only check assignments). Restrictive policies are AND-ed
+--    with the permissive ones and only affect callers whose role is doctor.
+DROP POLICY IF EXISTS "reports_require_verified_doctor" ON public.reports;
+CREATE POLICY "reports_require_verified_doctor"
+ON public.reports AS RESTRICTIVE
+FOR ALL TO authenticated
+USING ((SELECT public.get_auth_role()) IS DISTINCT FROM 'doctor' OR (SELECT public.is_verified_doctor()))
+WITH CHECK ((SELECT public.get_auth_role()) IS DISTINCT FROM 'doctor' OR (SELECT public.is_verified_doctor()));
+
+DROP POLICY IF EXISTS "ml_suggestions_require_verified_doctor" ON public.ml_suggestions;
+CREATE POLICY "ml_suggestions_require_verified_doctor"
+ON public.ml_suggestions AS RESTRICTIVE
+FOR ALL TO authenticated
+USING ((SELECT public.get_auth_role()) IS DISTINCT FROM 'doctor' OR (SELECT public.is_verified_doctor()))
+WITH CHECK ((SELECT public.get_auth_role()) IS DISTINCT FROM 'doctor' OR (SELECT public.is_verified_doctor()));
+
+-- 9. Only the patient answers a request (scheduled -> confirmed | cancelled). Doctors can't
+--    mark it confirmed for them, put it back to scheduled, or revive one the patient
+--    declined; they can still complete appointments. Runs on every path (direct updates
+--    and safe_appointment_update), keyed on the caller; server/dashboard calls have no
+--    auth.uid() and are allowed.
+CREATE OR REPLACE FUNCTION public.guard_appointment_status()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $function$
+DECLARE
+  caller uuid := auth.uid();
+BEGIN
+  IF caller IS NULL OR OLD.status IS NOT DISTINCT FROM NEW.status THEN
+    RETURN NEW;
+  END IF;
+  IF caller = OLD.patient_id AND OLD.status = 'scheduled' AND NEW.status IN ('confirmed', 'cancelled') THEN
+    RETURN NEW;
+  END IF;
+  IF caller = OLD.doctor_id AND OLD.status IS DISTINCT FROM 'cancelled' AND NEW.status NOT IN ('scheduled', 'confirmed') THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'This appointment status can only be changed by the patient' USING ERRCODE = '42501';
+END;
+$function$;
+REVOKE EXECUTE ON FUNCTION public.guard_appointment_status() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS guard_appointment_status ON public.appointments;
+CREATE TRIGGER guard_appointment_status
+BEFORE UPDATE OF status ON public.appointments
+FOR EACH ROW
+EXECUTE FUNCTION public.guard_appointment_status();

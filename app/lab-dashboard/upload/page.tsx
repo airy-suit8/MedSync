@@ -59,7 +59,11 @@ export default function LabUploadPage() {
         // auth network request blocking the upload screen.
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error) throw error
-        const user = session?.user
+        let user = session?.user
+        // Tokens issued before the app_metadata role backfill don't carry the role yet.
+        if (user && !user.app_metadata?.role) {
+          user = (await supabase.auth.getUser()).data.user ?? user
+        }
 
         const role = user?.app_metadata?.role
         if (!user || role !== "lab") {

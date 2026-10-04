@@ -30,7 +30,11 @@ export function useAuthCheck(requiredRole?: UserRole) {
       try {
         const supabase = createClient()
         const { data: { session }, error: authError } = await supabase.auth.getSession()
-        const user = session?.user || null
+        let user = session?.user || null
+        // Tokens issued before the app_metadata role backfill don't carry the role yet.
+        if (user && !user.app_metadata?.role) {
+          user = (await supabase.auth.getUser()).data.user ?? user
+        }
 
         if (!isMounted) return
 

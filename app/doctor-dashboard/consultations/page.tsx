@@ -36,6 +36,7 @@ interface Consultation {
   start_time: string
   end_time: string
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled'
+  awaitingPatient: boolean
   consultation_type: 'video' | 'audio' | 'chat'
   notes?: string
   symptoms?: string
@@ -216,6 +217,7 @@ export default function ConsultationsPage() {
           start_time: apt.start_time,
           end_time: apt.end_time,
           status: apt.status === 'confirmed' ? 'scheduled' : (apt.status || 'scheduled'), // Map confirmed to scheduled for consultations
+          awaitingPatient: apt.status === 'scheduled', // patient hasn't confirmed the request yet
           consultation_type: apt.consultation_type || 'video',
           notes: apt.notes,
           symptoms: apt.symptoms,
@@ -479,6 +481,11 @@ export default function ConsultationsPage() {
                     }`}>
                       {consultation.status}
                     </span>
+                    {consultation.awaitingPatient && (
+                      <span className="px-2 py-0.5 text-[10px] font-mono uppercase font-bold border tracking-tighter border-black/30 text-black/60">
+                        Awaiting patient
+                      </span>
+                    )}
 
                     <div className="flex gap-2">
                       {consultation.status === 'scheduled' && (

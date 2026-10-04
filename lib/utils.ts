@@ -13,6 +13,8 @@ export function pressable(onPress: () => void) {
     tabIndex: 0,
     onClick: onPress,
     onKeyDown: (e: KeyboardEvent<HTMLElement>) => {
+      // Keys pressed on a nested button or input belong to that control.
+      if (e.target !== e.currentTarget) return
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault()
         onPress()

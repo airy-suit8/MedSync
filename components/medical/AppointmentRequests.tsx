@@ -25,14 +25,21 @@ export default function AppointmentRequests({ patientId }: { patientId: string }
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await createClient()
+      const supabase = createClient()
+      const { data } = await supabase
         .from("appointments")
-        .select("id, doctor_name, appointment_date, start_time, consultation_type")
+        .select("id, doctor_id, appointment_date, start_time, consultation_type")
         .eq("patient_id", patientId)
         .eq("status", "scheduled")
         .gte("appointment_date", format(new Date(), "yyyy-MM-dd"))
         .order("appointment_date", { ascending: true })
-      setRequests(data || [])
+      // appointments.doctor_name is written by the doctor's browser; show the profile name instead.
+      const doctorIds = [...new Set((data || []).map((a: { doctor_id: string }) => a.doctor_id))]
+      const { data: doctors } = doctorIds.length
+        ? await supabase.from("profile_directory").select("id, name").in("id", doctorIds)
+        : { data: [] }
+      const names = new Map((doctors || []).map((d: { id: string; name: string | null }) => [d.id, d.name]))
+      setRequests((data || []).map((a: Omit<Request, "doctor_name"> & { doctor_id: string }) => ({ ...a, doctor_name: names.get(a.doctor_id) ?? null })))
     }
     load()
   }, [patientId])

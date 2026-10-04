@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
             data = null
           }
 
-          if (response.ok && !data.error) {
+          if (response.ok && !data?.error) {
             const text =
               data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
 

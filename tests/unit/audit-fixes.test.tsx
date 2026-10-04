@@ -41,6 +41,13 @@ describe('pressable', () => {
     expect(onPress).toHaveBeenCalledOnce()
     expect(preventDefault).toHaveBeenCalledOnce()
   })
+  it('leaves keys pressed on a nested control to that control', () => {
+    const onPress = vi.fn()
+    const preventDefault = vi.fn()
+    pressable(onPress).onKeyDown({ key: 'Enter', preventDefault, target: {}, currentTarget: {} } as never)
+    expect(onPress).not.toHaveBeenCalled()
+    expect(preventDefault).not.toHaveBeenCalled()
+  })
   it('ignores other keys and exposes button semantics', () => {
     const onPress = vi.fn()
     const props = pressable(onPress)
@@ -51,18 +58,22 @@ describe('pressable', () => {
 })
 
 describe('AppointmentRequests', () => {
-  const request = { id: 'appt-1', doctor_name: 'Dr Rao', appointment_date: '2099-01-02', start_time: '10:30:00', consultation_type: 'video' }
+  // doctor_name on the appointment is client-written and must not be shown; the profile name is.
+  const request = { id: 'appt-1', doctor_id: 'doc-1', doctor_name: 'Spoofed Name', appointment_date: '2099-01-02', start_time: '10:30:00', consultation_type: 'video' }
+  const tables = (appointments: unknown[]) => (table: string) =>
+    query({ data: table === 'appointments' ? appointments : [{ id: 'doc-1', name: 'Dr Rao' }] })
   let rpc: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     toast.mockReset()
     rpc = vi.fn().mockResolvedValue({ error: null })
-    createClientMock.mockReset().mockReturnValue({ from: () => query({ data: [request] }), rpc })
+    createClientMock.mockReset().mockReturnValue({ from: tables([request]), rpc })
   })
 
   it('lists pending requests and confirms one', async () => {
     render(<AppointmentRequests patientId="patient-1" />)
     expect(await screen.findByText('Dr Rao')).toBeTruthy()
+    expect(screen.queryByText('Spoofed Name')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
     await waitFor(() => expect(rpc).toHaveBeenCalledWith('respond_to_appointment', { p_appointment_id: 'appt-1', p_accept: true }))
     await waitFor(() => expect(screen.queryByText('Dr Rao')).toBeNull())
@@ -79,7 +90,7 @@ describe('AppointmentRequests', () => {
   })
 
   it('renders nothing when there are no requests', async () => {
-    createClientMock.mockReturnValue({ from: () => query({ data: [] }), rpc })
+    createClientMock.mockReturnValue({ from: tables([]), rpc })
     const { container } = render(<AppointmentRequests patientId="patient-1" />)
     await waitFor(() => expect(container.innerHTML).toBe(''))
   })

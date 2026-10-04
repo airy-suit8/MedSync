@@ -24,10 +24,15 @@ INSERT INTO public.appointments (id, doctor_id, patient_id, appointment_date, st
 INSERT INTO public.messages (id, content, sender_id, sender_name, sender_role, receiver_id, receiver_name, receiver_role)
 VALUES ('a2000000-0000-4000-8000-000000000001','private','53333333-3333-4333-8333-333333333333','D1','doctor','51111111-1111-4111-8111-111111111111','P1','patient');
 
-INSERT INTO public.reports (id, patient_id, test_type, original_name, file_name, uploaded_by)
-VALUES ('a3000000-0000-4000-8000-000000000001','51111111-1111-4111-8111-111111111111','x_ray','x.png','x.png','55555555-5555-4555-8555-555555555555');
+INSERT INTO public.reports (id, patient_id, test_type, original_name, file_name, uploaded_by) VALUES
+ ('a3000000-0000-4000-8000-000000000001','51111111-1111-4111-8111-111111111111','x_ray','x.png','x.png','55555555-5555-4555-8555-555555555555'),
+ ('a3000000-0000-4000-8000-000000000002','52222222-2222-4222-8222-222222222222','x_ray','y.png','y.png','55555555-5555-4555-8555-555555555555');
 
-SELECT plan(44);
+-- An assignment D2 got before verification existed (e.g. through the old insert policy).
+INSERT INTO public.doctor_patient_assignments (doctor_id, patient_id, is_active)
+VALUES ('54444444-4444-4444-8444-444444444444','52222222-2222-4222-8222-222222222222',true);
+
+SELECT plan(48);
 
 -- Run as postgres: schema and backfill checks.
 SELECT lives_ok($$INSERT INTO public.ml_suggestions (report_id, patient_id, test_type, findings, confidence, severity)
@@ -87,11 +92,15 @@ SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN (
 -- D1 verification gate.
 SELECT throws_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time) VALUES ('54444444-4444-4444-8444-444444444444','51111111-1111-4111-8111-111111111111',current_date + 3,'09:00')$$,'42501',NULL,'unverified doctor cannot schedule');
 SELECT throws_ok($$UPDATE public.profiles SET verified = true WHERE id = '54444444-4444-4444-8444-444444444444'$$,'42501',NULL,'doctor cannot verify themselves');
+SELECT is((SELECT count(*)::int FROM public.reports WHERE id = 'a3000000-0000-4000-8000-000000000002'), 0,
+  'an unverified doctor''s old assignment gives no access to the patient''s reports');
 
 SELECT set_config('request.jwt.claim.sub','53333333-3333-4333-8333-333333333333',true);
 SELECT is((SELECT diagnosis FROM public.appointments WHERE id = 'a1000000-0000-4000-8000-000000000001'), NULL, 'rejected updates left the diagnosis untouched');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000001','{"diagnosis":"ok"}')->>'success','true','the appointment''s doctor can update it');
 SELECT lives_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time) VALUES ('53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 3,'09:00')$$,'verified doctor can schedule');
+SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"confirmed"}')->>'success','false','doctor cannot confirm on the patient''s behalf');
+SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"completed"}')->>'success','true','doctor can still complete an appointment');
 SELECT throws_ok($$INSERT INTO public.doctor_patient_assignments (doctor_id, patient_id) VALUES ('53333333-3333-4333-8333-333333333333','52222222-2222-4222-8222-222222222222')$$,'42501',NULL,'doctor cannot assign a patient to themselves');
 SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN (
   '51111111-1111-4111-8111-111111111111','52222222-2222-4222-8222-222222222222','53333333-3333-4333-8333-333333333333',
@@ -112,6 +121,7 @@ SELECT throws_ok($$SELECT public.respond_to_appointment('a1000000-0000-4000-8000
 SELECT is(public.respond_to_appointment('a1000000-0000-4000-8000-000000000003', false), 'cancelled', 'P1 declines another appointment');
 
 SELECT set_config('request.jwt.claim.sub','53333333-3333-4333-8333-333333333333',true);
+SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000003','{"status":"scheduled"}')->>'success','false','doctor cannot revive a request the patient declined');
 SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('53333333-3333-4333-8333-333333333333')
            WHERE patient_id = '51111111-1111-4111-8111-111111111111'), 1, 'D1''s assigned-patients list shows P1');
 SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('54444444-4444-4444-8444-444444444444')), 0,

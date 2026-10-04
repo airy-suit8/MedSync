@@ -26,6 +26,8 @@ BEGIN
       AND p.prokind = 'f'
       AND NOT EXISTS (SELECT 1 FROM unnest(coalesce(p.proconfig, '{}')) c WHERE c LIKE 'search_path=%')
       AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')
+      -- ALTER FUNCTION needs ownership; one foreign-owned function must not abort this migration.
+      AND pg_get_userbyid(p.proowner) = current_user
   LOOP
     EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', f.sig);
   END LOOP;
