@@ -114,7 +114,7 @@ export default function PatientChatPage() {
           return
         }
 
-        if (user.user_metadata?.role !== "patient") {
+        if (user.app_metadata?.role !== "patient") {
           console.log('User is not a patient, redirecting to login')
           router.push("/login")
           return

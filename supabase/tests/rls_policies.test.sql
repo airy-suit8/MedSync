@@ -11,6 +11,9 @@ VALUES
  ('44444444-4444-4444-8444-444444444444','authenticated','authenticated','rls-lab@example.test','',now(),'{}','{"name":"Lab","role":"lab"}')
 ON CONFLICT (id) DO NOTHING;
 
+-- The fixture doctor is a verified doctor (20261004121000_doctor_verification...).
+UPDATE public.profiles SET verified = true WHERE id = '33333333-3333-4333-8333-333333333333';
+
 INSERT INTO public.doctor_patient_assignments (id, doctor_id, patient_id, is_active)
 VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111',true);
 
@@ -70,7 +73,7 @@ SELECT is((SELECT count(*)::int FROM public.reports WHERE id IN ('aaaaaaaa-0000-
 SELECT is((SELECT count(*)::int FROM public.ml_suggestions WHERE id IN ('bbbbbbbb-0000-4000-8000-000000000001','bbbbbbbb-0000-4000-8000-000000000002')),1,'patient A sees only patient A suggestion');
 SELECT is((SELECT count(*)::int FROM public.notifications WHERE id IN ('cccccccc-0000-4000-8000-000000000001','cccccccc-0000-4000-8000-000000000002')),1,'patient A sees only patient A notification');
 SELECT is((SELECT count(*)::int FROM public.profiles WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),1,'patient A reads only own full profile');
-SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),4,'patient A can read safe directory entries');
+SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),3,'patient A sees self, verified doctors and labs, not other patients');
 SELECT is((SELECT count(*)::int FROM public.doctor_patient_assignments WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),1,'patient A sees own assignment');
 SELECT is((SELECT count(*)::int FROM public.lab_samples),0,'patient cannot read lab samples');
 SELECT is((SELECT count(*)::int FROM public.imaging_studies),0,'patient cannot read imaging studies');
@@ -80,7 +83,7 @@ SELECT is((SELECT count(*)::int FROM public.reports WHERE id IN ('aaaaaaaa-0000-
 SELECT is((SELECT count(*)::int FROM public.ml_suggestions WHERE id IN ('bbbbbbbb-0000-4000-8000-000000000001','bbbbbbbb-0000-4000-8000-000000000002')),1,'patient B sees only patient B suggestion');
 SELECT is((SELECT count(*)::int FROM public.notifications WHERE id IN ('cccccccc-0000-4000-8000-000000000001','cccccccc-0000-4000-8000-000000000002')),1,'patient B sees only patient B notification');
 SELECT is((SELECT count(*)::int FROM public.profiles WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),1,'patient B reads only own full profile');
-SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),4,'patient B can read safe directory entries');
+SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id IN ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222','33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444')),3,'patient B sees self, verified doctors and labs, not other patients');
 SELECT is((SELECT count(*)::int FROM public.doctor_patient_assignments WHERE id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),0,'patient B sees no assignments');
 
 SELECT set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);

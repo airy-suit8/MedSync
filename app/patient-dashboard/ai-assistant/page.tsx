@@ -26,7 +26,7 @@ export default function PatientAIAssistantPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (!user || user.user_metadata?.role !== "patient") {
+      if (!user || user.app_metadata?.role !== "patient") {
         router.push("/login")
         return
       }

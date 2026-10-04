@@ -73,7 +73,7 @@ export default function LabCommunicationPage() {
         return
       }
 
-      if (user.user_metadata?.role !== "lab") {
+      if (user.app_metadata?.role !== "lab") {
         router.push("/login")
         return
       }

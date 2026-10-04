@@ -198,26 +198,20 @@ export default function ScheduleAppointmentModal({
 
             if (insertError) {
                 console.error('Error creating appointment:', insertError)
-                setError(`Failed to create appointment: ${insertError.message}`)
+                // RLS rejects inserts from doctors whose registration isn't verified yet.
+                setError(insertError.code === '42501'
+                    ? "Your account is awaiting verification, so you can't schedule appointments yet."
+                    : `Failed to create appointment: ${insertError.message}`)
                 return
             }
 
-            // Ensure patient is assigned to doctor so lab can upload reports
-            const { error: assignError } = await supabase
-                .from('doctor_patient_assignments')
-                .upsert(
-                    { doctor_id: doctorId, patient_id: resolvedPatientId, is_active: true },
-                    { onConflict: 'doctor_id,patient_id,is_active' }
-                )
-            if (assignError) {
-                console.warn('Could not upsert doctor patient assignment:', assignError)
-            }
-
+            // The patient is assigned to this doctor only when they confirm the request
+            // (respond_to_appointment), which is what lets labs upload their reports.
             console.log('Appointment created successfully:', data)
-            
+
             toast({
-                title: "Appointment scheduled",
-                description: "The appointment has been successfully scheduled.",
+                title: "Appointment requested",
+                description: "The patient will be asked to confirm it.",
             })
 
             if (onSuccess) {

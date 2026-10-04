@@ -61,7 +61,7 @@ export default function LabUploadPage() {
         if (error) throw error
         const user = session?.user
 
-        const role = user?.app_metadata?.role ?? user?.user_metadata?.role
+        const role = user?.app_metadata?.role
         if (!user || role !== "lab") {
           router.push("/login")
           return
@@ -398,29 +398,9 @@ export default function LabUploadPage() {
             const result = await response.json()
             console.log('ML processing result:', result)
             
-                         // Create ML suggestion notification
+             // /api/ml-process notifies the doctor (server-side); browsers cannot create notifications.
              if (result.success) {
-               try {
-                 await supabase
-                   .from('notifications')
-                   .insert({
-                     user_id: reportData.id, // Use report ID as user_id
-                     title: 'AI Analysis Complete',
-                     message: `AI analysis completed for ${formData.testType} report - Patient ID: ${formData.patientId}`,
-                     notification_type: 'ml_suggestion',
-                     related_id: result.suggestionId,
-                     related_type: 'ml_suggestion',
-                     data: {
-                       patient_id: formData.patientId,
-                       test_type: formData.testType,
-                       suggestion_id: result.suggestionId,
-                       confidence: result.confidence
-                     }
-                   })
-                 console.log('✅ ML notification created successfully')
-               } catch (mlNotificationError) {
-                 console.warn('⚠️ ML notification creation failed:', mlNotificationError)
-               }
+               console.log('✅ ML analysis complete:', result.suggestionId)
              } else {
                console.warn('⚠️ ML processing returned success: false', result)
              }

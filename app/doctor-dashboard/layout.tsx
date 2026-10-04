@@ -1,4 +1,5 @@
 import React from 'react'
+import VerificationBanner from '@/components/medical/common/VerificationBanner'
 
 export default function DoctorDashboardLayout({
     children,
@@ -16,6 +17,7 @@ export default function DoctorDashboardLayout({
                 }} />
             </div>
             <div className="relative z-10">
+                <VerificationBanner />
                 {children}
             </div>
         </div>

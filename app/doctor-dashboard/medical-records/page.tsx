@@ -70,7 +70,7 @@ export default function MedicalRecordsPage() {
         return
       }
 
-      if (user.user_metadata?.role !== "doctor") {
+      if (user.app_metadata?.role !== "doctor") {
         router.push("/login")
         return
       }

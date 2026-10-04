@@ -3,6 +3,8 @@ import path from 'node:path'
 
 export default defineConfig({
   resolve: { alias: { '@': path.resolve(__dirname, '.') } },
+  // tsconfig keeps JSX for Next ("preserve"); tests that render components need it compiled.
+  oxc: { jsx: { runtime: 'automatic' } },
   test: {
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],

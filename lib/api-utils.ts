@@ -51,6 +51,6 @@ export function forbiddenResponse() {
   )
 }
 
-export function hasRole(user: { app_metadata?: Record<string, unknown>, user_metadata?: Record<string, unknown> }, role: string) {
-  return user.app_metadata?.role === role || user.user_metadata?.role === role
+export function hasRole(user: { app_metadata?: Record<string, unknown> }, role: string) {
+  return user.app_metadata?.role === role
 }

@@ -98,8 +98,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url))
     }
 
-    // Dashboard authorization must use server-controlled metadata only (or fallback to user_metadata for newly created test users).
-    const userRole = user?.app_metadata?.role || user?.user_metadata?.role
+    // Dashboard authorization uses server-controlled app_metadata only; user_metadata is
+    // writable by the user. Migration 20261004120000 backfilled it for older accounts.
+    const userRole = user?.app_metadata?.role
     const requestedDashboard = request.nextUrl.pathname.split("/")[1]
 
     if (requestedDashboard === "patient-dashboard" && userRole !== "patient") {

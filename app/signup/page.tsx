@@ -18,6 +18,7 @@ export default function SignUpPage() {
     email: "",
     password: "",
     role: "",
+    licenseNumber: "",
   })
   const [loading, setLoading] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -68,6 +69,12 @@ export default function SignUpPage() {
       return
     }
 
+    if (formData.role === "doctor" && !formData.licenseNumber.trim()) {
+      setError(AUTH_ERRORS.MISSING_LICENSE)
+      setLoading(false)
+      return
+    }
+
     try {
       const supabase = createClient()
 
@@ -78,6 +85,7 @@ export default function SignUpPage() {
           data: {
             name: formData.name,
             role: formData.role,
+            ...(formData.role === "doctor" && { license_number: formData.licenseNumber.trim() }),
           },
           emailRedirectTo: `${window.location.origin}/verify-email`
         },
@@ -256,6 +264,28 @@ export default function SignUpPage() {
                     <option data-testid="signup-role-option-lab" value="lab">Lab Technician</option>
                   </select>
                 </div>
+
+                {formData.role === "doctor" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="licenseNumber" className="text-sm font-mono uppercase tracking-wide text-black/60">
+                      Medical Registration Number
+                    </Label>
+                    <Input
+                      id="licenseNumber"
+                      type="text"
+                      placeholder="State or National Medical Council number"
+                      value={formData.licenseNumber}
+                      onChange={(e) => setFormData((current) => ({ ...current, licenseNumber: e.target.value }))}
+                      maxLength={64}
+                      required
+                      aria-describedby="licenseHelp"
+                      className="border-black/20 focus:border-black h-12"
+                    />
+                    <p id="licenseHelp" className="text-xs text-black/60">
+                      Our team verifies this before you can schedule appointments or see patients.
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   type="submit"

@@ -53,7 +53,7 @@ export default function LabSamplesPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      if (!user || user.user_metadata?.role !== "lab") {
+      if (!user || user.app_metadata?.role !== "lab") {
         router.push("/login")
         return
       }

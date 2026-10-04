@@ -51,7 +51,7 @@ export default function LoginPage() {
       // The password grant already returns the verified user. Avoid a second
       // network round trip to /auth/v1/user before entering the dashboard.
       const user = data.user
-      const role = user?.app_metadata?.role || user?.user_metadata?.role
+      const role = user?.app_metadata?.role
       
       // Wait for cookie flush
       await new Promise(resolve => setTimeout(resolve, 500))

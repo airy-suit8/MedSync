@@ -40,7 +40,7 @@ export function useAuthCheck(requiredRole?: UserRole) {
           return
         }
 
-        const userRole = user.app_metadata?.role || user.user_metadata?.role
+        const userRole = user.app_metadata?.role
 
         if (requiredRole && userRole !== requiredRole) {
           console.error(`Unauthorized access: required ${requiredRole}, got ${userRole}`)

@@ -13,6 +13,7 @@ import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
 import { pressable } from "@/lib/utils"
 import DashboardSkeleton from "@/components/medical/common/DashboardSkeleton"
+import AppointmentRequests from "@/components/medical/AppointmentRequests"
 
 interface PatientActivity {
   id: string
@@ -178,6 +179,8 @@ export default function PatientDashboard() {
               </div>
             )}
           </div>
+
+          {user && <AppointmentRequests patientId={user.id} />}
 
           {/* Stats Grid - "Deconstructed" */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-black/10 border border-black/10 mb-16">

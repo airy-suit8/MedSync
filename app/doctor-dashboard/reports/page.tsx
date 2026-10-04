@@ -43,7 +43,7 @@ export default function DoctorPatientManagementPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (!user || user.user_metadata?.role !== "doctor") {
+      if (!user || user.app_metadata?.role !== "doctor") {
         router.push("/login")
         return
       }
