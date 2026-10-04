@@ -1,0 +1,17 @@
+# Pinned to the versions verified to load all three models and pass ml-service/tests.
+# Requires Python 3.12+ (tensorflow 2.21 has no 3.11 wheels).
+fastapi==0.142.2
+uvicorn==0.54.0
+python-multipart==0.0.32
+python-dotenv==1.2.4
+slowapi==0.1.10
+timm==1.0.30
+torch==2.14.1
+torchvision==0.29.1
+ultralytics==8.4.172
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+matplotlib==3.11.2
+tensorflow==2.21.0
+# brain_tumor_model.pkl is a pickled Keras model; unpickling depends on the Keras version.
+keras==3.15.1

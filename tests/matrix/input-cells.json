@@ -1,0 +1,1162 @@
+{
+  "suite": "phase-5-adversarial-input-matrix",
+  "fieldCases": [
+    {
+      "field": "login.email",
+      "case": "empty",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.email",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently."
+    },
+    {
+      "field": "login.password",
+      "case": "empty",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.password",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "empty",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "login.forgotPasswordEmail",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "empty",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.fullName",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.email",
+      "case": "empty",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.email",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified."
+    },
+    {
+      "field": "signup.password",
+      "case": "empty",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.password",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "signup.role",
+      "case": "empty",
+      "status": "Native select accepted each of patient/doctor/lab; account creation failed to respond and emitted Next.js Unexpected end of JSON input at /signup. Empty/invalid submit not verified."
+    },
+    {
+      "field": "signup.role",
+      "case": "invalid",
+      "status": "Native select accepted each of patient/doctor/lab; account creation failed to respond and emitted Next.js Unexpected end of JSON input at /signup. Empty/invalid submit not verified."
+    },
+    {
+      "field": "signup.role",
+      "case": "value",
+      "status": "Native select accepted each of patient/doctor/lab; account creation failed to respond and emitted Next.js Unexpected end of JSON input at /signup. Empty/invalid submit not verified."
+    },
+    {
+      "field": "reset.password",
+      "case": "empty",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "whitespace",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "maximum",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "one-over-maximum",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "unicode",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "emoji",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "rtl",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "html-script",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "sql-injection",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "null-byte",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.password",
+      "case": "control-characters",
+      "status": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "empty",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "whitespace",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "mismatch",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "maximum",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "one-over-maximum",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "unicode",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "emoji",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "rtl",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "html-script",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "sql-injection",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "null-byte",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "reset.confirmPassword",
+      "case": "control-characters",
+      "status": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)."
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientId",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.patientName",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.date",
+      "case": "invalid-date",
+      "status": "native min/max exist; date UI/API not yet automated"
+    },
+    {
+      "field": "appointment.date",
+      "case": "past-date",
+      "status": "native min/max exist; date UI/API not yet automated"
+    },
+    {
+      "field": "appointment.date",
+      "case": "far-future-date",
+      "status": "native min/max exist; date UI/API not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.symptoms",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "appointment.notes",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.patientId",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.doctorId",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.notes",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labUpload.file",
+      "case": "zero-byte-file",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "labUpload.file",
+      "case": "no-extension",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "labUpload.file",
+      "case": "double-extension",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "labUpload.file",
+      "case": "oversized-file",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "labUpload.file",
+      "case": "corrupt-file",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "labUpload.file",
+      "case": "concurrent-duplicate-upload",
+      "status": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed."
+    },
+    {
+      "field": "chat.message",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "chat.message",
+      "case": "double-submit",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "empty",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "whitespace",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "one-over-maximum",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "unicode",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "emoji",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "rtl",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "html-script",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "sql-injection",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "null-byte",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "control-characters",
+      "status": "not yet automated"
+    },
+    {
+      "field": "patientAi.message",
+      "case": "double-submit",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "empty",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "whitespace",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "maximum",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "one-over-maximum",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "unicode",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "emoji",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "rtl",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "html-script",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "sql-injection",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "null-byte",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "control-characters",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.message",
+      "case": "double-submit",
+      "status": "unit helper tests cover stored HTML text only; UI/API not run"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "zero-byte-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "no-extension",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "double-extension",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "oversized-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "corrupt-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "enhancedChat.file",
+      "case": "concurrent-duplicate-upload",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "zero-byte-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "no-extension",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "double-extension",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "oversized-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "corrupt-file",
+      "status": "not yet automated"
+    },
+    {
+      "field": "labImaging.file",
+      "case": "concurrent-duplicate-upload",
+      "status": "not yet automated"
+    },
+    {
+      "field": "numeric inputs",
+      "case": "N/A",
+      "status": "no type=number user inputs found in app/components inventory"
+    },
+    {
+      "field": "search/filter",
+      "case": "N/A",
+      "status": "no general search/filter controls identified in primary flows; confirm via follow-up inventory"
+    }
+  ],
+  "races": [
+    {
+      "field": "race-condition",
+      "case": "two lab uploads for same patient simultaneously",
+      "status": "not yet automated"
+    },
+    {
+      "field": "race-condition",
+      "case": "two doctors update same report simultaneously",
+      "status": "not yet automated"
+    },
+    {
+      "field": "race-condition",
+      "case": "double-submit mutation",
+      "status": "not yet automated"
+    }
+  ]
+}

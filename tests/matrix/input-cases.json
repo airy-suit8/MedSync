@@ -1,0 +1,41 @@
+{
+  "suite": "phase-5-adversarial-input-matrix",
+  "status": "enumerated; auth form fields executed in Chromium; upload cells attempted but blocked before Storage acceptance/rejection",
+  "cases": [
+    "empty", "whitespace", "maximum", "one-over-maximum", "unicode", "emoji", "rtl", "html-script", "sql-injection", "null-byte", "control-characters",
+    "negative", "zero", "decimal", "extremely-large-number", "non-numeric", "invalid-date", "past-date", "far-future-date",
+    "zero-byte-file", "no-extension", "double-extension", "oversized-file", "corrupt-file", "concurrent-duplicate-upload", "concurrent-update", "double-submit"
+  ],
+  "fields": [
+    { "field": "login.email", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Auth submit was not verified because Next hydration fails intermittently." },
+    { "field": "login.password", "kind": "secret", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes in the rendered control; login handler behavior is blocked by intermittent Next hydration failure." },
+    { "field": "login.forgotPasswordEmail", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Reset email submission was not verified." },
+    { "field": "signup.fullName", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure." },
+    { "field": "signup.email", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes; malformed values fail native validity. Field caps at 254. Account creation was not verified." },
+    { "field": "signup.password", "kind": "secret", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes in the rendered control; account creation handler is blocked by intermittent Next hydration failure." },
+    { "field": "signup.role", "kind": "select", "cases": "empty invalid value", "result": "Native select accepted each of patient/doctor/lab; account creation failed to respond and emitted Next.js Unexpected end of JSON input at /signup. Empty/invalid submit not verified." },
+    { "field": "reset.password", "kind": "secret", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered all listed classes in the rendered control; reset handler behavior is blocked by intermittent Next hydration failure." },
+    { "field": "reset.confirmPassword", "kind": "secret", "cases": "empty whitespace mismatch maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "Chromium entered listed classes; mismatch submit FAILED to render the expected Passwords do not match validation (latest run timed out)." },
+    { "field": "appointment.patientId", "kind": "identifier", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "appointment.patientName", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "appointment.date", "kind": "date", "cases": "invalid-date past-date far-future-date", "result": "native min/max exist; date UI/API not yet automated" },
+    { "field": "appointment.symptoms", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "appointment.notes", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "labUpload.patientId", "kind": "identifier", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "labUpload.doctorId", "kind": "identifier", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "labUpload.notes", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters", "result": "not yet automated" },
+    { "field": "labUpload.file", "kind": "file", "cases": "zero-byte-file no-extension double-extension oversized-file corrupt-file concurrent-duplicate-upload", "result": "Current Playwright rerun could not log the lab in (redirected back to /login), so no file cell reached the app upload or Storage. Earlier valid upload workflow reached the form but Storage returned a database timeout. Acceptance/rejection not observed." },
+    { "field": "chat.message", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters double-submit", "result": "not yet automated" },
+    { "field": "patientAi.message", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters double-submit", "result": "not yet automated" },
+    { "field": "enhancedChat.message", "kind": "text", "cases": "empty whitespace maximum one-over-maximum unicode emoji rtl html-script sql-injection null-byte control-characters double-submit", "result": "unit helper tests cover stored HTML text only; UI/API not run" },
+    { "field": "enhancedChat.file", "kind": "file", "cases": "zero-byte-file no-extension double-extension oversized-file corrupt-file concurrent-duplicate-upload", "result": "not yet automated" },
+    { "field": "labImaging.file", "kind": "file", "cases": "zero-byte-file no-extension double-extension oversized-file corrupt-file concurrent-duplicate-upload", "result": "not yet automated" },
+    { "field": "numeric inputs", "kind": "not found", "cases": "N/A", "result": "no type=number user inputs found in app/components inventory" },
+    { "field": "search/filter", "kind": "not found", "cases": "N/A", "result": "no general search/filter controls identified in primary flows; confirm via follow-up inventory" }
+  ],
+  "raceCases": [
+    { "case": "two lab uploads for same patient simultaneously", "result": "not yet automated" },
+    { "case": "two doctors update same report simultaneously", "result": "not yet automated" },
+    { "case": "double-submit mutation", "result": "not yet automated" }
+  ]
+}
