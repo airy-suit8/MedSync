@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { callGeminiAPI, DOCTOR_PROMPT_CONTEXT } from "@/lib/gemini"
+import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 
 
 export default function DoctorAIAssistantPage() {
@@ -139,6 +140,9 @@ export default function DoctorAIAssistantPage() {
   return (
     <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
       {/* Header */}
+      <div className="mb-8">
+        <ClinicalNotice>Messages are sent to Google Gemini; do not include names or other identifying details.</ClinicalNotice>
+      </div>
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
           <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/40 hover:text-black mb-4 transition-colors">

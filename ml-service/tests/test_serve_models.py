@@ -94,11 +94,38 @@ def test_analyze_reports_missing_server_secret(monkeypatch):
     assert response.json()["error"] == "Server misconfiguration"
 
 
-def test_analyze_valid_other_scan_without_model_inference(monkeypatch):
+def test_analyze_unsupported_scan_type_says_no_model(monkeypatch):
     monkeypatch.setenv("INTERNAL_API_KEY", "expected")
     response = client.post("/analyze", headers={"X-Internal-Secret": "expected"}, data={"scan_type": "blood_test"}, files={"file": ("report.txt", b"text")})
     assert response.status_code == 200
-    assert response.json()["model_used"] == "blood_test"
+    body = response.json()
+    assert body["error"] == "Unsupported scan type"
+    assert body["model_used"] is None
+    assert body["confidence"] == 0.0
+    assert body["severity"] == "unknown"
+
+
+def test_analyze_normal_xray_is_severity_none(monkeypatch):
+    monkeypatch.setenv("INTERNAL_API_KEY", "expected")
+    monkeypatch.setattr(service, "xray_models_ready", True)
+    monkeypatch.setattr(service, "run_effnet", lambda _img: 0.05)
+    monkeypatch.setattr(service, "run_yolo", lambda _bytes: (0.0, [], 24, 16))
+    response = client.post("/analyze", headers={"X-Internal-Secret": "expected"}, data={"scan_type": "xray"}, files={"file": ("a.png", image_bytes())})
+    body = response.json()
+    assert body["prediction"] == 0
+    assert body["severity"] == "none"
+    assert "not a diagnosis" in body["recommendations"]
+
+
+def test_analyze_normal_mri_is_severity_none(monkeypatch):
+    monkeypatch.setenv("INTERNAL_API_KEY", "expected")
+    monkeypatch.setattr(service, "mri_model", object())
+    monkeypatch.setattr(service, "preprocess_mri_image", lambda _bytes: np.zeros((1, 224, 224, 3)))
+    monkeypatch.setattr(service, "get_prediction_and_confidence", lambda _m, _a: (0, 0.9))
+    response = client.post("/analyze", headers={"X-Internal-Secret": "expected"}, data={"scan_type": "mri"}, files={"file": ("a.png", image_bytes())})
+    body = response.json()
+    assert body["prediction"] == 0
+    assert body["severity"] == "none"
 
 
 def test_health_endpoint_reports_each_model_ready(monkeypatch):

@@ -9,6 +9,7 @@ import { ArrowLeft, Activity, Brain, FileText, Download } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { ErrorLogger } from '@/lib/error-logger'
 import Link from 'next/link'
+import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 
 export default function PatientReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -139,7 +140,10 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 <Brain className="h-6 w-6 text-amber-600" />
                 <span>AI Health Briefing</span>
               </h2>
-              
+              <div className="mb-8">
+                <ClinicalNotice>Discuss any result with your doctor.</ClinicalNotice>
+              </div>
+
               <div className="space-y-8">
                 {report.result?.findings && (
                   <div>
@@ -166,14 +170,17 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 <div className="grid grid-cols-2 gap-8 pt-4 border-t border-black/5">
                   <div>
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-2">Confidence</h3>
-                    <span className="text-2xl font-mono">{Math.round((report.result?.confidence || 0.95) * 100)}%</span>
+                    <span className="text-2xl font-mono">{typeof report.result?.confidence === 'number' ? `${Math.round(report.result.confidence * 100)}%` : '—'}</span>
                   </div>
                   <div>
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/40 mb-2">Severity</h3>
                     <span className={`text-2xl font-mono uppercase ${
-                      report.result?.severity === 'high' ? 'text-red-600 border-b-2 border-red-600' : 'text-green-600 border-b-2 border-green-600'
+                      ['critical', 'severe'].includes(report.result?.severity) ? 'text-red-600 border-b-2 border-red-600'
+                        : report.result?.severity === 'moderate' ? 'text-amber-600 border-b-2 border-amber-600'
+                        : report.result?.severity === 'unknown' ? 'text-black/60 border-b-2 border-black/20'
+                        : 'text-green-600 border-b-2 border-green-600'
                     }`}>
-                      {report.result?.severity || 'NORMAL'}
+                      {!report.result?.severity || report.result.severity === 'none' ? 'NORMAL' : report.result.severity}
                     </span>
                   </div>
                 </div>

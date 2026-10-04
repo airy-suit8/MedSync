@@ -125,7 +125,7 @@ export async function middleware(request: NextRequest) {
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.supabase.co",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://api-inference.huggingface.co http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",

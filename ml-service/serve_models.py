@@ -233,7 +233,7 @@ except Exception as exc:
 
 @app.post("/analyze")
 @limiter.limit("20/minute")
-async def analyze(request: Request, scan_type: str = Form(...), file: UploadFile = File(...)):
+def analyze(request: Request, scan_type: str = Form(...), file: UploadFile = File(...)):
     """Analyze medical images using appropriate ML models"""
     internal_secret = request.headers.get("X-Internal-Secret")
     expected_secret = os.getenv("INTERNAL_API_KEY")
@@ -265,7 +265,7 @@ async def analyze(request: Request, scan_type: str = Form(...), file: UploadFile
         )
 
     try:
-        image_bytes = await file.read()
+        image_bytes = file.file.read()
         scan_kind = scan_type.lower()
 
         if scan_kind in ["xray", "x_ray", "chest_xray", "bone_xray"]:
@@ -297,21 +297,15 @@ async def analyze(request: Request, scan_type: str = Form(...), file: UploadFile
                     "Radiologist review is recommended."
                 )
                 severity = "moderate"
-                recommendations = (
-                    "Please perform manual radiology review. Consider repeat imaging "
-                    "or additional views if clinically indicated."
-                )
+                recommendations = "Models disagree; radiologist review required. This is decision support, not a diagnosis."
             elif pred == 1:
                 findings = "High probability of bone fracture or significant abnormality detected in the X-ray image."
                 severity = "severe" if confidence > 0.8 else "moderate"
-                recommendations = (
-                    "Immediate consultation with orthopedic specialist recommended. "
-                    "Consider additional imaging if needed."
-                )
+                recommendations = "Flagged for priority clinician review. This is decision support, not a diagnosis."
             else:
-                findings = "No significant bone fracture or abnormality detected in the X-ray image."
-                severity = "mild"
-                recommendations = "Continue with current treatment plan. Follow-up as scheduled."
+                findings = "No fracture or abnormality flagged by the model in the X-ray image."
+                severity = "none"
+                recommendations = "Clinician review required. This is decision support, not a diagnosis."
 
             return {
                 "findings": findings,
@@ -361,13 +355,13 @@ async def analyze(request: Request, scan_type: str = Form(...), file: UploadFile
 
             pred, confidence = get_prediction_and_confidence(mri_model, arr)
             if pred == 1:
-                findings = "Possible brain tumor or mass lesion detected in the MRI scan. Immediate attention required."
+                findings = "Possible brain tumor or mass lesion flagged by the model in the MRI scan."
                 severity = "critical" if confidence > 0.8 else "severe"
-                recommendations = "Urgent consultation with neurosurgeon recommended. Consider emergency follow-up imaging."
+                recommendations = "Flagged for urgent clinician review. This is decision support, not a diagnosis."
             else:
-                findings = "No brain tumor or significant abnormality detected in the MRI scan."
-                severity = "mild"
-                recommendations = "Continue with current treatment plan. Follow-up as scheduled."
+                findings = "No tumor or abnormality flagged by the model in the MRI scan."
+                severity = "none"
+                recommendations = "Clinician review required. This is decision support, not a diagnosis."
 
             return {
                 "findings": findings,
@@ -379,12 +373,12 @@ async def analyze(request: Request, scan_type: str = Form(...), file: UploadFile
             }
 
         return {
-            "findings": f"Analysis completed for {scan_type} scan. Please review manually for detailed assessment.",
-            "confidence": 0.5,
-            "recommendations": "Consult a specialist for further evaluation and interpretation.",
-            "severity": "moderate",
-            "model_used": scan_kind,
-            "prediction": 0,
+            "error": "Unsupported scan type",
+            "findings": f"No AI model is available for {scan_type} scans. Please review manually.",
+            "confidence": 0.0,
+            "recommendations": "Manual clinician review required.",
+            "severity": "unknown",
+            "model_used": None,
         }
 
     except Exception as exc:

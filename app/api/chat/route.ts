@@ -1,56 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifySession, unauthorizedResponse } from '@/lib/api-utils'
 
-async function generateWithHuggingFace(prompt: string, context?: string) {
-  const HF_API_KEY = process.env.HF_API_KEY
-  if (!HF_API_KEY) {
-    return {
-      text: 'Hugging Face fallback is not configured on server.',
-      status: 503,
-      ok: false
-    }
-  }
-  const HF_API_URL =
-    'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium'
-
-  const fullPrompt = context
-    ? `${context}\n\nUser: ${prompt}`
-    : `User: ${prompt}`
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  }
-
-  if (HF_API_KEY) {
-    headers['Authorization'] = `Bearer ${HF_API_KEY}`
-  }
-
-  const response = await fetch(HF_API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ inputs: fullPrompt })
-  })
-
-  const raw = await response.text()
-  let data: any = null
-  try {
-    data = raw ? JSON.parse(raw) : null
-  } catch {
-    data = null
-  }
-
-  const text =
-    data?.generated_text ||
-    data?.[0]?.generated_text ||
-    data?.error ||
-    (raw?.startsWith('<!DOCTYPE') || raw?.startsWith('<html')
-      ? 'Upstream AI provider returned a non-JSON error page. Please try again shortly.'
-      : raw) ||
-    'Upstream AI provider returned an empty response.'
-
-  return { text, status: response.status, ok: response.ok }
-}
-
 export async function POST(request: NextRequest) {
   try {
     // Verify session
@@ -94,18 +44,11 @@ export async function POST(request: NextRequest) {
         ? `${context}\n\n${prompt}`
         : prompt
 
-      // Smart model selection with modern-first fallback
-      const isComplex =
-        prompt.length > 300 ||
-        /explain|why|how|analyze|compare/i.test(prompt)
-
-      // Keep to currently supported/known working model IDs.
-      const models = isComplex
-        ? ['gemini-2.5-flash', 'gemini-2.0-flash']
-        : ['gemini-2.5-flash', 'gemini-2.0-flash']
+      // Keep to currently supported/known working model IDs, newest first.
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash']
 
       let lastError: any = null
-      let shouldFallbackToHf = false
+      let isTransient = false
 
       for (const model of models) {
         try {
@@ -159,45 +102,27 @@ export async function POST(request: NextRequest) {
 
           console.warn(`Gemini ${model} failed:`, lastError)
 
-          // Gemini-specific transient/quota failures should fallback to HF.
+          // Quota and availability failures get a "try again" response below.
           if (
             response.status === 429 ||
             response.status === 503 ||
             lastError?.status === 'RESOURCE_EXHAUSTED' ||
             lastError?.status === 'UNAVAILABLE'
           ) {
-            shouldFallbackToHf = true
+            isTransient = true
           }
         } catch (err: any) {
           lastError = err
-          shouldFallbackToHf = true
+          isTransient = true
         }
       }
 
-      if (shouldFallbackToHf) {
-        const hfFallback = await generateWithHuggingFace(prompt, context)
-        if (hfFallback.ok) {
-          return NextResponse.json({
-            provider: 'huggingface',
-            model: 'microsoft/DialoGPT-medium',
-            text: hfFallback.text,
-            fallbackReason: lastError?.message || 'Gemini is temporarily unavailable'
-          })
-        }
-
-        // If Gemini failed and HF fallback is unavailable, return clear actionable error.
-        const fallbackDetails = [
-          lastError?.message || 'Gemini request failed.',
-          hfFallback.text || 'Hugging Face fallback unavailable.'
-        ].join(' ')
-
+      if (isTransient) {
         return NextResponse.json(
           {
             error: {
-              message: 'AI provider temporarily unavailable.',
-              details: fallbackDetails,
-              suggestion:
-                'Retry after the Gemini cooldown, or configure HF_API_KEY for fallback.'
+              message: 'AI assistant temporarily unavailable. Please try again shortly.',
+              details: lastError?.message || 'Gemini request failed.',
             }
           },
           {
@@ -218,30 +143,6 @@ export async function POST(request: NextRequest) {
         },
         { status: 500 }
       )
-    }
-
-    // =========================
-    // HUGGING FACE PROVIDER
-    // =========================
-    if (provider === 'huggingface') {
-      const result = await generateWithHuggingFace(prompt, context)
-      if (!result.ok) {
-        return NextResponse.json(
-          {
-            error: {
-              message: 'Hugging Face request failed.',
-              details: result.text
-            }
-          },
-          { status: result.status || 503 }
-        )
-      }
-
-      return NextResponse.json({
-        provider: 'huggingface',
-        model: 'microsoft/DialoGPT-medium',
-        text: result.text
-      })
     }
 
     // =========================

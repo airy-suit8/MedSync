@@ -1,7 +1,4 @@
 // Gemini API utility functions
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-// Using v1beta as some 1.5 models are not yet fully stabilized in v1 for some regions
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
 
 export interface GeminiResponse {
   success: boolean

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import BBoxAnalysisViewer from '@/components/medical/bbox-analysis-viewer'
 import { ArrowLeft, Download } from 'lucide-react'
 import { PrintButton } from '@/components/ui/print-button'
+import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 
 async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any }> {
   const { supabase, user } = await verifySession()
@@ -151,7 +152,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
       case 'critical': return 'border-red-600 text-red-600 bg-red-50 font-black'
       case 'severe': return 'border-red-500 text-red-500 bg-red-50 font-bold'
       case 'moderate': return 'border-amber-600 text-amber-600 bg-amber-50'
-      case 'mild': return 'border-emerald-600 text-emerald-600 bg-emerald-50'
+      case 'mild':
+      case 'none': return 'border-emerald-600 text-emerald-600 bg-emerald-50'
       default: return 'border-black/20 text-black/40 bg-black/[0.02]'
     }
   }
@@ -254,6 +256,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="space-y-6">
+              <ClinicalNotice>Model output is unvalidated decision support; confirm clinically.</ClinicalNotice>
               <div className="border border-black/10 bg-black/[0.02] p-6">
                 <h3 className="font-bold text-sm uppercase mb-2 border-b border-black/5 pb-2">Findings</h3>
                 <p className="font-mono text-sm leading-relaxed">{findings}</p>

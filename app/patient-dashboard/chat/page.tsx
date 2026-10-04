@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 
 interface Message {
   id: string
@@ -733,6 +734,9 @@ export default function PatientChatPage() {
 
               {/* Input Area */}
               <div className="p-8 border-t border-black/10 bg-black/[0.01] flex-shrink-0">
+                <div className="mb-4">
+                  <ClinicalNotice>Chat is not monitored for emergencies.</ClinicalNotice>
+                </div>
                 <div className="flex gap-4">
                   <Input
                     value={newMessage}

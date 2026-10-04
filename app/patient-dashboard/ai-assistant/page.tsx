@@ -150,7 +150,7 @@ export default function PatientAIAssistantPage() {
                 <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Clinical Notice</span>
               </div>
               <p className="text-[10px] font-mono text-red-600/80 uppercase leading-relaxed">
-                Assistant provides data only. Not a substitute for professional medical advice. Consult your doctor for diagnosis.
+                Assistant provides data only. Not a substitute for professional medical advice. Consult your doctor for diagnosis. In an emergency call 112. Messages are sent to Google Gemini; do not include names or other identifying details.
               </p>
             </div>
           </div>
