@@ -1,5 +1,4 @@
 // Authentication utility functions and constants
-import { createClient } from "./supabase"
 
 // ============================================
 // VALIDATION FUNCTIONS
@@ -109,44 +108,6 @@ export const getRoleDashboard = (role: UserRole | null | undefined): string => {
             return "/lab-dashboard"
         default:
             return "/"
-    }
-}
-
-// ============================================
-// SESSION MANAGEMENT
-// ============================================
-
-export const checkAuthStatus = async (): Promise<{
-    isAuthenticated: boolean
-    user: any | null
-    role: UserRole | null
-}> => {
-    try {
-        const supabase = createClient()
-        const { data: { session }, error } = await supabase.auth.getSession()
-        const user = session?.user || null
-
-        if (error || !user) {
-            return {
-                isAuthenticated: false,
-                user: null,
-                role: null,
-            }
-        }
-
-        const role = user.user_metadata?.role as UserRole
-
-        return {
-            isAuthenticated: true,
-            user,
-            role,
-        }
-    } catch (error) {
-        return {
-            isAuthenticated: false,
-            user: null,
-            role: null,
-        }
     }
 }
 

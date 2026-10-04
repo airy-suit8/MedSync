@@ -2,11 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { createClientMock } = vi.hoisted(() => ({ createClientMock: vi.fn() }))
 vi.mock('@/lib/supabase', () => ({ createClient: createClientMock }))
-import { createAuthClient, createAuthenticatedClient, testDatabaseConnection } from '@/lib/supabase-auth'
+import { createAuthenticatedClient, testDatabaseConnection } from '@/lib/supabase-auth'
 
 describe('Supabase auth helpers', () => {
   beforeEach(() => createClientMock.mockReset())
-  it('keeps createAuthClient as the createClient alias', () => expect(createAuthClient).toBe(createClientMock))
   it('returns a client with a session', async () => {
     const client = { auth: { getSession: vi.fn().mockResolvedValue({ data: { session: { access_token: 'x' } }, error: null }) } }
     createClientMock.mockReturnValue(client)

@@ -1,11 +1,6 @@
 import { createClient } from "./supabase"
 
 /**
- * Alias for createClient() — kept for backward compatibility.
- */
-export const createAuthClient = createClient
-
-/**
  * Returns a Supabase client only if the user has an active session.
  * Throws if not authenticated.
  */

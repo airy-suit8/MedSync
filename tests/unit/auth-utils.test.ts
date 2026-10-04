@@ -1,8 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-const { getSession, createClientMock } = vi.hoisted(() => ({ getSession: vi.fn(), createClientMock: vi.fn() }))
-vi.mock('@/lib/supabase', () => ({ createClient: createClientMock }))
-import { AUTH_ERRORS, checkAuthStatus, getRoleDashboard, parseAuthError, validateEmail, validatePassword } from '@/lib/auth-utils'
+import { describe, expect, it } from 'vitest'
+import { AUTH_ERRORS, getRoleDashboard, parseAuthError, validateEmail, validatePassword } from '@/lib/auth-utils'
 
 describe('auth validation and role utilities', () => {
   it.each([
@@ -35,24 +32,4 @@ describe('auth validation and role utilities', () => {
     [{ message: 'already registered' }, AUTH_ERRORS.EMAIL_EXISTS], [{ message: 'Too many requests' }, AUTH_ERRORS.RATE_LIMIT],
     [{ message: 'Network unavailable' }, AUTH_ERRORS.NETWORK_ERROR], [{ message: 'specific error' }, 'specific error'],
   ])('parses errors %#', (error, expected) => expect(parseAuthError(error)).toBe(expected))
-})
-
-describe('checkAuthStatus', () => {
-  beforeEach(() => {
-    getSession.mockReset()
-    createClientMock.mockReset().mockReturnValue({ auth: { getSession } })
-  })
-  it('returns logged out for missing users and expired sessions', async () => {
-    getSession.mockResolvedValue({ data: { session: null }, error: new Error('expired') })
-    await expect(checkAuthStatus()).resolves.toEqual({ isAuthenticated: false, user: null, role: null })
-  })
-  it('returns user role for an authenticated user', async () => {
-    const user = { id: 'u1', user_metadata: { role: 'doctor' } }
-    getSession.mockResolvedValue({ data: { session: { user } }, error: null })
-    await expect(checkAuthStatus()).resolves.toEqual({ isAuthenticated: true, user, role: 'doctor' })
-  })
-  it('fails closed when Supabase throws', async () => {
-    createClientMock.mockImplementation(() => { throw new Error('fetch failed') })
-    await expect(checkAuthStatus()).resolves.toEqual({ isAuthenticated: false, user: null, role: null })
-  })
 })

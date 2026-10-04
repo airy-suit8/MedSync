@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import path from 'path'
-import axios from 'axios'
-import FormData from 'form-data'
 import { analysisRequestSchema } from '@/lib/schemas'
 import { verifySession, unauthorizedResponse, forbiddenResponse, hasRole } from '@/lib/api-utils'
 
@@ -101,30 +99,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // PERFORMANCE: Stream the buffer directly to FastAPI — no temp file on disk
-    const arrayBuffer = await fileData.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    // Call FastAPI for ML analysis
+    // Call FastAPI for ML analysis; the downloaded Blob goes straight into the form, no temp file on disk
     let prediction
     try {
       const fastApiForm = new FormData();
       fastApiForm.append('scan_type', testType === 'x_ray' ? 'xray' : testType === 'mri' ? 'mri' : testType);
-      fastApiForm.append('file', buffer, originalName);
+      fastApiForm.append('file', fileData, originalName);
 
       if (!process.env.ML_SERVICE_URL) {
         throw new Error('ML_SERVICE_URL is not configured');
       }
       const mlServiceUrl = process.env.ML_SERVICE_URL;
-      const response = await axios.post(`${mlServiceUrl}/analyze`, fastApiForm, {
-        headers: {
-          ...fastApiForm.getHeaders(),
-          'X-Internal-Secret': process.env.INTERNAL_API_KEY
-        },
-        timeout: 30000, // 30 second timeout
+      const response = await fetch(`${mlServiceUrl}/analyze`, {
+        method: 'POST',
+        body: fastApiForm,
+        headers: { 'X-Internal-Secret': process.env.INTERNAL_API_KEY ?? '' },
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       });
+      if (!response.ok) {
+        throw new Error(`ML service responded ${response.status}`);
+      }
 
-      prediction = response.data;
+      prediction = await response.json();
 
       // Ensure all required fields are present
       if (!prediction.findings) prediction.findings = 'No specific findings detected.';
