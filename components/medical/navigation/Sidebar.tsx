@@ -18,6 +18,7 @@ import {
   UserCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import NotificationBell from "@/components/medical/NotificationBell"
 
 interface SidebarProps {
   userRole: 'doctor' | 'patient' | 'lab'
@@ -67,21 +68,24 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
     <div className={`${collapsed ? 'w-20' : 'w-72'} bg-black text-white h-screen sticky top-0 flex flex-col transition-all duration-300 border-r border-white/10 relative z-50`}>
       {/* Header */}
       <div className="p-6 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
+        <div className={`flex items-center justify-between mb-4 ${collapsed ? "justify-center" : ""}`}>
           {!collapsed && (
             <div className="flex items-center space-x-3">
               <span className="text-xl font-bold tracking-tight">MedSync</span>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
+          <div className={`flex items-center gap-1 ${collapsed ? "flex-col" : ""}`}>
+            <NotificationBell role={userRole} />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+            >
+              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
         {!collapsed && (
           <div>
