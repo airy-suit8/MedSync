@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import PrescriptionForm from "@/components/medical/PrescriptionForm"
+import PrescriptionList from "@/components/medical/PrescriptionList"
 import { Activity, Users, Video, Phone, MessageSquare, Calendar, ArrowLeft, CheckCircle, Clock } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
@@ -613,9 +615,9 @@ export default function ConsultationsPage() {
               />
             </div>
 
-            {/* Prescription */}
+            {/* Prescription: free-text notes, plus a printable prescription the patient receives */}
             <div>
-              <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Prescription</p>
+              <p className="text-[10px] font-mono uppercase text-black/55 mb-2">Prescription notes</p>
               <Textarea
                 placeholder="ENTER PRESCRIPTION DETAILS..."
                 value={prescription}
@@ -623,6 +625,16 @@ export default function ConsultationsPage() {
                 rows={3}
                 className="border-black/20 rounded-none focus:border-black font-mono text-sm uppercase placeholder:text-black/55 resize-none"
               />
+              {selectedConsultation && !selectedConsultation.awaitingPatient && (
+                <div className="mt-4 space-y-4">
+                  <PrescriptionForm
+                    patientId={selectedConsultation.patient_id}
+                    patientName={selectedConsultation.patient_name}
+                    appointmentId={selectedConsultation.id}
+                  />
+                  <PrescriptionList patientId={selectedConsultation.patient_id} appointmentId={selectedConsultation.id} />
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

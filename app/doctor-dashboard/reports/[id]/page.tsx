@@ -10,6 +10,8 @@ import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 import ReportReviewPanel from "@/components/medical/ReportReviewPanel"
 import AiStatusNotice from "@/components/medical/AiStatusNotice"
 import LabValuesTable from "@/components/medical/LabValuesTable"
+import PrescriptionForm from "@/components/medical/PrescriptionForm"
+import PrescriptionList from "@/components/medical/PrescriptionList"
 
 async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null, reviewed?: boolean }> {
   const { supabase, user } = await verifySession()
@@ -314,11 +316,20 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           </div>
 
           {userId && (
-            <ReportReviewPanel
-              reportId={report.id}
-              doctorId={userId}
-              hasAi={hasAiReading}
-            />
+            <div className="space-y-6">
+              <ReportReviewPanel
+                reportId={report.id}
+                doctorId={userId}
+                hasAi={hasAiReading}
+              >
+                <PrescriptionForm
+                  patientId={report.patient_id}
+                  patientName={fullName !== 'Not provided' ? fullName : 'the patient'}
+                  reportId={report.id}
+                />
+              </ReportReviewPanel>
+              <PrescriptionList patientId={report.patient_id} reportId={report.id} />
+            </div>
           )}
 
           {/* Patient Information & Metadata */}

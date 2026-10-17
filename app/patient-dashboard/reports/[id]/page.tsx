@@ -10,6 +10,7 @@ import { ErrorLogger } from '@/lib/error-logger'
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 import { VERDICTS, type Review } from '@/lib/review'
 import LabValuesTable from '@/components/medical/LabValuesTable'
+import PrescriptionList from '@/components/medical/PrescriptionList'
 import type { LabValue } from '@/lib/lab-report-ai'
 
 type ShownReview = Review & { doctor_name: string; image_url: string | null }
@@ -189,6 +190,13 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                   <dd className={`text-2xl font-mono uppercase ${['critical', 'severe'].includes(severity) ? 'text-red-700' : severity === 'moderate' ? 'text-amber-700' : ''}`}>{severity}</dd>
                 </div>
               </dl>
+            </section>
+          )}
+
+          {reviewed && (
+            <section aria-labelledby="rx" className="space-y-4">
+              <h2 id="rx" className="text-xl font-bold uppercase">Prescriptions from this report</h2>
+              <PrescriptionList patientId={report.patient_id} reportId={report.id} emptyText="No prescription was written for this report." />
             </section>
           )}
 

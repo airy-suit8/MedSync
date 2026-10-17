@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { format, parseISO } from "date-fns"
 import dynamic from "next/dynamic"
+import PrescriptionList from "@/components/medical/PrescriptionList"
 
 const MedicalVideoCall = dynamic(() => import("@/components/medical-video-call"), {
   ssr: false,
@@ -24,6 +25,7 @@ const MedicalVideoCall = dynamic(() => import("@/components/medical-video-call")
 interface Consultation {
   id: string
   call_secret?: string
+  awaitingConfirmation?: boolean
   doctor_name: string
   doctor_id: string
   patient_name: string
@@ -128,6 +130,7 @@ export default function PatientVideoConsultationsPage() {
           start_time: apt.start_time,
           end_time: apt.end_time,
           status: apt.status === 'confirmed' ? 'scheduled' : (apt.status || 'scheduled'),
+          awaitingConfirmation: apt.status === 'scheduled', // a doctor's request the patient hasn't confirmed
           consultation_type: apt.consultation_type || 'video',
           notes: apt.notes,
           symptoms: apt.symptoms,
@@ -194,24 +197,63 @@ export default function PatientVideoConsultationsPage() {
           {loadError && <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700 font-mono">{loadError}</div>}
           {consultations.length > 0 ? (
             consultations.map((consultation) => (
-              <div key={consultation.id} className="group border border-black/10 bg-white p-8 relative flex flex-col md:flex-row md:items-center justify-between gap-8">
-                <div className="flex items-center gap-6">
-                  <div className="p-4 bg-black text-white"><Video className="h-6 w-6" /></div>
-                  <div>
-                    <h3 className="text-2xl font-black uppercase tracking-tight">{consultation.doctor_name}</h3>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-black/55 mt-1">
-                      {getConsultationTypeLabel(consultation.consultation_type)} • SYMPTOMS: {consultation.symptoms || 'NOT SPECIFIED'}
-                    </p>
+              <div key={consultation.id} className="group border border-black/10 bg-white p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                  <div className="flex items-center gap-6">
+                    <div className="p-4 bg-black text-white"><Video className="h-6 w-6" aria-hidden="true" /></div>
+                    <div>
+                      <h3 className="text-2xl font-black uppercase tracking-tight">{consultation.doctor_name}</h3>
+                      <p className="text-[11px] font-mono uppercase tracking-widest text-black/60 mt-1">
+                        {getConsultationTypeLabel(consultation.consultation_type)} • SYMPTOMS: {consultation.symptoms || 'NOT SPECIFIED'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-right mr-4">
+                      <p className="text-sm font-bold uppercase tracking-tight">{format(parseISO(consultation.appointment_date), 'MMMM d, yyyy')}</p>
+                      <p className="text-[11px] font-mono text-black/60 uppercase tracking-widest">{consultation.start_time?.slice(0, 5)}</p>
+                    </div>
+                    {consultation.status === 'completed' ? (
+                      <span className="border border-black px-3 py-1 font-mono text-[11px] uppercase tracking-widest">Completed</span>
+                    ) : consultation.awaitingConfirmation ? (
+                      <Button asChild variant="outline" className="rounded-none border-black h-12 px-6 uppercase font-mono text-[11px] tracking-widest">
+                        <Link href="/patient-dashboard">Confirm on your dashboard</Link>
+                      </Button>
+                    ) : consultation.status !== 'cancelled' ? (
+                      <Button className="bg-black text-white rounded-none h-12 px-8 uppercase font-mono text-[11px] tracking-widest" onClick={() => startVideoCall(consultation)}>Establish Link</Button>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                   <div className="text-right mr-4">
-                    <p className="text-sm font-bold uppercase tracking-tight">{format(parseISO(consultation.appointment_date), 'MMMM d, yyyy')}</p>
-                    <p className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{consultation.start_time} PST</p>
+                {consultation.status === 'completed' && (consultation.diagnosis || consultation.notes || consultation.prescription || user) && (
+                  <div className="mt-8 grid gap-6 border-t border-black/10 pt-6 md:grid-cols-2">
+                    {consultation.diagnosis && (
+                      <div>
+                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Diagnosis</h4>
+                        <p>{consultation.diagnosis}</p>
+                      </div>
+                    )}
+                    {consultation.notes && (
+                      <div>
+                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Doctor&apos;s notes</h4>
+                        <p className="whitespace-pre-line">{consultation.notes}</p>
+                      </div>
+                    )}
+                    {consultation.prescription && (
+                      <div>
+                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Prescription notes</h4>
+                        <p className="whitespace-pre-line">{consultation.prescription}</p>
+                      </div>
+                    )}
+                    {user && (
+                      <div className="md:col-span-2">
+                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-2">Prescriptions</h4>
+                        <PrescriptionList patientId={user.id} appointmentId={consultation.id} emptyText="No printable prescription for this consultation." />
+                      </div>
+                    )}
                   </div>
-                  <Button className="bg-black text-white rounded-none h-12 px-8 uppercase font-mono text-[10px] tracking-widest" onClick={() => startVideoCall(consultation)}>Establish Link</Button>
-                </div>
+                )}
               </div>
             ))
           ) : (
