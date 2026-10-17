@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Activity, FileText, MessageSquare, Calendar, Brain, Video, ArrowRight } from "lucide-react"
+import { Activity, FileText, MessageSquare, Calendar, Brain, Video, ArrowRight, Stethoscope } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -61,6 +61,7 @@ export default function PatientDashboard() {
           .select('*')
           .eq('patient_id', patientId)
           .gte('appointment_date', today)
+          .neq('status', 'requested') // requests the doctor hasn't answered are on the Doctors page
           .order('appointment_date', { ascending: true }),
         supabase
           .from('reports')
@@ -318,6 +319,7 @@ export default function PatientDashboard() {
                 </div>
                 <div className="space-y-2">
                   {[
+                    { label: 'Find a doctor', href: '/patient-dashboard/doctors', icon: Stethoscope },
                     { label: 'My Reports', href: '/patient-dashboard/reports', icon: FileText },
                     { label: 'Messages', href: '/patient-dashboard/chat', icon: MessageSquare },
                     { label: 'Appointments', href: '/patient-dashboard/video-consultations', icon: Calendar },

@@ -76,6 +76,7 @@ export default function DoctorSchedulePage() {
       const { data } = await supabase
         .from('appointments')
         .select('*')
+        .neq('status', 'requested') // unanswered patient requests live on the Patients page
         .order('appointment_date', { ascending: true })
         .order('start_time', { ascending: true })
 

@@ -19,6 +19,7 @@ import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
 import { pressable } from "@/lib/utils"
 import DashboardSkeleton from "@/components/medical/common/DashboardSkeleton"
+import ConsultationRequests from "@/components/medical/ConsultationRequests"
 
 interface UrgentReview {
   id: string
@@ -95,6 +96,7 @@ export default function DoctorDashboard() {
           .select('*')
           .eq('doctor_id', authUserId)
           .eq('appointment_date', today)
+          .neq('status', 'requested') // unanswered requests are listed in ConsultationRequests
           .order('start_time', { ascending: true }),
         supabase
           .from('reports')
@@ -263,6 +265,8 @@ export default function DoctorDashboard() {
               </div>
             </div>
           )}
+
+          {user && <ConsultationRequests doctorId={user.id} />}
 
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-black/10 border border-black/10 mb-16">

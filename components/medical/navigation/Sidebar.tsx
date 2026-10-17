@@ -12,7 +12,10 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard
+  LayoutDashboard,
+  Users,
+  Stethoscope,
+  UserCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -25,13 +28,16 @@ interface SidebarProps {
 const menuItems = {
   doctor: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/doctor-dashboard' },
+    { id: 'patients', label: 'My Patients', icon: Users, href: '/doctor-dashboard/patients' },
     { id: 'reports', label: 'Reports', icon: FileText, href: '/doctor-dashboard/reports' },
     { id: 'communication', label: 'Messages', icon: MessageSquare, href: '/doctor-dashboard/communication' },
     { id: 'schedule', label: 'Schedule', icon: Calendar, href: '/doctor-dashboard/schedule' },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, href: '/doctor-dashboard/ai-assistant' },
+    { id: 'profile', label: 'Public Profile', icon: UserCircle, href: '/doctor-dashboard/profile' },
   ],
   patient: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/patient-dashboard' },
+    { id: 'doctors', label: 'My Doctors', icon: Stethoscope, href: '/patient-dashboard/doctors' },
     { id: 'reports', label: 'My Reports', icon: FileText, href: '/patient-dashboard/reports' },
     { id: 'chat', label: 'Messages', icon: MessageSquare, href: '/patient-dashboard/chat' },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, href: '/patient-dashboard/ai-assistant' },
