@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<title>Confirm your MedSync email</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f2;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">One click to confirm your MedSync account.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f2" style="background:#f4f4f2;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #0a0a0a;">
+        <tr>
+          <td style="padding:24px 36px;border-bottom:1px solid #0a0a0a;font-family:Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.3px;color:#0a0a0a;">MedSync</td>
+        </tr>
+        <tr>
+          <td style="padding:36px 36px 10px;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#5c5c5c;">&ldquo;Confirm your email&rdquo;</td>
+        </tr>
+        <tr>
+          <td style="padding:0 36px;font-family:Helvetica,Arial,sans-serif;font-size:34px;line-height:1.05;font-weight:700;letter-spacing:-1px;text-transform:uppercase;color:#0a0a0a;">One click<br>and you&rsquo;re in.</td>
+        </tr>
+        <tr>
+          <td style="padding:22px 36px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#2b2b2b;">
+            {{ if .Data.name }}Hi {{ .Data.name }},{{ else }}Hello,{{ end }}<br><br>
+            Confirm this email address to finish creating your MedSync account.
+          </td>
+        </tr>
+        {{ if .Data.role }}{{ if eq .Data.role "doctor" }}
+        <tr>
+          <td style="padding:16px 36px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#2b2b2b;">
+            After that, we check your medical registration number. Until it&rsquo;s verified, patients can&rsquo;t find you and you can&rsquo;t schedule appointments.
+          </td>
+        </tr>
+        {{ else if eq .Data.role "lab" }}
+        <tr>
+          <td style="padding:16px 36px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#2b2b2b;">
+            After that, we check your lab registration number. Until it&rsquo;s verified, you can&rsquo;t upload reports.
+          </td>
+        </tr>
+        {{ end }}{{ end }}
+        <tr>
+          <td style="padding:32px 36px 8px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td bgcolor="#0a0a0a" style="background:#0a0a0a;">
+                  <a href="{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&amp;type=email" style="display:inline-block;padding:16px 28px;font-family:'Courier New',Courier,monospace;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#ffffff;text-decoration:none;">Confirm email &rarr;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 36px 32px;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#5c5c5c;">
+            Button not working? Paste this into your browser:<br>
+            <a href="{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&amp;type=email" style="color:#0a0a0a;word-break:break-all;">{{ .SiteURL }}/confirm?token_hash={{ .TokenHash }}&amp;type=email</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 36px 28px;border-top:1px solid #d9d9d6;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.6;color:#5c5c5c;">
+            You&rsquo;re getting this because {{ .Email }} was used to sign up for MedSync. If that wasn&rsquo;t you, ignore this email: nothing happens until the address is confirmed.<br><br>
+            <span style="font-family:'Courier New',Courier,monospace;letter-spacing:2px;text-transform:uppercase;">MedSync &middot; Patients, doctors and labs on one platform</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

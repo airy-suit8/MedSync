@@ -1,256 +1,138 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { createClient } from "@/lib/supabase"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import type React from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle, XCircle, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import AuthFrame from "@/components/auth/AuthFrame"
+import ResendConfirmation from "@/components/auth/ResendConfirmation"
+import { createClient } from "@/lib/supabase"
+import { AUTH_ERRORS, getRoleDashboard, validatePassword } from "@/lib/auth-utils"
 
-import { Suspense } from "react"
+// Where MedSync's emails link (supabase/templates/*.html): /confirm?token_hash=…&type=…
+// The token in the link is checked here, so it works in any browser or device (unlike
+// the default links, which only finish in the browser that started sign-up or reset).
+//   type=email (or signup)  confirm a new account, then go to the dashboard
+//   type=recovery           choose a new password
+//   type=email_change       confirm a new email address
+type OtpType = "email" | "recovery" | "email_change"
+type Phase = "checking" | "confirmed" | "new-password" | "password-saved" | "email-changed" | "failed"
 
 function ConfirmContent() {
-  const [status, setStatus] = useState<'loading' | 'reset-password' | 'success' | 'error'>('loading')
-  const [message, setMessage] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const params = useSearchParams()
+  const [phase, setPhase] = useState<Phase>("checking")
+  const [dashboard, setDashboard] = useState("/login")
+  const started = useRef(false)
 
   useEffect(() => {
-    const handleConfirmation = async () => {
-      const token = searchParams.get('token')
-      const type = searchParams.get('type')
-
-      if (!token) {
-        setStatus('error')
-        setMessage('Invalid confirmation link')
-        return
-      }
-
-      try {
-        const supabase = createClient()
-        
-        if (type === 'recovery') {
-          // Password reset flow
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: 'recovery'
-          })
-
-          if (error) {
-            setStatus('error')
-            setMessage(error.message)
-          } else {
-            setStatus('reset-password')
-            setMessage('Please enter your new password')
-          }
-        } else {
-          // Email confirmation flow
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: 'signup'
-          })
-
-          if (error) {
-            setStatus('error')
-            setMessage(error.message)
-          } else {
-            setStatus('success')
-            setMessage('Your email has been confirmed successfully!')
-            setTimeout(() => {
-              router.push('/login')
-            }, 3000)
-          }
-        }
-      } catch (error) {
-        setStatus('error')
-        setMessage('An unexpected error occurred')
-      }
+    if (started.current) return // the token can only be used once
+    started.current = true
+    const tokenHash = params.get("token_hash") || params.get("token")
+    const raw = params.get("type")
+    const type: OtpType | null = raw === "signup" || raw === "email" ? "email" : raw === "recovery" || raw === "email_change" ? raw : null
+    if (!tokenHash || !type) {
+      setPhase("failed")
+      return
     }
+    createClient().auth.verifyOtp({ token_hash: tokenHash, type }).then(({ data, error }: { data: { user: { app_metadata?: { role?: string } } | null }; error: unknown }) => {
+      if (error) return setPhase("failed")
+      setDashboard(getRoleDashboard(data.user?.app_metadata?.role as Parameters<typeof getRoleDashboard>[0]))
+      setPhase(type === "recovery" ? "new-password" : type === "email_change" ? "email-changed" : "confirmed")
+    })
+  }, [params])
 
-    handleConfirmation()
-  }, [searchParams, router])
+  if (phase === "checking") return <p role="status" className="text-sm text-black/60">Checking your link…</p>
+  if (phase === "new-password") return <NewPassword onSaved={() => setPhase("password-saved")} />
 
-  const handlePasswordReset = async (e: React.FormEvent) => {
+  if (phase === "failed") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-start gap-3">
+          <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-700" aria-hidden="true" />
+          <p role="alert">This link has expired or was already used. Links work once, for a limited time.</p>
+        </div>
+        <p className="text-sm text-black/70">Confirming a new account? Enter your email for a fresh link.</p>
+        <ResendConfirmation />
+        <p className="text-sm text-black/70">
+          Resetting your password? Use “Forgot password?” on the <Link href="/login" className="underline underline-offset-4">sign-in page</Link>.
+        </p>
+      </div>
+    )
+  }
+
+  const done = {
+    confirmed: { title: "Email confirmed", text: "Your account is ready.", cta: "Go to your dashboard" },
+    "email-changed": { title: "Link accepted", text: "If a link was also sent to your other address, open that one too. Then sign in with your new address.", cta: "Go to your dashboard" },
+    "password-saved": { title: "Password saved", text: "You're signed in with your new password.", cta: "Go to your dashboard" },
+  }[phase]
+
+  return (
+    <div role="status" className="space-y-6 text-center">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center border border-black">
+        <CheckCircle className="h-6 w-6" aria-hidden="true" />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold">{done.title}</h2>
+        <p className="mt-2 text-black/60">{done.text}</p>
+      </div>
+      <Button asChild className="h-14 w-full rounded-none bg-black text-white hover:bg-black/90 font-mono text-sm uppercase tracking-widest">
+        <Link href={dashboard}>{done.cta}</Link>
+      </Button>
+    </div>
+  )
+}
+
+function NewPassword({ onSaved }: { onSaved: () => void }) {
+  const [password, setPassword] = useState("")
+  const [confirm, setConfirm] = useState("")
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+  const check = validatePassword(password)
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match')
-      return
-    }
-
-    if (password.length < 6) {
-      setMessage('Password must be at least 6 characters')
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      })
-
-      if (error) {
-        setMessage(error.message)
-      } else {
-        setStatus('success')
-        setMessage('Password updated successfully!')
-        setTimeout(() => {
-          router.push('/login')
-        }, 2000)
-      }
-    } catch (error) {
-      setMessage('Failed to update password')
-    } finally {
-      setIsSubmitting(false)
-    }
+    if (password !== confirm) return setError(AUTH_ERRORS.PASSWORDS_MISMATCH)
+    if (!check.isValid) return setError(AUTH_ERRORS.WEAK_PASSWORD)
+    setBusy(true)
+    const { error } = await createClient().auth.updateUser({ password })
+    setBusy(false)
+    if (error) return setError(error.message)
+    onSaved()
   }
 
   return (
-    <div className="min-h-screen bg-medical-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Image src="/medi.png" alt="MedSync Logo" width={48} height={48} />
-            <span className="text-3xl font-bold text-medical-navy ml-3">MedSync</span>
-          </div>
-          <p className="text-medical-gray-600">
-            {status === 'reset-password' ? 'Reset Password' : 'Email Confirmation'}
-          </p>
-        </div>
-
-        <Card className="border-medical-gray-200">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
-              {status === 'loading' && (
-                <Lock className="h-12 w-12 text-medical-primary animate-pulse" />
-              )}
-              {status === 'success' && (
-                <CheckCircle className="h-12 w-12 text-medical-success" />
-              )}
-              {status === 'error' && (
-                <XCircle className="h-12 w-12 text-medical-error" />
-              )}
-              {status === 'reset-password' && (
-                <Lock className="h-12 w-12 text-medical-primary" />
-              )}
-            </div>
-            <CardTitle className="text-medical-navy">
-              {status === 'loading' && 'Processing...'}
-              {status === 'success' && 'Success!'}
-              {status === 'error' && 'Error'}
-              {status === 'reset-password' && 'Set New Password'}
-            </CardTitle>
-            <CardDescription className="text-medical-gray-600">
-              {message}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {status === 'reset-password' && (
-              <form onSubmit={handlePasswordReset} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-medical-navy">New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="border-medical-gray-300 focus:border-medical-primary pr-10"
-                      placeholder="Enter new password"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 text-medical-gray-600 hover:text-medical-primary"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-medical-navy">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="border-medical-gray-300 focus:border-medical-primary"
-                    placeholder="Confirm new password"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Updating...' : 'Update Password'}
-                </Button>
-              </form>
-            )}
-            
-            {status === 'success' && (
-              <div className="text-center">
-                <p className="text-sm text-medical-gray-600 mb-4">
-                  Redirecting to login...
-                </p>
-                <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white" asChild>
-                  <Link href="/login">
-                    Continue to Login
-                  </Link>
-                </Button>
-              </div>
-            )}
-            
-            {status === 'error' && (
-              <div className="space-y-3">
-                <Button className="w-full bg-medical-primary hover:bg-medical-primary-dark text-white" asChild>
-                  <Link href="/reset-password">
-                    Request New Link
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full border-medical-gray-300 text-medical-gray-600 hover:bg-medical-gray-50" asChild>
-                  <Link href="/login">
-                    Back to Login
-                  </Link>
-                </Button>
-              </div>
-            )}
-
-            <div className="text-center pt-4">
-              <Link href="/" className="inline-flex items-center text-sm text-medical-gray-600 hover:text-medical-primary">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to Home
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+    <form onSubmit={save} className="space-y-6">
+      <p>Choose a new password for your account.</p>
+      {error && <p role="alert" className="border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      <div className="space-y-2">
+        <Label htmlFor="new-password" className="font-mono text-xs uppercase tracking-widest text-black/60">New password</Label>
+        <Input id="new-password" type="password" autoComplete="new-password" required value={password}
+          onChange={(e) => setPassword(e.target.value)} aria-describedby="password-help"
+          className="h-12 rounded-none border-black/20 font-mono focus:border-black" />
+        {password && <p id="password-help" className="text-xs text-black/60">{check.isValid ? "Strong enough." : check.errors.join(" · ")}</p>}
       </div>
-    </div>
+      <div className="space-y-2">
+        <Label htmlFor="confirm-password" className="font-mono text-xs uppercase tracking-widest text-black/60">Type it again</Label>
+        <Input id="confirm-password" type="password" autoComplete="new-password" required value={confirm}
+          onChange={(e) => setConfirm(e.target.value)} className="h-12 rounded-none border-black/20 font-mono focus:border-black" />
+      </div>
+      <Button type="submit" disabled={busy} className="h-14 w-full rounded-none bg-black text-white hover:bg-black/90 font-mono text-sm uppercase tracking-widest">
+        {busy ? "Saving…" : "Save new password"}
+      </Button>
+    </form>
   )
 }
 
 export default function ConfirmPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Lock className="h-12 w-12 text-medical-primary animate-pulse" />
-      </div>
-    }>
-      <ConfirmContent />
-    </Suspense>
+    <AuthFrame label="MEDSYNC" title="ALMOST THERE." subtitle="Checking the link from your email.">
+      <Suspense fallback={<p className="text-sm text-black/60">Checking your link…</p>}>
+        <ConfirmContent />
+      </Suspense>
+    </AuthFrame>
   )
 }

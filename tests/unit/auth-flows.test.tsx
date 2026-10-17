@@ -11,6 +11,7 @@ vi.mock('next/navigation', () => ({
 
 import SignUpPage from '@/app/signup/page'
 import VerifyEmailPage from '@/app/verify-email/page'
+import ConfirmPage from '@/app/confirm/page'
 
 afterEach(cleanup)
 
@@ -57,5 +58,38 @@ describe('email confirmation page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send a new link' }))
     expect(await screen.findByText(/new link is on its way/)).toBeTruthy()
     expect(resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'ravi@example.com' }))
+  })
+})
+
+// The links in supabase/templates/*.html
+describe('/confirm links from MedSync emails', () => {
+  it('confirms a sign-up link on any device and links to the dashboard', async () => {
+    searchParams.value = new URLSearchParams('token_hash=abc&type=email')
+    const verifyOtp = vi.fn().mockResolvedValue({ data: { user: { app_metadata: { role: 'patient' } } }, error: null })
+    createClientMock.mockReturnValue({ auth: { verifyOtp } })
+    render(<ConfirmPage />)
+    expect(await screen.findByText('Email confirmed')).toBeTruthy()
+    expect(verifyOtp).toHaveBeenCalledWith({ token_hash: 'abc', type: 'email' })
+    expect(screen.getByRole('link', { name: 'Go to your dashboard' }).getAttribute('href')).toBe('/patient-dashboard')
+  })
+
+  it('lets a recovery link set a new password', async () => {
+    searchParams.value = new URLSearchParams('token_hash=abc&type=recovery')
+    const updateUser = vi.fn().mockResolvedValue({ error: null })
+    createClientMock.mockReturnValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: {} }, error: null }), updateUser } })
+    render(<ConfirmPage />)
+    fireEvent.change(await screen.findByLabelText('New password'), { target: { value: 'Str0ng!Passw0rd' } })
+    fireEvent.change(screen.getByLabelText('Type it again'), { target: { value: 'Str0ng!Passw0rd' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save new password' }))
+    expect(await screen.findByText('Password saved')).toBeTruthy()
+    expect(updateUser).toHaveBeenCalledWith({ password: 'Str0ng!Passw0rd' })
+  })
+
+  it('offers a fresh link when the token is used or expired', async () => {
+    searchParams.value = new URLSearchParams('token_hash=old&type=email')
+    createClientMock.mockReturnValue({ auth: { verifyOtp: vi.fn().mockResolvedValue({ data: { user: null }, error: { message: 'expired' } }) } })
+    render(<ConfirmPage />)
+    expect(await screen.findByText(/expired or was already used/)).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Send a new link' })).toBeTruthy()
   })
 })
