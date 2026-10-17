@@ -864,7 +864,7 @@ export default function MedicalVideoCall({
       signalingChannel.unsubscribe()
       signalingChannelRef.current = null
     }
-  }, [isOpen, consultation?.id])
+  }, [isOpen, consultation?.id, consultation?.call_secret])
 
   useEffect(() => {
     if (!isOpen) {
