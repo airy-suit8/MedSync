@@ -28,28 +28,24 @@ export const metadata: Metadata = {
     description: 'AI-powered healthcare collaboration platform connecting patients, doctors, and laboratory technicians.',
     type: 'website',
     locale: 'en_US',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'MedSync Platform' }],
+    // Image: app/opengraph-image.png
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MedSync - Healthcare Collaboration Platform',
     description: 'AI-powered healthcare collaboration platform',
-    images: ['/og-image.jpg'],
   },
 }
 
+// A web app, not a medical organization, and there is no support phone line.
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'MedicalOrganization',
-  name: 'MedSync Healthcare',
+  '@type': 'WebApplication',
+  name: 'MedSync',
   description: 'AI-powered healthcare collaboration platform connecting patients, doctors, and laboratory technicians.',
   url: 'https://medsync.health',
-  logo: 'https://medsync.health/medi.png',
-  contactPoint: {
-    '@type': 'ContactPoint',
-    telephone: '+1-800-555-1234',
-    contactType: 'customer service'
-  }
+  applicationCategory: 'HealthApplication',
+  operatingSystem: 'Web',
 }
 
 export default function RootLayout({

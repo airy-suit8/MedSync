@@ -124,13 +124,13 @@ export default function HomePage() {
             </div>
 
             <h2 className="text-5xl lg:text-6xl font-bold tracking-tight mb-8 uppercase">
-              Built for
+              Under the
               <br />
-              <span className="text-black/55">Scale</span>
+              <span className="text-black/55">Hood</span>
             </h2>
 
             <p className="text-xl text-black/60 mb-16 font-light max-w-2xl mx-auto">
-              Next.js 15, Supabase, Google Gemini AI. Production-grade infrastructure with real-time capabilities.
+              Next.js 15, Supabase, Google Gemini AI and our own scan models. Real-time chat and peer-to-peer video.
             </p>
 
             {/* Tech Stack Grid */}
@@ -177,7 +177,7 @@ export default function HomePage() {
                   today.
                 </h2>
                 <p className="text-xl text-black/60 font-light">
-                  Join healthcare professionals transforming patient care.
+                  Patients, doctors and labs on one platform.
                 </p>
               </div>
               <div className="flex flex-col items-start gap-4">
@@ -190,7 +190,7 @@ export default function HomePage() {
                   </Link>
                 </Button>
                 <span className="text-sm text-black/55 font-mono">
-                  {'// FREE TRIAL AVAILABLE'}
+                  {'// RESEARCH PROTOTYPE'}
                 </span>
               </div>
             </div>
