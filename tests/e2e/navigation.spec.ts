@@ -201,13 +201,14 @@ test('signup, login, and dashboard access work for each local role', async ({ br
 
         const reportName = `e2e-${runId}.pdf`
         await page.getByPlaceholder('ENTER SHORT ID / UUID').fill(patient!.id)
-        await expect(page.getByText(/NODE:/)).toBeVisible({ timeout: 10_000 })
-        await page.getByPlaceholder('ENTER DOCTOR ID').fill(doctor!.id)
-        await page.getByRole('combobox').first().selectOption('blood_test')
+        await page.getByRole('button', { name: /^Find$/ }).click()
+        await expect(page.getByText(/Patient:/)).toBeVisible({ timeout: 10_000 })
+        await page.locator('#doctor').selectOption(doctor!.id)
+        await page.locator('#test-type').selectOption('blood_test')
         await page.locator('#mlEnabled').uncheck()
         await fileInput.setInputFiles({ name: reportName, mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\nMedSync local upload test\n%%EOF') })
-        await page.getByRole('button', { name: /UPLOAD|SYNCHRONIZE|SUBMIT/i }).click()
-        await expect(page.getByText('Uplink Successful')).toBeVisible({ timeout: 30_000 })
+        await page.getByRole('button', { name: /Upload report/i }).click()
+        await expect(page.getByText('Report uploaded')).toBeVisible({ timeout: 30_000 })
 
         const { data: uploadedReports } = await admin.from('reports').select('id,file_name').eq('uploaded_by', lab!.id).eq('original_name', reportName)
         if (uploadedReports?.length) {

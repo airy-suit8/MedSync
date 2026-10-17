@@ -1,808 +1,253 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Activity, Upload, FileText, ArrowLeft, CheckCircle, AlertCircle, Brain, Sparkles, User } from "lucide-react"
-import { createClient } from "@/lib/supabase"
-import { createAuthenticatedClient, testDatabaseConnection } from "@/lib/supabase-auth"
-import { useRouter } from "next/navigation"
+import type React from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import { format, parseISO } from "date-fns"
+import { CheckCircle, Search, Upload } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import DashboardShell from "@/components/medical/common/DashboardShell"
+import { createClient } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { UUID_REGEX } from "@/lib/constants"
+import { doctorsOfPatient, submitReport, type LinkedDoctor } from "@/lib/submit-report"
+
+const LABEL = "font-mono text-[11px] uppercase tracking-widest text-black/60"
+const FIELD = "h-12 rounded-none border-black/20 focus:border-black"
+const SELECT = "h-12 w-full border border-black/20 bg-white px-3 text-sm focus:border-black focus:outline-none"
+
+// Which tests the AI can read (scan models for X-ray/MRI, lab-value reader for blood/urine).
+const TEST_TYPES: { value: string; label: string; ai: boolean }[] = [
+  { value: "x_ray", label: "X-ray", ai: true },
+  { value: "mri", label: "MRI", ai: true },
+  { value: "blood_test", label: "Blood test", ai: true },
+  { value: "urine_test", label: "Urine test", ai: true },
+  { value: "ct_scan", label: "CT scan", ai: false },
+  { value: "ultrasound", label: "Ultrasound", ai: false },
+  { value: "ecg", label: "ECG", ai: false },
+  { value: "other", label: "Other", ai: false },
+]
+
+const AI_STATUS: Record<string, string> = {
+  pending: "Sending to doctor", running: "AI reading", done: "AI reading ready",
+  failed: "AI could not read it", not_applicable: "Sent to doctor",
+}
+
+type Patient = { id: string; name: string | null; short_id: string | null }
+type Recent = { id: string; patient_id: string; test_type: string; uploaded_at: string; ai_status: string }
 
 export default function LabUploadPage() {
-  const [user, setUser] = useState<any>(null)
-  const [uploading, setUploading] = useState(false)
-  const [mlProcessing, setMlProcessing] = useState(false)
+  return (
+    <DashboardShell role="lab" label="UPLOAD" title="Upload a report"
+      intro="Find the patient, pick which of their doctors it is for, and attach the file. The doctor is told straight away; scans and blood or urine reports also get an AI reading.">
+      {(user) => <UploadForm labId={user.id} />}
+    </DashboardShell>
+  )
+}
+
+function UploadForm({ labId }: { labId: string }) {
+  const [patientQuery, setPatientQuery] = useState("")
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [doctors, setDoctors] = useState<LinkedDoctor[]>([])
+  const [looking, setLooking] = useState(false)
+  const [doctorId, setDoctorId] = useState("")
+  const [testType, setTestType] = useState("")
+  const [priority, setPriority] = useState("normal")
+  const [notes, setNotes] = useState("")
+  const [runAi, setRunAi] = useState(true)
   const [file, setFile] = useState<File | null>(null)
-  const [formData, setFormData] = useState({
-    patientId: "",
-    patientName: "",
-    doctorId: "",
-    testType: "",
-    dateOfBirth: "",
-    age: "",
-    gender: "",
-    phoneNumber: "",
-    address: "",
-    eyeSide: "",
-    familyHistory: "",
-    previousDiagnosis: "",
-    ongoingTreatments: "",
-    notes: "",
-    priority: "normal"
-  })
-  const [patientProfile, setPatientProfile] = useState<any>(null)
-  const [doctorProfile, setDoctorProfile] = useState<any>(null)
-  const [loadingPatient, setLoadingPatient] = useState(false)
-  const [loadingDoctor, setLoadingDoctor] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [mlEnabled, setMlEnabled] = useState(true)
-  const [dbConnectionTested, setDbConnectionTested] = useState(false)
-  const router = useRouter()
+  const [fileKey, setFileKey] = useState(0)
+  const [uploading, setUploading] = useState(false)
+  const [done, setDone] = useState<string | null>(null)
+  const [recent, setRecent] = useState<Recent[]>([])
+  const [names, setNames] = useState<Map<string, string>>(new Map())
   const { toast } = useToast()
-  const [uploadSuccess, setUploadSuccess] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let active = true
-    const checkUser = async () => {
-      try {
-        const supabase = createClient()
-        // The session is already persisted by the login flow. Middleware
-        // validates it server-side; read it locally here to avoid a second
-        // auth network request blocking the upload screen.
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) throw error
-        let user = session?.user
-        // Tokens issued before the app_metadata role backfill don't carry the role yet.
-        if (user && !user.app_metadata?.role) {
-          user = (await supabase.auth.getUser()).data.user ?? user
-        }
-
-        const role = user?.app_metadata?.role
-        if (!user || role !== "lab") {
-          router.push("/login")
-          return
-        }
-
-        if (active) setUser(user)
-      } catch (error) {
-        console.error("Unable to verify lab session:", error)
-        router.push("/login")
-      } finally {
-        if (active) setLoading(false)
-      }
+  const loadRecent = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase.from("reports").select("id, patient_id, test_type, uploaded_at, ai_status")
+      .eq("uploaded_by", labId).order("uploaded_at", { ascending: false }).limit(6)
+    const rows = (data || []) as Recent[]
+    setRecent(rows)
+    const ids = [...new Set(rows.map((r) => r.patient_id))]
+    if (ids.length) {
+      const { data: people } = await supabase.from("profile_directory").select("id, name").in("id", ids)
+      setNames(new Map((people || []).map((p: { id: string; name: string | null }) => [p.id, p.name || "Patient"])))
     }
-    
-    checkUser()
-    return () => { active = false }
-  }, [router])
+  }, [labId])
 
-  const fetchPatientProfile = async (patientId: string, doctorId = formData.doctorId) => {
-    if (!patientId.trim()) {
-      setPatientProfile(null)
+  useEffect(() => { loadRecent() }, [loadRecent])
+
+  const findPatient = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const id = patientQuery.trim()
+    if (!id) return
+    setLooking(true)
+    setPatient(null)
+    setDoctors([])
+    setDoctorId("")
+    const supabase = createClient()
+    let query = supabase.from("profile_directory").select("id, name, short_id").eq("role", "patient")
+    query = UUID_REGEX.test(id) ? query.eq("id", id) : query.ilike("short_id", id)
+    const { data, error } = await query.maybeSingle()
+    if (error || !data) {
+      setLooking(false)
+      toast({ title: "Patient not found", description: "Check the Patient ID on their dashboard.", variant: "destructive" })
       return
     }
-
-    // Validate patientId format and length
-    const trimmedId = patientId.trim()
-    if (trimmedId.length > 100) {
-      console.warn('❌ Patient ID too long:', trimmedId.length, 'characters')
-      toast({
-        title: "Invalid Patient ID",
-        description: "Patient ID is too long. Please enter a valid Short ID or UUID.",
-        variant: "destructive"
-      })
-      setPatientProfile(null)
-      setLoadingPatient(false)
-      return
-    }
-
-    setLoadingPatient(true)
     try {
-      const supabase = createClient()
-      let patientQuery = supabase
-        .from('profile_directory')
-        .select('id, name, role, short_id')
-        .eq('role', 'patient')
-      patientQuery = UUID_REGEX.test(trimmedId)
-        ? patientQuery.eq('id', trimmedId)
-        : patientQuery.ilike('short_id', trimmedId)
-      const { data: patientDirectory, error } = await patientQuery.maybeSingle()
-
-      if (error) {
-        console.warn('Error fetching patient:', error.message)
-        setPatientProfile(null)
-        toast({
-          title: "Error fetching patient",
-          description: `Error: ${error.message}`,
-          variant: "destructive"
-        })
-      } else if (!patientDirectory) {
-        console.warn('No patient profile found for identifier:', trimmedId)
-        setPatientProfile(null)
-        toast({
-          title: "Patient not found",
-          description: "No patient profile found. Use the patient's Short ID or UUID.",
-          variant: "destructive"
-        })
-      } else {
-        let patientDetails: any = patientDirectory
-        if (doctorId.trim()) {
-          let doctorQuery = supabase
-            .from('profile_directory')
-            .select('id')
-            .eq('role', 'doctor')
-          doctorQuery = UUID_REGEX.test(doctorId.trim())
-            ? doctorQuery.eq('id', doctorId.trim())
-            : doctorQuery.ilike('short_id', doctorId.trim())
-          const { data: doctorDirectory, error: doctorError } = await doctorQuery.maybeSingle()
-
-          if (doctorError || !doctorDirectory) {
-            throw doctorError || new Error('Doctor not found')
-          }
-
-          const { data: details, error: detailsError } = await supabase.rpc(
-            'get_lab_upload_patient_profile',
-            { p_patient_id: patientDirectory.id, p_doctor_id: doctorDirectory.id },
-          )
-
-          if (detailsError) throw detailsError
-          patientDetails = Array.isArray(details) ? details[0] : details
-          if (!patientDetails) {
-            setPatientProfile(null)
-            toast({
-              title: 'Patient is not assigned to this doctor',
-              description: 'Confirm the active patient-doctor assignment before uploading a report.',
-              variant: 'destructive',
-            })
-            return
-          }
-        }
-
-        setPatientProfile(patientDetails)
-        setFormData(prev => ({
-          ...prev,
-          patientName: patientDetails.name || patientDirectory.name || '',
-          dateOfBirth: patientDetails.date_of_birth || '',
-          age: patientDetails.date_of_birth
-            ? String(Math.floor((Date.now() - new Date(patientDetails.date_of_birth).getTime()) / 31_557_600_000))
-            : '',
-          gender: patientDetails.gender || '',
-          phoneNumber: patientDetails.phone || '',
-          address: patientDetails.address || '',
-          previousDiagnosis: patientDetails.chronic_conditions || '',
-          ongoingTreatments: patientDetails.current_medications || '',
-        }))
-        toast({
-          title: 'Patient found',
-          description: `Patient: ${patientDetails.name || patientDirectory.name}`,
-          duration: 3000,
-          className: "bg-green-50 border-green-200 text-green-800"
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching patient:', error)
-      setPatientProfile(null)
+      const list = await doctorsOfPatient(data.id)
+      setPatient(data)
+      setDoctors(list)
+      if (list.length === 1) setDoctorId(list[0].id)
+    } catch (err) {
+      toast({ title: "Could not load the patient's doctors", description: (err as Error).message, variant: "destructive" })
     } finally {
-      setLoadingPatient(false)
+      setLooking(false)
     }
   }
 
-  const fetchDoctorProfile = async (doctorId: string) => {
-    if (!doctorId.trim()) {
-      setDoctorProfile(null)
-      return
-    }
-
-    setLoadingDoctor(true)
-    try {
-      const supabase = createClient()
-      let doctorQuery = supabase
-        .from('profile_directory')
-        .select('id, name, role, short_id, specialty')
-        .eq('role', 'doctor')
-      doctorQuery = UUID_REGEX.test(doctorId.trim())
-        ? doctorQuery.eq('id', doctorId.trim())
-        : doctorQuery.ilike('short_id', doctorId.trim())
-      const { data: profile, error } = await doctorQuery.maybeSingle()
-
-      if (error) {
-        console.warn('Error fetching doctor:', error.message)
-        setDoctorProfile(null)
-        toast({
-          title: "Error fetching doctor",
-          description: `Error: ${error.message}`,
-          variant: "destructive"
-        })
-      } else if (!profile) {
-        console.warn('No doctor found for identifier:', doctorId)
-        setDoctorProfile(null)
-        toast({
-          title: "Doctor not found",
-          description: "No doctor found. Use the doctor's Short ID or UUID.",
-          variant: "destructive"
-        })
-      } else {
-        setDoctorProfile(profile)
-        toast({
-          title: "✅ Doctor Found!",
-          description: `Doctor: ${profile.name || 'Doctor'}`,
-          duration: 3000,
-          className: "bg-green-50 border-green-200 text-green-800"
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching doctor:', error)
-      setDoctorProfile(null)
-    } finally {
-      setLoadingDoctor(false)
-    }
-  }
-
-  const handlePatientIdChange = (value: string) => {
-    setFormData(prev => ({ ...prev, patientId: value }))
-    // Fetch patient profile when Patient ID changes
-    if (value.trim()) {
-      fetchPatientProfile(value, formData.doctorId)
-    } else {
-      setPatientProfile(null)
-      // Clear auto-filled data
-      setFormData(prev => ({
-        ...prev,
-        patientName: "",
-        dateOfBirth: "",
-        age: "",
-        gender: "",
-        phoneNumber: "",
-        address: "",
-        familyHistory: "",
-        previousDiagnosis: "",
-        ongoingTreatments: ""
-      }))
-    }
-  }
-
-  const handleDoctorIdChange = (value: string) => {
-    setFormData(prev => ({ ...prev, doctorId: value }))
-    if (value.trim()) {
-      fetchDoctorProfile(value)
-      if (formData.patientId.trim()) fetchPatientProfile(formData.patientId, value)
-    } else {
-      setDoctorProfile(null)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const upload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!file) {
-      toast({ title: 'No file selected', description: 'Please select a file to upload', variant: 'destructive' })
+    if (!patient || !doctorId || !testType || !file) {
+      toast({ title: "Fill in the patient, doctor, test and file", variant: "destructive" })
       return
     }
-
     setUploading(true)
-    setUploadError(null)
-    let uploadedFileName: string | null = null
-
     try {
-      const supabase = createClient()
-      const resolveDirectoryId = async (identifier: string, role: 'doctor' | 'patient') => {
-        const trimmed = identifier.trim()
-        if (!trimmed) return null
-        let query = supabase
-          .from('profile_directory')
-          .select('id')
-          .eq('role', role)
-        query = UUID_REGEX.test(trimmed)
-          ? query.eq('id', trimmed)
-          : query.ilike('short_id', trimmed)
-        const { data, error } = await query.maybeSingle()
-        if (error) throw error
-        return data?.id || null
-      }
-
-      const resolvedDoctorId = await resolveDirectoryId(formData.doctorId, 'doctor')
-      const resolvedPatientId = await resolveDirectoryId(formData.patientId, 'patient')
-      if (!resolvedDoctorId || !resolvedPatientId) {
-        throw new Error('Enter a valid patient and doctor ID or Short ID.')
-      }
-
-      const { data: assignedPatient, error: assignmentError } = await supabase.rpc(
-        'get_lab_upload_patient_profile',
-        { p_patient_id: resolvedPatientId, p_doctor_id: resolvedDoctorId },
-      )
-      if (assignmentError) throw assignmentError
-      if (!assignedPatient || (Array.isArray(assignedPatient) && assignedPatient.length === 0)) {
-        throw new Error('This patient is not actively assigned to the selected doctor.')
-      }
-
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const { error: uploadError } = await supabase.storage
-        .from('reports')
-        .upload(fileName, file, { cacheControl: '3600', upsert: false })
-      if (uploadError) throw new Error(`File upload failed: ${uploadError.message}`)
-      uploadedFileName = fileName
-
-      console.log('🔍 Resolved IDs - Patient:', resolvedPatientId, 'Doctor:', resolvedDoctorId)
-      console.log('🔍 Original inputs - Patient:', formData.patientId, 'Doctor:', formData.doctorId)
-
-      // Step 2: Create report directly in database (simpler approach)
-      console.log('📊 Creating report in database...')
-      
-      const { data: reportData, error: reportError } = await supabase
-        .from('reports')
-        .insert({
-          patient_id: resolvedPatientId, // Use resolved UUID instead of original input
-          doctor_id: resolvedDoctorId,
-          test_type: formData.testType,
-          original_name: file.name,
-          file_name: fileName,
-          priority: formData.priority,
-          notes: formData.notes,
-          uploaded_by: user.id,
-          patient_info: {
-            patientId: formData.patientId, // Keep original input for reference
-            resolvedPatientId: resolvedPatientId, // Add resolved UUID for debugging
-            testType: formData.testType,
-            fullName: formData.patientName || `Patient ${formData.patientId}`,
-            dateOfBirth: formData.dateOfBirth || 'Not provided',
-            age: formData.age || 'Not provided',
-            gender: formData.gender || 'Not specified',
-            phoneNumber: formData.phoneNumber || 'Not provided',
-            address: formData.address || 'Not provided',
-            eyeSide: formData.eyeSide || 'Not applicable',
-            familyHistoryOfCancer: formData.familyHistory || 'Not provided',
-            previousDiagnosis: formData.previousDiagnosis || 'None',
-            ongoingTreatments: formData.ongoingTreatments || 'None',
-            recordCreated: new Date().toISOString(),
-            lastUpdated: new Date().toISOString()
-          }
-        })
-        .select('id')
-        .single()
-
-      if (reportError) {
-        console.error('❌ Database insert failed:', reportError)
-        throw new Error(`Database error: ${reportError.message}`)
-      }
-
-      console.log('✅ Report created successfully in database:', reportData.id)
-
-      // Step 3: Trigger ML processing
-      if (mlEnabled) {
-        setMlProcessing(true)
-        try {
-          console.log('🧠 Starting ML processing for:', fileName, formData.patientId, formData.testType)
-          
-                     const response = await fetch('/api/ml-process', {
-             method: 'POST',
-             headers: {
-               'Content-Type': 'application/json',
-             },
-             body: JSON.stringify({
-               fileName: fileName,
-               originalName: file.name,
-               patientId: formData.patientId,
-               testType: formData.testType,
-               reportId: reportData.id,
-               doctorId: formData.doctorId
-             }),
-           })
-
-          console.log('ML API response status:', response.status)
-          
-          if (response.ok) {
-            const result = await response.json()
-            console.log('ML processing result:', result)
-            
-             // /api/ml-process notifies the doctor (server-side); browsers cannot create notifications.
-             if (result.success) {
-               console.log('✅ ML analysis complete:', result.suggestionId)
-             } else {
-               console.warn('⚠️ ML processing returned success: false', result)
-             }
-          } else {
-            const errorText = await response.text()
-            console.warn('⚠️ ML processing failed:', response.status, errorText)
-          }
-        } catch (mlError) {
-          console.error('❌ ML processing error:', mlError)
-          // Continue even if ML processing fails
-        } finally {
-          setMlProcessing(false)
-        }
-      }
-
-      // Show success message with more details
-      toast({ 
-        title: '✅ Report Uploaded Successfully!', 
-        description: `Patient ID: ${formData.patientId} | Test Type: ${formData.testType} | File: ${file?.name}`,
-        duration: 5000,
-        className: "bg-green-50 border-green-200 text-green-800"
-      })
-      
-      // Set success state for UI feedback
-      setUploadSuccess(true)
-      
-      // Optional: Add a subtle notification sound/vibration if supported
-      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate([100, 50, 100]); // Short vibration pattern
-      }
-      
-      // Reset form
+      const aiAvailable = TEST_TYPES.find((t) => t.value === testType)?.ai ?? false
+      const { aiStatus } = await submitReport({ file, patientId: patient.id, doctorId, testType, priority, notes, runAi: runAi && aiAvailable, labId })
+      const doctor = doctors.find((d) => d.id === doctorId)
+      setDone(`${doctor?.name || "The doctor"} has been told.${aiStatus === "running" ? " The AI reading will be ready in a minute or two; you can leave this page." : ""}`)
       setFile(null)
-      setFormData({
-        patientId: "",
-        patientName: "",
-          doctorId: "",
-        testType: "",
-        dateOfBirth: "",
-        age: "",
-        gender: "",
-        phoneNumber: "",
-        address: "",
-        eyeSide: "",
-        familyHistory: "",
-        previousDiagnosis: "",
-        ongoingTreatments: "",
-        notes: "",
-        priority: "normal"
-      })
-      
-      // Clear success state after 3 seconds
-      setTimeout(() => {
-        setUploadSuccess(false)
-      }, 3000)
-      
-    } catch (error: any) {
-      console.error('❌ Upload error:', error)
-      const errorMessage = error.message || 'Upload failed'
-      if (uploadedFileName) {
-        await createClient().storage.from('reports').remove([uploadedFileName])
-      }
-      setUploadError(errorMessage)
-      toast({ 
-        title: 'Upload failed', 
-        description: errorMessage, 
-        variant: 'destructive' 
-      })
+      setFileKey((k) => k + 1) // clears the file input
+      setNotes("")
+      loadRecent()
+    } catch (err) {
+      toast({ title: "Upload failed", description: (err as Error).message, variant: "destructive" })
     } finally {
       setUploading(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <div className="flex flex-col items-center">
-          <Activity className="h-8 w-8 animate-spin mb-4 text-black" />
-          <span className="text-xs font-mono uppercase tracking-widest text-black/60">Initializing Uplink...</span>
-        </div>
-      </div>
-    )
-  }
+  const aiAvailable = TEST_TYPES.find((t) => t.value === testType)?.ai
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
-      {/* Header */}
-      <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
-        <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Return to Node</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Upload Diagnostic Data</h1>
-          <p className="text-black/60 font-light text-lg italic">
-            Securely synchronize clinical results with the patient record
-          </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Portal Mode
-          </span>
-          <span className="text-xl font-mono border-b-2 border-indigo-600">
-            LAB_UPLINK_v2.0
-          </span>
-        </div>
-      </header>
-
-      {/* Success Message Banner */}
-      {uploadSuccess && (
-        <div className="mb-8 p-6 bg-emerald-50 border border-emerald-500/20 relative overflow-hidden">
-          <div className="absolute left-0 top-0 h-full w-0.5 bg-emerald-600"></div>
-          <div className="flex items-center space-x-3">
-            <CheckCircle className="h-5 w-5 text-emerald-600" />
+    <div className="grid gap-12 lg:grid-cols-12">
+      <div className="space-y-8 lg:col-span-7">
+        {done && (
+          <div role="status" className="flex items-start gap-3 border border-black p-5">
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
             <div>
-              <h3 className="text-sm font-black uppercase tracking-tight text-emerald-800">Uplink Successful</h3>
-              <p className="text-xs font-mono uppercase text-emerald-700 mt-1">
-                Data packet synchronized. AI analysis queued for processing.
+              <p className="font-bold">Report uploaded</p>
+              <p className="text-sm text-black/70">{done}</p>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={findPatient} className="space-y-2">
+          <Label htmlFor="patient-id" className={LABEL}>1. Patient ID</Label>
+          <div className="flex gap-2">
+            <Input id="patient-id" value={patientQuery} onChange={(e) => setPatientQuery(e.target.value)}
+              placeholder="ENTER SHORT ID / UUID" className={`${FIELD} font-mono`} />
+            <Button type="submit" disabled={looking || !patientQuery.trim()} className="h-12 rounded-none bg-black px-6 text-white hover:bg-black/90 font-mono text-xs uppercase tracking-widest">
+              <Search className="mr-2 h-4 w-4" aria-hidden="true" />{looking ? "Finding…" : "Find"}
+            </Button>
+          </div>
+          {patient && <p className="text-sm">Patient: <strong>{patient.name || "Unnamed"}</strong> <span className="font-mono text-black/60">({patient.short_id})</span></p>}
+        </form>
+
+        <form onSubmit={upload} className="space-y-8">
+          <div className="space-y-2">
+            <Label htmlFor="doctor" className={LABEL}>2. For which doctor</Label>
+            {patient && doctors.length === 0 ? (
+              <p className="border border-dashed border-black/20 p-4 text-sm text-black/70">
+                This patient has no doctor yet. They can find one under My Doctors, or a doctor can add them with their Patient ID.
               </p>
-            </div>
+            ) : (
+              <select id="doctor" value={doctorId} onChange={(e) => setDoctorId(e.target.value)} disabled={!patient} className={SELECT}>
+                <option value="">{patient ? "Choose one of the patient's doctors" : "Find the patient first"}</option>
+                {doctors.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name || "Doctor"}{d.specialty ? ` · ${d.specialty}` : ""}</option>
+                ))}
+              </select>
+            )}
           </div>
-        </div>
-      )}
 
-      <div className="grid lg:grid-cols-3 gap-12">
-        {/* Upload Form */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="border border-black/10 bg-white p-10 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-600"></div>
-            
-            <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
-               <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                 <Upload className="h-6 w-6" />
-                 Report Payload
-               </h3>
-               {mlEnabled && (
-                 <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-500/20">
-                   <Brain className="h-3.5 w-3.5 text-amber-600" />
-                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">AI Enabled</span>
-                 </div>
-               )}
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="test-type" className={LABEL}>3. Test</Label>
+              <select id="test-type" value={testType} onChange={(e) => setTestType(e.target.value)} className={SELECT}>
+                <option value="">Choose the test</option>
+                {TEST_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Patient Identification</label>
-                  <div className="relative">
-                    <Input
-                      placeholder="ENTER SHORT ID / UUID"
-                      value={formData.patientId}
-                      onChange={(e) => handlePatientIdChange(e.target.value)}
-                      className="rounded-none border-black h-12 font-mono text-sm uppercase focus-visible:ring-0 focus-visible:border-indigo-600"
-                      required
-                    />
-                    {loadingPatient && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <Activity className="h-4 w-4 text-indigo-600 animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  {patientProfile && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-500/10 relative overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-0.5 bg-emerald-600"></div>
-                      <div className="text-[10px] font-mono text-emerald-800 uppercase space-y-1">
-                        <p><strong>NODE:</strong> {patientProfile.name || patientProfile.full_name || 'UNKNOWN'}</p>
-                        <p><strong>AGE:</strong> {patientProfile.age || (patientProfile.date_of_birth ? new Date().getFullYear() - new Date(patientProfile.date_of_birth).getFullYear() : 'N/A')} YR | {patientProfile.gender || 'N/A'}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Ordering Physician</label>
-                  <div className="relative">
-                    <Input
-                      placeholder="ENTER DOCTOR ID"
-                      value={formData.doctorId}
-                      onChange={(e) => handleDoctorIdChange(e.target.value)}
-                      className="rounded-none border-black h-12 font-mono text-sm uppercase focus-visible:ring-0 focus-visible:border-indigo-600"
-                      required
-                    />
-                    {loadingDoctor && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <Activity className="h-4 w-4 text-indigo-600 animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  {doctorProfile && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-500/10 relative overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-0.5 bg-emerald-600"></div>
-                      <div className="text-[10px] font-mono text-emerald-800 uppercase space-y-1">
-                        <p><strong>NAME:</strong> {doctorProfile.name}</p>
-                        <p><strong>ROLE:</strong> {doctorProfile.specialty || 'Generalist'}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Diagnostic Protocol</label>
-                  <select 
-                    className="w-full h-12 border border-black rounded-none bg-white font-mono text-sm uppercase px-4 focus:outline-none focus:border-indigo-600"
-                    value={formData.testType}
-                    onChange={(e) => setFormData({...formData, testType: e.target.value})}
-                    required
-                  >
-                    <option value="">SELECT TEST TYPE</option>
-                    <option value="blood_test">Blood Test</option>
-                    <option value="x_ray">X-Ray</option>
-                    <option value="ct_scan">CT Scan</option>
-                    <option value="mri">MRI</option>
-                    <option value="ultrasound">Ultrasound</option>
-                    <option value="ecg">ECG</option>
-                    <option value="urine_test">Urine Test</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Priority Sequence</label>
-                  <select 
-                    className="w-full h-12 border border-black rounded-none bg-white font-mono text-sm uppercase px-4 focus:outline-none focus:border-indigo-600"
-                    value={formData.priority}
-                    onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                  >
-                    <option value="normal">Normal Priority</option>
-                    <option value="urgent">Urgent Processing</option>
-                    <option value="critical">Critical (Red-Line)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Technician Observations</label>
-                <Textarea
-                  placeholder="ADD ANY CLINICAL NOTES OR OBSERVATIONS..."
-                  value={formData.notes}
-                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  rows={4}
-                  className="rounded-none border-black font-mono text-sm uppercase focus-visible:ring-0 focus-visible:border-indigo-600"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-black/55">Binary Payload (File)</label>
-                <div className="border-2 border-dashed border-black/10 p-8 text-center hover:border-black/30 transition-all cursor-pointer relative bg-black/[0.01] group">
-                   <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png,.dicom"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    required
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="flex flex-col items-center pointer-events-none">
-                    <FileText className="h-8 w-8 mb-4 text-black/20" />
-                    <p className="text-xs font-mono uppercase text-black/60">
-                      {file ? file.name : "DROP FILE OR CLICK TO BROWSE"}
-                    </p>
-                    <p className="text-[10px] font-mono uppercase text-black/55 mt-2">PDF, JPG, PNG, DICOM (MAX 10MB)</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* ML Processing Toggle */}
-              <div className="flex items-center justify-between p-6 bg-amber-50 border border-amber-500/10">
-                <div className="flex items-center space-x-3">
-                   <div className="p-2 bg-amber-600 text-white">
-                     <Brain className="h-4 w-4" />
-                   </div>
-                   <div>
-                     <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-900">AI Diagnostic Uplink</h4>
-                     <p className="text-[10px] font-mono text-amber-800/60 uppercase">ML analysis will be triggered on synchronize</p>
-                   </div>
-                </div>
-                <input
-                  type="checkbox"
-                  id="mlEnabled"
-                  checked={mlEnabled}
-                  onChange={(e) => setMlEnabled(e.target.checked)}
-                  className="h-5 w-5 rounded-none border-black accent-amber-600 cursor-pointer"
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                disabled={uploading || mlProcessing}
-                className="w-full bg-black text-white rounded-none h-16 hover:bg-indigo-600 transition-all uppercase font-mono text-xs tracking-[0.2em] flex items-center justify-center gap-4 group"
-              >
-                {uploading ? (
-                  <>
-                    <Activity className="h-5 w-5 animate-spin" />
-                    UPLOADING DATA...
-                  </>
-                ) : mlProcessing ? (
-                  <>
-                    <Brain className="h-5 w-5 animate-pulse" />
-                    AI PROCESSING...
-                  </>
-                ) : (
-                  <>
-                    <span>Synchronize Payload</span>
-                    <Upload className="h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-                  </>
-                )}
-              </Button>
-
-              {/* Error Display */}
-              {uploadError && (
-                <div className="p-6 bg-red-50 border border-red-500/20 relative overflow-hidden">
-                  <div className="absolute left-0 top-0 h-full w-0.5 bg-red-600"></div>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <AlertCircle className="h-5 w-5 text-red-600" />
-                    <p className="text-sm font-black uppercase text-red-800 tracking-tight">Sync Failed</p>
-                  </div>
-                  <p className="text-xs font-mono text-red-700 uppercase leading-relaxed">{uploadError}</p>
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-
-        {/* Upload Guidelines */}
-        <div className="space-y-8">
-          <div className="border border-black/10 bg-white p-8 relative">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-emerald-600"></div>
-            <h3 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center gap-3">
-               <CheckCircle className="h-5 w-5 text-emerald-600" />
-               Uplink Protocol
-            </h3>
-            
-            <div className="space-y-8">
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-4">Identification</h4>
-                <div className="p-4 bg-black/[0.02] border border-black/5 space-y-4">
-                  <p className="text-[10px] font-mono uppercase text-black/60 leading-relaxed">
-                    Use Short ID (preferred) or UUID to ensure data packet routing to correct node.
-                  </p>
-                  <ul className="text-[10px] font-mono text-black/55 uppercase space-y-2">
-                    <li>• Resolve ID from patient profile</li>
-                    <li>• Verify Physician Node ID</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-4">Payload Constraints</h4>
-                <ul className="text-[10px] font-mono uppercase text-black/60 space-y-3">
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-black/20"></span>
-                    MAX SIZE: 10MB
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-black/20"></span>
-                    FORMATS: PDF, JPG, DICOM
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-black/20"></span>
-                    CLEAR SCAN RESOLUTION
-                  </li>
-                </ul>
-              </div>
-
-              <div className="p-4 bg-indigo-50 border border-indigo-500/10">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-900 mb-2">Automated Analysis</h4>
-                <p className="text-[10px] font-mono text-indigo-800/60 uppercase leading-relaxed">
-                  ML models will evaluate data for patterns and abnormalities. Results encrypted and sent to physician.
-                </p>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority" className={LABEL}>Priority</Label>
+              <select id="priority" value={priority} onChange={(e) => setPriority(e.target.value)} className={SELECT}>
+                <option value="normal">Normal</option>
+                <option value="urgent">Urgent</option>
+                <option value="critical">Critical</option>
+              </select>
             </div>
           </div>
 
-          <div className="border border-black/10 bg-white p-8 relative">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-black/10"></div>
-            <h3 className="text-xl font-black uppercase tracking-tight mb-8">Recent Uplinks</h3>
-            <div className="space-y-4">
-              {[
-                { label: 'Patient 12345', type: 'Blood Test', time: '2H AGO', status: 'COMPLETED' },
-                { label: 'Patient 67890', type: 'X-Ray', time: '4H AGO', status: 'PROCESSING' }
-              ].map((item, i) => (
-                <div key={i} className="p-4 border border-black/5 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-tight">{item.label}</p>
-                    <p className="text-[10px] font-mono text-black/55 uppercase">{item.type} • {item.time}</p>
-                  </div>
-                  <span className={`text-[9px] font-black px-2 py-0.5 border ${
-                    item.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                  }`}>
-                    {item.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="report-file" className={LABEL}>4. File</Label>
+            <Input key={fileKey} id="report-file" type="file" accept=".pdf,.jpg,.jpeg,.png,.dcm,.dicom"
+              onChange={(e) => setFile(e.target.files?.[0] || null)} className="h-auto rounded-none border-black/20 py-3" />
+            <p className="text-xs text-black/60">PDF, JPEG, PNG or DICOM, up to 10 MB.</p>
           </div>
-        </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className={LABEL}>Notes for the doctor (optional)</Label>
+            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} rows={3}
+              className="rounded-none border-black/20 focus:border-black" />
+          </div>
+
+          <label className="flex items-start gap-3 text-sm">
+            <input id="mlEnabled" type="checkbox" checked={runAi} onChange={(e) => setRunAi(e.target.checked)} className="mt-1 h-4 w-4 accent-black" />
+            <span>
+              Get an AI first reading
+              <span className="block text-xs text-black/60">
+                {testType && !aiAvailable ? "There is no AI for this test; the doctor reviews it directly." : "For X-ray, MRI, blood and urine reports. The doctor reviews it before the patient sees anything."}
+              </span>
+            </span>
+          </label>
+
+          <Button type="submit" disabled={uploading} className="h-14 w-full rounded-none bg-black text-white hover:bg-black/90 font-mono text-sm uppercase tracking-widest">
+            <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+            {uploading ? "Uploading…" : "Upload report"}
+          </Button>
+        </form>
       </div>
+
+      <aside className="lg:col-span-5">
+        <h2 className="mb-4 font-mono text-[11px] uppercase tracking-widest text-black/60">Your recent uploads</h2>
+        {recent.length === 0 ? (
+          <p className="border border-dashed border-black/20 p-6 text-sm text-black/60">Nothing uploaded yet.</p>
+        ) : (
+          <ul className="divide-y divide-black/10 border-y border-black/10">
+            {recent.map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-4 py-4">
+                <div>
+                  <p className="font-bold">{names.get(r.patient_id) || "Patient"}</p>
+                  <p className="font-mono text-xs uppercase text-black/60">
+                    {r.test_type.replace(/_/g, " ")} · {format(parseISO(r.uploaded_at), "d MMM, HH:mm")}
+                  </p>
+                </div>
+                <span className="border border-black/20 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider">{AI_STATUS[r.ai_status] || r.ai_status}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-6 text-sm text-black/60">
+          Scans from the <Link href="/lab-dashboard/imaging" className="underline underline-offset-4">Imaging</Link> page can be sent to a doctor the same way.
+        </p>
+      </aside>
     </div>
   )
-} 
+}

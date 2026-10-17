@@ -45,6 +45,8 @@ const menuItems = {
   lab: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/lab-dashboard' },
     { id: 'upload', label: 'Upload Reports', icon: FileText, href: '/lab-dashboard/upload' },
+    { id: 'imaging', label: 'Imaging', icon: Activity, href: '/lab-dashboard/imaging' },
+    { id: 'samples', label: 'Samples', icon: Calendar, href: '/lab-dashboard/samples' },
     { id: 'communication', label: 'Messages', icon: MessageSquare, href: '/lab-dashboard/communication' },
   ]
 }

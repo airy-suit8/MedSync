@@ -1,26 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { analysisRequestSchema } from '@/lib/schemas'
+import { reportProcessingSchema } from '@/lib/schemas'
 import { cn } from '@/lib/utils'
 import { isValidUUID } from '@/lib/appointment-utils'
 
-const valid = { fileName: 'abc.png', originalName: 'scan.png', patientId: 'p-1', testType: 'x_ray', reportId: '123e4567-e89b-12d3-a456-426614174000' }
-describe('analysis request validation', () => {
-  it('accepts valid shape and nullable doctor', () => {
-    expect(analysisRequestSchema.parse(valid)).toEqual(valid)
-    expect(analysisRequestSchema.parse({ ...valid, doctorId: null }).doctorId).toBeNull()
+const reportId = '123e4567-e89b-12d3-a456-426614174000'
+describe('report processing request validation', () => {
+  it('needs only the report ID; AI runs unless switched off', () => {
+    expect(reportProcessingSchema.parse({ reportId })).toEqual({ reportId, runAi: true })
+    expect(reportProcessingSchema.parse({ reportId, runAi: false }).runAi).toBe(false)
   })
   it.each([
-    ['fileName', ''], ['originalName', ''], ['patientId', ''], ['testType', 'ultrasound'], ['reportId', 'not-a-uuid'],
-  ])('rejects invalid %s', (field, value) => expect(analysisRequestSchema.safeParse({ ...valid, [field]: value }).success).toBe(false))
-  it('rejects wrong field types, missing fields and bad report UUIDs', () => {
-    expect(analysisRequestSchema.safeParse({ ...valid, patientId: 12 }).success).toBe(false)
-    expect(analysisRequestSchema.safeParse({ ...valid, doctorId: 42 }).success).toBe(false)
-    expect(analysisRequestSchema.safeParse({ ...valid, reportId: '00000000-0000-0000-0000-000000000000' }).success).toBe(true)
-    expect(analysisRequestSchema.safeParse({ fileName: 'x' }).success).toBe(false)
-  })
-  it('currently accepts additional keys and long names (recorded behavior)', () => {
-    expect(analysisRequestSchema.safeParse({ ...valid, ignored: true }).success).toBe(true)
-    expect(analysisRequestSchema.safeParse({ ...valid, originalName: 'x'.repeat(10000) }).success).toBe(true)
+    [{}], [{ reportId: 'not-a-uuid' }], [{ reportId, runAi: 'yes' }], [null],
+  ])('rejects %j', (body) => expect(reportProcessingSchema.safeParse(body).success).toBe(false))
+  it('ignores client-sent file, patient and doctor details', () => {
+    const parsed = reportProcessingSchema.parse({ reportId, fileName: 'x', patientId: 'p', doctorId: 'd' })
+    expect(parsed).toEqual({ reportId, runAi: true })
   })
 })
 describe('appointment identifiers', () => {

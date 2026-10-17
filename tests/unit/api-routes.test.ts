@@ -12,14 +12,24 @@ vi.mock('@/lib/api-utils', () => ({
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }))
 
 import { POST as chatPost } from '@/app/api/chat/route'
-import { POST as labUploadPost } from '@/app/api/lab-upload/route'
-import { POST as simpleUploadPost } from '@/app/api/simple-upload/route'
 import { POST as mlProcessPost } from '@/app/api/ml-process/route'
 import { GET as signedUrlGet } from '@/app/api/file/signed-url/route'
 
 function post(body: unknown) {
   return new NextRequest('http://localhost/api/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
 }
+
+// Service-role client stand-in: each table answers with a fixed result.
+function serviceClient(tables: Record<string, unknown>) {
+  const builder = (result: unknown): any => new Proxy({}, {
+    get: (_t, prop) => prop === 'then' ? (resolve: (v: unknown) => void) => resolve(result)
+      : prop === 'maybeSingle' || prop === 'single' ? async () => result
+      : () => builder(result),
+  })
+  return { from: (table: string) => builder(tables[table] ?? { data: null }) } as any
+}
+
+const reportId = '123e4567-e89b-12d3-a456-426614174000'
 
 describe('API authentication boundary', () => {
   beforeEach(() => {
@@ -28,41 +38,57 @@ describe('API authentication boundary', () => {
   })
   it.each([
     ['chat', () => chatPost(post({ prompt: 'hello', provider: 'invalid' }))],
-    ['lab upload', () => labUploadPost(post({}))],
-    ['simple upload', () => simpleUploadPost(post({}))],
-    ['ML processing', () => mlProcessPost(post({}))],
+    ['ML processing', () => mlProcessPost(post({ reportId }))],
     ['signed file URL', () => signedUrlGet(new NextRequest('http://localhost/api/file/signed-url?path=x'))],
   ])('rejects unauthenticated %s requests', async (_name, invoke) => {
     const response = await invoke()
     expect(response.status).toBe(401)
   })
 
-  it.each([
-    ['lab upload', () => labUploadPost(post({}))],
-    ['simple upload', () => simpleUploadPost(post({}))],
-    ['ML processing', () => mlProcessPost(post({}))],
-  ])('rejects non-lab users from %s service-role operations', async (_name, invoke) => {
+  it('refuses patients before touching the service-role client', async () => {
     verifySession.mockResolvedValue({ user: { id: 'patient-1', app_metadata: { role: 'patient' } } })
-    const response = await invoke()
+    const response = await mlProcessPost(post({ reportId }))
     expect(response.status).toBe(403)
     expect(createClient).not.toHaveBeenCalled()
   })
-
-  it.each([
-    ['lab upload', () => labUploadPost(post({}))],
-    ['simple upload', () => simpleUploadPost(post({}))],
-  ])('rejects labs the team has not verified from %s', async (_name, invoke) => {
-    verifySession.mockResolvedValue({ user: { id: 'lab-1', app_metadata: { role: 'lab' } } })
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321'
-    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-only-placeholder'
-    const maybeSingle = vi.fn().mockResolvedValue({ data: { verified: false } })
-    vi.mocked(createClient).mockReturnValueOnce({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }) } as any)
-    const response = await invoke()
-    expect(response.status).toBe(403)
-    expect(maybeSingle).toHaveBeenCalled()
-  })
 })
 
+describe('report processing authorisation', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321'
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-only-placeholder'
+  })
+  const report = { data: { id: reportId, patient_id: 'p1', doctor_id: 'd1', uploaded_by: 'lab-1', test_type: 'x_ray', file_name: 'f.png', original_name: 'f.png', ai_status: 'pending', updated_at: null } }
+
+  it('refuses labs the team has not verified', async () => {
+    verifySession.mockResolvedValue({ user: { id: 'lab-1', app_metadata: { role: 'lab' } } })
+    vi.mocked(createClient).mockReturnValueOnce(serviceClient({ reports: report, profiles: { data: { verified: false } } }))
+    expect((await mlProcessPost(post({ reportId }))).status).toBe(403)
+  })
+
+  it("refuses a lab processing another lab's report", async () => {
+    verifySession.mockResolvedValue({ user: { id: 'lab-2', app_metadata: { role: 'lab' } } })
+    vi.mocked(createClient).mockReturnValueOnce(serviceClient({ reports: report, profiles: { data: { verified: true } } }))
+    expect((await mlProcessPost(post({ reportId }))).status).toBe(403)
+  })
+
+  it('refuses a doctor who is not treating the patient', async () => {
+    verifySession.mockResolvedValue({ user: { id: 'd9', app_metadata: { role: 'doctor' } } })
+    vi.mocked(createClient).mockReturnValueOnce(serviceClient({ reports: report, profiles: { data: { verified: true } }, doctor_patient_assignments: { data: [] } }))
+    expect((await mlProcessPost(post({ reportId }))).status).toBe(403)
+  })
+
+  it('reports no AI for tests without one (and does not start a run)', async () => {
+    verifySession.mockResolvedValue({ user: { id: 'lab-1', app_metadata: { role: 'lab' } } })
+    vi.mocked(createClient).mockReturnValueOnce(serviceClient({
+      reports: { data: { ...report.data, test_type: 'ecg', ai_status: 'not_applicable' } },
+      profiles: { data: { verified: true, name: 'P' } },
+    }))
+    const response = await mlProcessPost(post({ reportId }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ status: 'not_applicable' })
+  })
+})
 describe('chat API validation', () => {
   beforeEach(() => verifySession.mockResolvedValue({ user: { id: 'test-user' } }))
   it('rejects missing, non-string, oversized prompts and invalid providers', async () => {
@@ -84,10 +110,11 @@ describe('ML route request shape', () => {
     verifySession.mockResolvedValue({ user: { id: 'test-user', app_metadata: { role: 'lab' } } })
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-only-placeholder'
-    process.env.INTERNAL_API_KEY = 'test-only-placeholder'
   })
-  it('rejects absent required fields and unexpected test type before making network calls', async () => {
-    const response = await mlProcessPost(post({ fileName: 'x', originalName: 'x', patientId: 'p', testType: 'malformed', reportId: 'bad' }))
+  it('rejects a malformed report ID before any database call', async () => {
+    vi.mocked(createClient).mockClear()
+    const response = await mlProcessPost(post({ reportId: 'bad' }))
     expect(response.status).toBe(400)
+    expect(createClient).not.toHaveBeenCalled()
   })
 })

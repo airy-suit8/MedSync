@@ -8,8 +8,10 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { PrintButton } from '@/components/ui/print-button'
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 import ReportReviewPanel from "@/components/medical/ReportReviewPanel"
+import AiStatusNotice from "@/components/medical/AiStatusNotice"
+import LabValuesTable from "@/components/medical/LabValuesTable"
 
-async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null }> {
+async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null, reviewed?: boolean }> {
   const { supabase, user } = await verifySession()
   if (!user) return { report: null, mlSuggestion: null, userId: null }
   
@@ -50,16 +52,23 @@ async function getReport(id: string): Promise<{ report: Report | null, mlSuggest
     console.error('Error fetching ML suggestion:', mlError)
   }
 
+  // Reviewed reports keep their AI reading (no re-run).
+  const { count: reviewCount } = await supabase
+    .from('report_reviews')
+    .select('id', { count: 'exact', head: true })
+    .eq('report_id', id)
+
   return {
     report,
     mlSuggestion: mlSuggestion || null,
     userId: user.id,
+    reviewed: (reviewCount ?? 0) > 0,
   }
 }
 
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { report, mlSuggestion, userId } = await getReport(id)
+  const { report, mlSuggestion, userId, reviewed } = await getReport(id)
   
   if (!report) {
     return (
@@ -76,7 +85,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
   // Get ML analysis results - prioritize ml_suggestions over reports.result
   let findings = 'No findings available'
-  let confidence = 0
+  let confidence: number | null = null
   let recommendations = 'No recommendations available'
   let severity = 'Unknown'
   let status = 'Unknown'
@@ -85,7 +94,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   if (mlSuggestion) {
     // Use ML suggestion data
     findings = mlSuggestion.findings || 'No findings available'
-    confidence = mlSuggestion.confidence || 0
+    confidence = typeof mlSuggestion.confidence === 'number' ? mlSuggestion.confidence : null
     recommendations = mlSuggestion.recommendations || 'No recommendations available'
     severity = mlSuggestion.severity || 'Unknown'
     status = mlSuggestion.status || 'Unknown'
@@ -93,13 +102,14 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
     // Fallback to reports.result (backward compatibility)
     const result = report.result
     findings = result.findings || 'No findings available'
-    confidence = result.confidence || 0
+    confidence = typeof result.confidence === 'number' ? result.confidence : null
     recommendations = result.recommendations || 'No recommendations available'
     severity = result.severity || 'Unknown'
   }
   reportResultDetails = (report.result as any)?.details || null
   // A failed AI call stores a placeholder result; there is nothing to agree or disagree with.
   const hasAiReading = !!mlSuggestion && !String(mlSuggestion.findings || '').startsWith('AI analysis unavailable')
+  const labValues = mlSuggestion?.details?.kind === 'lab_values' ? mlSuggestion.details.tests : null
 
   // Extract and clean patient information
   const patientInfo = (report.patient_info as any) || {}
@@ -252,8 +262,12 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               )}
             </div>
 
+            {!hasAiReading ? (
+              <AiStatusNotice reportId={report.id} status={(report as any).ai_status || 'not_applicable'} testType={report.test_type} reviewed={!!reviewed} />
+            ) : (
             <div className="space-y-6">
               <ClinicalNotice>Model output is unvalidated decision support; confirm clinically.</ClinicalNotice>
+              {labValues && <LabValuesTable tests={labValues} />}
               <div className="border border-black/10 bg-black/[0.02] p-6">
                 <h3 className="font-bold text-sm uppercase mb-2 border-b border-black/5 pb-2">Findings</h3>
                 <p className="font-mono text-sm leading-relaxed">{findings}</p>
@@ -262,7 +276,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="border border-black/10 p-4 bg-white text-center">
                   <h4 className="text-[11px] font-mono uppercase text-black/55 mb-2">Confidence Score</h4>
-                  <p className="text-3xl font-bold font-mono">{(confidence * 100).toFixed(1)}%</p>
+                  <p className="text-3xl font-bold font-mono">{typeof confidence === 'number' ? `${(confidence * 100).toFixed(1)}%` : '—'}</p>
                 </div>
                 
                 <div className="border border-black/10 p-4 bg-white text-center">
@@ -296,6 +310,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 </div>
               )}
             </div>
+            )}
           </div>
 
           {userId && (

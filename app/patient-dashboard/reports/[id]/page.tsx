@@ -9,9 +9,11 @@ import { createClient } from '@/lib/supabase'
 import { ErrorLogger } from '@/lib/error-logger'
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 import { VERDICTS, type Review } from '@/lib/review'
+import LabValuesTable from '@/components/medical/LabValuesTable'
+import type { LabValue } from '@/lib/lab-report-ai'
 
 type ShownReview = Review & { doctor_name: string; image_url: string | null }
-type Ai = { findings: string | null; recommendations: string | null; confidence: number | null; severity: string | null }
+type Ai = { findings: string | null; recommendations: string | null; confidence: number | null; severity: string | null; details?: { kind?: string; tests?: LabValue[] } | null }
 
 // The patient sees a report's AI reading only after a doctor has reviewed it, together
 // with what the doctor wrote. Until then the page says the doctor is reviewing it.
@@ -41,7 +43,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
 
         const [{ data: reviewRows }, { data: suggestion }] = await Promise.all([
           supabase.from('report_reviews').select('id, doctor_id, verdict, patient_note, note_image_path, updated_at').eq('report_id', id).order('updated_at'),
-          supabase.from('ml_suggestions').select('findings, recommendations, confidence, severity').eq('report_id', id).order('processed_at', { ascending: false }).limit(1).maybeSingle(),
+          supabase.from('ml_suggestions').select('findings, recommendations, confidence, severity, details').eq('report_id', id).order('processed_at', { ascending: false }).limit(1).maybeSingle(),
         ])
         const rows = (reviewRows || []) as Review[]
         const doctorIds = [...new Set(rows.map((r) => r.doctor_id))]
@@ -164,6 +166,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
                 AI first reading
               </h2>
               <ClinicalNotice>The AI assists your doctor; your doctor&apos;s review above is what counts.</ClinicalNotice>
+              {ai.details?.kind === 'lab_values' && ai.details.tests && <LabValuesTable tests={ai.details.tests} />}
               {ai.findings && (
                 <div>
                   <h3 className="text-[11px] font-mono uppercase tracking-widest text-black/60 mb-2">What it found</h3>

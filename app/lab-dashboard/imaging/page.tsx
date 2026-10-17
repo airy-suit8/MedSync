@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Activity, Camera, ArrowLeft, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, Upload, Eye, X } from "lucide-react"
+import { Activity, Camera, ArrowLeft, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, Upload, Eye, X, Send } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { UUID_REGEX } from "@/lib/constants"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
+import SendStudyToDoctor from "@/components/medical/SendStudyToDoctor"
 
 interface ImagingStudy {
   id: string
@@ -40,6 +41,7 @@ export default function LabImagingPage() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedStudy, setSelectedStudy] = useState<ImagingStudy | null>(null)
+  const [sendingStudy, setSendingStudy] = useState<ImagingStudy | null>(null)
   const [scheduleForm, setScheduleForm] = useState({
     patient_id: "",
     patient_name: "",
@@ -401,6 +403,16 @@ export default function LabImagingPage() {
                       <Upload className="h-4 w-4 mr-2" />
                       UPLOAD
                     </Button>
+                    {(study.file_paths?.length || 0) > 0 && (
+                      <Button
+                        variant="outline"
+                        className="rounded-none border-black h-12 px-6 font-mono text-[10px] uppercase tracking-widest hover:bg-black/5 transition-all"
+                        onClick={() => setSendingStudy(study)}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        SEND TO DOCTOR
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -408,6 +420,10 @@ export default function LabImagingPage() {
           )}
         </div>
       </div>
+
+      {user && (
+        <SendStudyToDoctor study={sendingStudy} labId={user.id} open={!!sendingStudy} onOpenChange={(o) => { if (!o) setSendingStudy(null) }} />
+      )}
 
       {/* Schedule Study Modal - Brutalist */}
       {showScheduleModal && (

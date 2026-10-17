@@ -63,38 +63,40 @@ test('lab report upload, ML suggestion, doctor review, and patient result visibi
     await signIn(page, lab)
     await page.goto('/lab-dashboard/upload', { waitUntil: 'domcontentloaded', timeout: 90_000 })
     await page.getByPlaceholder('ENTER SHORT ID / UUID').fill(patient.id)
-    await expect(page.getByText(/NODE:/)).toBeVisible({ timeout: 10_000 })
-    await page.getByPlaceholder('ENTER DOCTOR ID').fill(doctor.id)
-    await page.locator('select').first().selectOption('blood_test')
+    await page.getByRole('button', { name: /^Find$/ }).click()
+    await expect(page.getByText(/Patient:/)).toBeVisible({ timeout: 10_000 })
+    await page.locator('#doctor').selectOption(doctor.id)
+    await page.locator('#test-type').selectOption('blood_test')
     await page.locator('input[type="file"]').setInputFiles({
       name: originalName,
       mimeType: 'application/pdf',
       buffer: Buffer.from('%PDF-1.4\nMedSync end-to-end report fixture\n%%EOF'),
     })
-    await page.getByRole('button', { name: /UPLOAD|SYNCHRONIZE|SUBMIT/i }).click()
-    await expect(page.getByText('Uplink Successful')).toBeVisible({ timeout: 60_000 })
+    // No AI here: the doctor reviews the report directly, so the test doesn't depend on Gemini.
+    await page.locator('#mlEnabled').uncheck()
+    await page.getByRole('button', { name: /Upload report/i }).click()
+    await expect(page.getByText('Report uploaded')).toBeVisible({ timeout: 60_000 })
 
     const { data: report } = await admin.from('reports').select('id,file_name').eq('uploaded_by', lab.id).eq('original_name', originalName).single()
     expect(report?.id).toBeTruthy()
-    let { data: suggestion } = await admin.from('ml_suggestions').select('id,status,findings').eq('report_id', report!.id).single()
-    expect(suggestion?.findings).toBeTruthy()
+    // The doctor is told about every upload, with or without AI.
+    const { data: uploadNotice } = await admin.from('notifications').select('id').eq('user_id', doctor.id).eq('related_id', report!.id)
+    expect(uploadNotice?.length).toBeGreaterThan(0)
 
+    const note = `Values look fine ${runId}`
     await signIn(page, doctor)
-    await page.goto('/doctor-dashboard/reports', { waitUntil: 'domcontentloaded', timeout: 90_000 })
-    const reportCard = page.locator('div.border').filter({ hasText: originalName }).first()
-    await expect(reportCard).toBeVisible({ timeout: 20_000 })
-    await reportCard.getByRole('button', { name: /Approve AI/ }).click()
+    await page.goto(`/doctor-dashboard/reports/${report!.id}`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
+    await page.getByLabel('Note for the patient').fill(note)
+    await page.getByRole('button', { name: 'Save review' }).click()
+    await expect(page.getByText(/^Saved /)).toBeVisible({ timeout: 20_000 })
 
-    // Verify the persisted result, not only the optimistic status shown by the UI.
-    const { data: reviewed } = await admin.from('ml_suggestions').select('status,reviewed_by').eq('id', suggestion!.id).single()
-    expect(reviewed).toMatchObject({ status: 'accepted', reviewed_by: doctor.id })
+    // Verify what was stored, not only what the UI shows.
+    const { data: review } = await admin.from('report_reviews').select('verdict,patient_note').eq('report_id', report!.id).eq('doctor_id', doctor.id).single()
+    expect(review).toMatchObject({ verdict: 'reviewed', patient_note: note })
 
     await signIn(page, patient)
-    await page.goto('/patient-dashboard/reports', { waitUntil: 'domcontentloaded', timeout: 90_000 })
-    const patientReport = page.locator('div').filter({ hasText: originalName }).first()
-    await expect(patientReport).toBeVisible({ timeout: 20_000 })
-    await patientReport.getByRole('button', { name: /DETAILED BRIEF/i }).click()
-    await expect(page.getByText(suggestion!.findings, { exact: false })).toBeVisible({ timeout: 20_000 })
+    await page.goto(`/patient-dashboard/reports/${report!.id}`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
+    await expect(page.getByText(note)).toBeVisible({ timeout: 20_000 })
   } finally {
     const { data: reports } = await admin.from('reports').select('id,file_name').eq('original_name', originalName)
     const reportIds = reports?.map((row) => row.id) || []
