@@ -129,3 +129,6 @@ middleware-fixed.ts
 
 # Archify scratch files (the finished diagram is in docs/architecture/)
 .archify/
+
+# Paste-ready production SQL (copies of the migrations above them; run in the SQL editor)
+supabase/migrations/MedSync-prod-update-*.sql

@@ -178,30 +178,20 @@ export default function HomePage() {
       {/* CTA */}
       <section className="border-b border-black/10">
         <div className="container mx-auto px-6 lg:px-12 py-20 lg:py-24">
-          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10">
-            <div>
-              <div className="mb-6">
-                <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
-                   &quot;GET ACCESS&quot;
-                </span>
-              </div>
-              <h2 className="text-4xl lg:text-6xl font-bold tracking-tight mb-4 uppercase">
-                Start collaborating
-                <br />
-                today.
-              </h2>
-              <p className="text-xl text-black/60 font-light">
-                Patients, doctors and labs on one platform.
-              </p>
+          <div className="text-center">
+            <div className="mb-6">
+              <span className="text-xs font-mono tracking-widest text-black/55 uppercase">
+                 &quot;GET ACCESS&quot;
+              </span>
             </div>
-            <Button
-                size="lg"
-                className="bg-black hover:bg-black/90 text-white px-10 py-6 text-base font-medium"
-               asChild>
-              <Link href="/signup">
-                CREATE ACCOUNT →
-              </Link>
-            </Button>
+            <h2 className="text-4xl lg:text-6xl font-bold tracking-tight mb-4 uppercase">
+              Start collaborating
+              <br />
+              today.
+            </h2>
+            <p className="text-xl text-black/60 font-light">
+              Patients, doctors and labs on one platform.
+            </p>
           </div>
         </div>
       </section>
