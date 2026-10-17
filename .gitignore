@@ -126,3 +126,6 @@ playwright-report/
 debug-output.json
 medsync-flow.*
 middleware-fixed.ts
+
+# Archify scratch files (the finished diagram is in docs/architecture/)
+.archify/
