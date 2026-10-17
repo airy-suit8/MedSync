@@ -65,7 +65,7 @@ test('auth input matrix executes adversarial values across login, signup, and pa
   for (const value of passwordCases) {
     await fillAndObserve(loginPassword, value)
   }
-  await page.getByRole('button', { name: /Reset Key/ }).click()
+  await page.getByRole('button', { name: /Forgot password/ }).click()
   const resetEmail = page.locator('input[type="email"]').last()
   await expect(resetEmail).toHaveAttribute('maxlength', '254')
   for (const value of textCases) {
@@ -138,12 +138,13 @@ test('signup, login, and dashboard access work for each local role', async ({ br
       await page.locator('#password').fill(password)
       await expect(page.locator('#name')).toHaveValue(`Test ${role}`)
       await expect(page.locator('#email')).toHaveValue(email)
-      const roleTrigger = page.getByTestId('signup-role-trigger')
-      await roleTrigger.scrollIntoViewIfNeeded()
-      const roleLabel = role === 'patient' ? 'Patient' : role === 'doctor' ? 'Doctor' : 'Lab Technician'
-      await roleTrigger.selectOption(role)
-      await expect(roleTrigger).toHaveValue(role)
-      await expect(roleTrigger).toContainText(roleLabel)
+      const roleTile = page.getByTestId(`signup-role-${role}`)
+      await roleTile.scrollIntoViewIfNeeded()
+      await roleTile.click()
+      const roleInput = roleTile.locator('input[type="radio"]')
+      await expect(roleInput).toBeChecked()
+      // Doctors and labs enter a registration number (verified by the team later).
+      if (role !== 'patient') await page.locator('#licenseNumber').fill(`TEST-${runId}`)
       await expect(page.locator('#name')).toHaveValue(`Test ${role}`)
       await expect(page.locator('#email')).toHaveValue(email)
       await expect(page.locator('#password')).toHaveValue(password)
@@ -151,7 +152,7 @@ test('signup, login, and dashboard access work for each local role', async ({ br
       try {
         await expect(page.getByText('Account Created!')).toBeVisible({ timeout: 20_000 })
       } catch (cause) {
-        throw new Error(`Signup did not complete for ${role}; hydrated=${await page.getByTestId('signup-form').getAttribute('data-hydrated')}; role=${await roleTrigger.inputValue().catch(() => 'n/a')}; body=${(await page.locator('body').innerText().catch(() => '')).slice(0, 1000)}; browser=${browserFailures.join(' | ')}; cause=${String(cause)}`)
+        throw new Error(`Signup did not complete for ${role}; hydrated=${await page.getByTestId('signup-form').getAttribute('data-hydrated')}; role=${await roleInput.isChecked().catch(() => 'n/a')}; body=${(await page.locator('body').innerText().catch(() => '')).slice(0, 1000)}; browser=${browserFailures.join(' | ')}; cause=${String(cause)}`)
       }
 
       await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 90_000 })
@@ -163,7 +164,7 @@ test('signup, login, and dashboard access work for each local role', async ({ br
       page.on('response', async (response) => {
         if (response.url().endsWith('/auth/v1/user')) userResponses.push(`${response.status()} ${await response.text().catch(() => '')}`)
       })
-      await page.getByRole('button', { name: /INITIATE SESSION/ }).click()
+      await page.getByRole('button', { name: /^SIGN IN$/ }).click()
       const signInResponse = await signInResponsePromise
       if (!signInResponse.ok()) throw new Error(`Login failed (${signInResponse.status()}): ${await signInResponse.text()}`)
       try {

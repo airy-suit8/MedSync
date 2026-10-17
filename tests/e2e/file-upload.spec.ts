@@ -12,6 +12,8 @@ async function createAccount(admin: SupabaseClient, email: string, role: 'patien
     user_metadata: { name, role },
   })
   if (error || !data.user) throw new Error(`Could not create ${role} upload fixture: ${error?.message}`)
+  // Doctors and labs need the team's verification before they can see patients or upload.
+  if (role !== 'patient') await admin.from('profiles').update({ verified: true }).eq('id', data.user.id)
   return { id: data.user.id, email, role }
 }
 
@@ -20,7 +22,7 @@ async function login(page: Page, email: string, role: string) {
   await expect(page.getByTestId('login-form')).toHaveAttribute('data-hydrated', 'true', { timeout: 20_000 })
   await page.locator('#email').fill(email)
   await page.locator('#password').fill(password)
-  await page.getByRole('button', { name: /INITIATE SESSION/ }).click()
+  await page.getByRole('button', { name: /^SIGN IN$/ }).click()
   await expect(page).toHaveURL(new RegExp(`/${role}-dashboard/?$`), { timeout: 20_000 })
 }
 
