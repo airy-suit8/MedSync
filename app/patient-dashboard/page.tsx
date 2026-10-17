@@ -320,6 +320,7 @@ export default function PatientDashboard() {
                 <div className="space-y-2">
                   {[
                     { label: 'Find a doctor', href: '/patient-dashboard/doctors', icon: Stethoscope },
+                    { label: 'Health record', href: '/patient-dashboard/health', icon: Activity },
                     { label: 'My Reports', href: '/patient-dashboard/reports', icon: FileText },
                     { label: 'Messages', href: '/patient-dashboard/chat', icon: MessageSquare },
                     { label: 'Appointments', href: '/patient-dashboard/video-consultations', icon: Calendar },

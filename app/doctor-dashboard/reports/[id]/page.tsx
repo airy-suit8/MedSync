@@ -337,6 +337,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             <div>
               <div className="flex items-center gap-3 border-b border-black/10 pb-4 mb-6">
                 <h2 className="text-xl font-bold uppercase">Patient Info</h2>
+                <Link href={`/doctor-dashboard/patients/${report.patient_id}`} className="ml-auto font-mono text-[11px] uppercase tracking-widest underline underline-offset-4">Full record</Link>
               </div>
               <div className="border border-black/10 bg-black/[0.02]">
                 <div className="grid grid-cols-1 divide-y divide-black/10">

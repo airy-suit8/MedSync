@@ -38,6 +38,7 @@ const menuItems = {
   patient: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/patient-dashboard' },
     { id: 'doctors', label: 'My Doctors', icon: Stethoscope, href: '/patient-dashboard/doctors' },
+    { id: 'health', label: 'Health Record', icon: Activity, href: '/patient-dashboard/health' },
     { id: 'reports', label: 'My Reports', icon: FileText, href: '/patient-dashboard/reports' },
     { id: 'chat', label: 'Messages', icon: MessageSquare, href: '/patient-dashboard/chat' },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, href: '/patient-dashboard/ai-assistant' },

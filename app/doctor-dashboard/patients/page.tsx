@@ -85,7 +85,7 @@ function Patients({ doctorId }: { doctorId: string }) {
             {results.map((p) => (
               <li key={p.patient_id} className="flex flex-col gap-4 py-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="font-bold">{p.patient_name}</p>
+                  <Link href={`/doctor-dashboard/patients/${p.patient_id}`} className="font-bold hover:underline underline-offset-4">{p.patient_name}</Link>
                   <p className="font-mono text-xs text-black/60 tabular-nums">
                     {p.patient_short_id && `ID ${p.patient_short_id}`}
                     {p.assigned_at && ` · since ${format(parseISO(p.assigned_at), "d MMM yyyy")}`}
@@ -97,7 +97,7 @@ function Patients({ doctorId }: { doctorId: string }) {
                     <Link href={`/doctor-dashboard/communication?patient=${p.patient_id}`}>Message</Link>
                   </Button>
                   <Button variant="ghost" asChild className="rounded-none font-mono text-xs uppercase tracking-widest">
-                    <Link href="/doctor-dashboard/reports">Reports</Link>
+                    <Link href={`/doctor-dashboard/patients/${p.patient_id}`}>Open record</Link>
                   </Button>
                   <EndCareButton otherId={p.patient_id} otherName={p.patient_name} role="doctor" onEnded={load} />
                 </div>
