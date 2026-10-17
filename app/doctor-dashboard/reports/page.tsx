@@ -24,6 +24,7 @@ interface Report {
   priority: string
   notes?: string
   user_name?: string
+  doctor_id?: string | null
   ml_suggestion?: any
 }
 
@@ -51,33 +52,15 @@ export default function DoctorPatientManagementPage() {
       setUser(user)
       console.log('Loading reports for doctor...')
       
-      // Get doctor's short ID for filtering
-      let doctorShortId: string | null = null
-      try {
-        const { data: shortIdData } = await supabase
-          .from('profile_directory')
-          .select('short_id')
-          .eq('id', user.id)
-          .maybeSingle()
-        doctorShortId = shortIdData?.short_id || null
-      } catch (shortIdError) {
-        console.warn('Could not fetch doctor short ID:', shortIdError)
-      }
 
-      // Fetch reports for this doctor only (simplified - no joins)
+      // Every report of every patient this doctor is treating: RLS returns only patients
+      // with an active link, so a second-opinion doctor sees the earlier reports too.
       const { data: reportsData, error } = await supabase
         .from('reports')
         .select('*')
         .order('uploaded_at', { ascending: false })
-      
-      // Filter reports on client-side to match doctor
-      let filteredReports = reportsData || []
-      if (reportsData) {
-        filteredReports = reportsData.filter((report: any) => 
-          report.doctor_id === user.id || 
-          (doctorShortId && report.doctor_id === doctorShortId)
-        )
-      }
+
+      const filteredReports = reportsData || []
       
       if (error) {
         const errorDetails = {
@@ -204,152 +187,6 @@ export default function DoctorPatientManagementPage() {
     router.push(`/doctor-dashboard/reports/${reportId}`)
   }
 
-  const handleUpdateMLStatus = async (suggestionId: string, status: string, notes?: string) => {
-    if (!suggestionId) {
-      console.error('No suggestion ID provided')
-      return
-    }
-
-    // Check if this is demo data
-    if (suggestionId.startsWith('demo-ml-')) {
-      // Update demo data locally
-      setReports(prev => prev.map(report => {
-        if (report.ml_suggestion?.id === suggestionId) {
-          return {
-            ...report,
-            ml_suggestion: {
-              ...report.ml_suggestion,
-              status,
-              reviewed_at: new Date().toISOString(),
-              doctor_notes: notes
-            }
-          }
-        }
-        return report
-      }))
-      
-      // Show success message
-      const statusMessages = {
-        'accepted': 'Analysis accepted successfully',
-        'reviewed': 'Analysis marked as reviewed',
-        'rejected': 'Analysis rejected'
-      }
-      
-      toast({
-        title: "Status updated",
-        description: statusMessages[status as keyof typeof statusMessages] || 'Status updated successfully',
-      })
-      return
-    }
-
-    const supabase = createClient()
-    
-    try {
-      console.log('Updating ML suggestion:', suggestionId, 'to status:', status)
-      
-      const { error } = await supabase
-        .from('ml_suggestions')
-        .update({
-          status,
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString(),
-          doctor_notes: notes
-        })
-        .eq('id', suggestionId)
-
-      if (error) {
-        const errorDetails = {
-          message: error?.message || 'Unknown error',
-          details: error?.details || null,
-          hint: error?.hint || null,
-          code: error?.code || null,
-          timestamp: new Date().toISOString(),
-          context: 'updating_ml_suggestion',
-          suggestionId
-        }
-        console.error('Error updating ML suggestion:', errorDetails)
-        toast({
-          title: "Update failed",
-          description: "Failed to update status. Please try again.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      console.log('Successfully updated ML suggestion status')
-      // Optimistically update local state for immediate UI feedback
-      setReports(prev => prev.map(r => {
-        if (r.ml_suggestion?.id === suggestionId) {
-          return {
-            ...r,
-            ml_suggestion: {
-              ...r.ml_suggestion,
-              status,
-              reviewed_at: new Date().toISOString(),
-              doctor_notes: notes
-            }
-          }
-        }
-        return r
-      }))
-
-      // Background refresh to stay in sync with DB (scoped to this doctor)
-      try {
-        const { data: reportsData } = await supabase
-          .from('reports')
-          .select(`
-            *,
-            ml_suggestions (
-              id,
-              findings,
-              confidence,
-              recommendations,
-              severity,
-              status,
-              processed_at
-            )
-          `)
-          .eq('doctor_id', user.id)
-          .order('uploaded_at', { ascending: false })
-        if (reportsData) {
-          const transformedReports = (reportsData || []).map((report: any) => ({
-            ...report,
-            ml_suggestion: report.ml_suggestions?.[0] || null
-          }))
-          setReports(transformedReports)
-        }
-      } catch (refreshError) {
-        console.warn('Background refresh failed:', refreshError)
-      }
-
-      // Success notice
-      const statusMessages = {
-        'accepted': 'Analysis accepted successfully',
-        'reviewed': 'Analysis marked as reviewed',
-        'rejected': 'Analysis rejected'
-      }
-      toast({
-        title: "Status updated",
-        description: statusMessages[status as keyof typeof statusMessages] || 'Status updated successfully',
-      })
-    } catch (error) {
-      const errorInfo = {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : null,
-        timestamp: new Date().toISOString(),
-        context: 'handleUpdateMLStatus',
-        suggestionId,
-        status
-      }
-      console.error('Error in handleUpdateMLStatus:', errorInfo)
-      toast({
-        title: "Update error",
-        description: "An error occurred while updating the status. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
   const handleContactPatient = (patientId: string) => {
     if (!patientId) {
       console.error('No patient ID provided')
@@ -362,15 +199,6 @@ export default function DoctorPatientManagementPage() {
   }
 
   const handleDownloadReport = async (report: Report) => {
-    // Check if this is demo data
-    if (report.id.startsWith('demo-report-')) {
-      toast({
-        title: "Demo data",
-        description: "This is demo data. In a real application, the file would be downloaded from storage.",
-      })
-      return
-    }
-
     try {
       const supabase = createClient()
       const { data, error } = await supabase.storage
@@ -562,6 +390,9 @@ export default function DoctorPatientManagementPage() {
                   <p className="text-sm font-mono text-black/60 uppercase">
                     PT: {report.user_name || report.patient_id} <span className="mx-2">|</span> UPL: {new Date(report.uploaded_at).toLocaleDateString()}
                   </p>
+                  {report.doctor_id && report.doctor_id !== user?.id && (
+                    <p className="mt-1 text-xs font-mono uppercase tracking-wide text-black/60">Sent to another of the patient&apos;s doctors</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -674,26 +505,14 @@ export default function DoctorPatientManagementPage() {
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </Button>
-                {report.ml_suggestion?.status === 'pending_review' && (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleUpdateMLStatus(report.ml_suggestion.id, 'accepted')}
-                      className="border-green-600 text-green-700 hover:bg-green-50 rounded-none font-mono uppercase text-xs h-10 px-6 flex items-center"
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Approve AI
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleUpdateMLStatus(report.ml_suggestion.id, 'rejected')}
-                      className="border-red-600 text-red-700 hover:bg-red-50 rounded-none font-mono uppercase text-xs h-10 px-6 flex items-center"
-                    >
-                      <AlertTriangle className="h-4 w-4 mr-2" />
-                      Reject AI
-                    </Button>
-                  </>
-                )}
+                <Button
+                  variant="outline"
+                  onClick={() => handleViewReportDetails(report.id)}
+                  className="border-black rounded-none font-mono uppercase text-xs h-10 px-6 flex items-center"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {report.ml_suggestion?.status === 'pending_review' || !report.ml_suggestion ? 'Review' : 'Edit review'}
+                </Button>
               </div>
             </div>
           </div>
@@ -833,30 +652,14 @@ export default function DoctorPatientManagementPage() {
                       </span>
                     </div>
 
-                    {/* Review Actions */}
+                    {/* The review (verdict, notes, photo) is written on the report page */}
                     <div className="flex flex-wrap gap-4 pt-6">
-                      <Button 
+                      <Button
                         className="bg-black hover:bg-black/80 text-white rounded-none font-mono uppercase text-xs h-12 px-6"
-                        onClick={() => handleUpdateMLStatus(selectedReport.ml_suggestion.id, 'accepted')}
+                        onClick={() => handleViewReportDetails(selectedReport.id)}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Accept
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        className="border-black rounded-none font-mono uppercase text-xs h-12 px-6"
-                        onClick={() => handleUpdateMLStatus(selectedReport.ml_suggestion.id, 'reviewed')}
-                      >
-                        <Clock className="h-4 w-4 mr-2" />
-                        Mark Reviewed
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50 rounded-none font-mono uppercase text-xs h-12 px-6"
-                        onClick={() => handleUpdateMLStatus(selectedReport.ml_suggestion.id, 'rejected')}
-                      >
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Reject
+                        Open review
                       </Button>
                     </div>
                   </div>

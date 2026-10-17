@@ -35,6 +35,9 @@ import { createClient } from '@/lib/supabase'
 
 interface Consultation {
   id: string
+  // Per-appointment secret (appointments.call_secret) that names the signalling channel;
+  // only the appointment's doctor and patient can read it.
+  call_secret?: string
   appointment_date?: string
   appointment_time?: string
   start_time?: string
@@ -840,7 +843,7 @@ export default function MedicalVideoCall({
     if (!isOpen || !consultation?.id) return
     const supabase = createClient()
     const signalingChannel = supabase
-      .channel(`consultation-signal-${consultation.id}`)
+      .channel(`consultation-signal-${consultation.call_secret || consultation.id}`)
       .on('broadcast', { event: 'signal' }, ({ payload }: { payload: any }) => {
         void handleIncomingSignalRef.current(payload as SignalPayload)
       })

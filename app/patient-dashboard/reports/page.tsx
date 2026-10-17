@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 export default function PatientReportsPage() {
   const [user, setUser] = useState<any>(null)
   const [reports, setReports] = useState<any[]>([])
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [viewingReport, setViewingReport] = useState<any>(null)
   const [downloadingReport, setDownloadingReport] = useState<string | null>(null)
@@ -42,6 +43,9 @@ export default function PatientReportsPage() {
 
         if (error) throw error
         setReports(data || [])
+        // Which reports a doctor has reviewed (reviews are only for the patient's own reports).
+        const { data: reviewRows } = await supabase.from('report_reviews').select('report_id')
+        setReviewedIds(new Set((reviewRows || []).map((r: { report_id: string }) => r.report_id)))
       } catch (error) {
         console.error('Error fetching patient reports:', error)
         toast({
@@ -180,22 +184,17 @@ export default function PatientReportsPage() {
                         <div className="font-mono text-[10px] uppercase font-bold text-black/60 px-2 py-0.5 border border-black/10 bg-black/[0.02] tracking-tighter">
                           TYPE: {report.test_type?.replace('_', ' ')}
                         </div>
-                        <div className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 border border-emerald-600 text-emerald-600 bg-emerald-50 tracking-tighter">
-                          STATUS: AVAILABLE
+                        <div className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 border border-black tracking-tighter">
+                          {reviewedIds.has(report.id) ? 'REVIEWED BY YOUR DOCTOR' : 'AWAITING DOCTOR REVIEW'}
                         </div>
                       </div>
 
-                    <div className="p-6 bg-amber-50 border border-amber-500/20 relative overflow-hidden mb-6">
-                      <div className="absolute left-0 top-0 h-full w-0.5 bg-amber-600"></div>
-                      <h4 className="text-[11px] font-black uppercase tracking-widest text-amber-900 mb-3 flex items-center gap-2">
-                        <Brain className="h-4 w-4" />
-                        AI Analysis Insight
-                      </h4>
-                      <p className="text-sm font-mono text-amber-900 uppercase leading-relaxed">
-                        Automated scan complete. No critical anomalies detected in cell morphology or telemetry.
-                         Detailed patient-friendly briefing available in &quot;View Details&quot;.
-                      </p>
-                    </div>
+                    <p className="mb-6 flex items-start gap-2 text-sm text-black/70">
+                      <Brain className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+                      {reviewedIds.has(report.id)
+                        ? "Your doctor has reviewed this report. Open it to read their notes and the AI's first reading."
+                        : "Your doctor is reviewing this report. You'll be notified when their notes are ready."}
+                    </p>
                   </div>
 
                   <div className="flex flex-col gap-3 min-w-[200px]">

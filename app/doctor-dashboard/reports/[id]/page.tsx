@@ -7,10 +7,11 @@ import BBoxAnalysisViewer from '@/components/medical/bbox-analysis-viewer'
 import { ArrowLeft, Download } from 'lucide-react'
 import { PrintButton } from '@/components/ui/print-button'
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
+import ReportReviewPanel from "@/components/medical/ReportReviewPanel"
 
-async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any }> {
+async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null }> {
   const { supabase, user } = await verifySession()
-  if (!user) return { report: null, mlSuggestion: null }
+  if (!user) return { report: null, mlSuggestion: null, userId: null }
   
   // Get the report
   const { data: report, error: reportError } = await supabase
@@ -21,7 +22,7 @@ async function getReport(id: string): Promise<{ report: Report | null, mlSuggest
     
   if (reportError) {
     console.error('Error fetching report:', reportError)
-    return { report: null, mlSuggestion: null }
+    return { report: null, mlSuggestion: null, userId: user.id }
   }
 
   // Audit Log
@@ -49,15 +50,16 @@ async function getReport(id: string): Promise<{ report: Report | null, mlSuggest
     console.error('Error fetching ML suggestion:', mlError)
   }
 
-  return { 
-    report, 
-    mlSuggestion: mlSuggestion || null 
+  return {
+    report,
+    mlSuggestion: mlSuggestion || null,
+    userId: user.id,
   }
 }
 
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { report, mlSuggestion } = await getReport(id)
+  const { report, mlSuggestion, userId } = await getReport(id)
   
   if (!report) {
     return (
@@ -96,6 +98,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
     severity = result.severity || 'Unknown'
   }
   reportResultDetails = (report.result as any)?.details || null
+  // A failed AI call stores a placeholder result; there is nothing to agree or disagree with.
+  const hasAiReading = !!mlSuggestion && !String(mlSuggestion.findings || '').startsWith('AI analysis unavailable')
 
   // Extract and clean patient information
   const patientInfo = (report.patient_info as any) || {}
@@ -174,13 +178,6 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           </p>
         </div>
         <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-3">
-            System Status
-          </span>
-          <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2 mb-6">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-            ACTIVE
-          </span>
           <PrintButton className="print:hidden w-full bg-black text-white hover:bg-black/80 rounded-none uppercase font-mono text-[10px] tracking-widest flex items-center justify-center h-10" />
         </div>
       </header>
@@ -301,6 +298,14 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
+          {userId && (
+            <ReportReviewPanel
+              reportId={report.id}
+              doctorId={userId}
+              hasAi={hasAiReading}
+            />
+          )}
+
           {/* Patient Information & Metadata */}
           <div className="grid md:grid-cols-2 gap-12">
             <div>
@@ -395,7 +400,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   
                   {report.notes && (
                     <div className="flex flex-col gap-1 p-3 bg-white border-t-2 border-black/10">
-                      <span className="text-[10px] font-mono uppercase text-black/55">Physician Notes</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Lab notes</span>
                       <span className="text-sm font-mono">{report.notes}</span>
                     </div>
                   )}

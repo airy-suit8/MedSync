@@ -28,6 +28,7 @@ import ScheduleAppointmentModal from "@/components/schedule-appointment-modal"
 
 interface Consultation {
   id: string
+  call_secret?: string
   patient_name: string
   patient_id: string
   doctor_id: string
@@ -209,6 +210,7 @@ export default function ConsultationsPage() {
         console.log('✅ Found', appointments.length, 'appointments')
         const consultationsData: Consultation[] = appointments.map((apt: any) => ({
           id: apt.id,
+          call_secret: apt.call_secret,
           patient_name: apt.patient_name || 'Unknown Patient',
           patient_id: apt.patient_id,
           doctor_id: apt.doctor_id,

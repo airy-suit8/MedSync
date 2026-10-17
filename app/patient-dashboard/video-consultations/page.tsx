@@ -23,6 +23,7 @@ const MedicalVideoCall = dynamic(() => import("@/components/medical-video-call")
 
 interface Consultation {
   id: string
+  call_secret?: string
   doctor_name: string
   doctor_id: string
   patient_name: string
@@ -118,6 +119,7 @@ export default function PatientVideoConsultationsPage() {
       if (appointments) {
         setConsultations(appointments.map((apt: any) => ({
           id: apt.id,
+          call_secret: apt.call_secret,
           doctor_name: apt.doctor_name || 'Dr. Unknown',
           doctor_id: apt.doctor_id,
           patient_name: apt.patient_name || 'Unknown Patient',
