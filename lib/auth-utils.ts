@@ -79,7 +79,7 @@ export const AUTH_ERRORS = {
     INVALID_EMAIL: "Please enter a valid email address.",
     MISSING_NAME: "Please enter your full name.",
     MISSING_ROLE: "Please select your role.",
-    MISSING_LICENSE: "Please enter your medical registration number.",
+    MISSING_LICENSE: "Please enter your registration number.",
 
     // Password reset errors
     PASSWORDS_MISMATCH: "Passwords do not match. Please try again.",

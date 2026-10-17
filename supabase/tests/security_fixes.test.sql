@@ -12,8 +12,8 @@ VALUES
  ('54444444-4444-4444-8444-444444444444','authenticated','authenticated','sec-d2@example.test','',now(),'{}','{"name":"D2","role":"doctor","license_number":"GMC-2"}'),
  ('55555555-5555-4555-8555-555555555555','authenticated','authenticated','sec-l1@example.test','',now(),'{}','{"name":"L1","role":"lab"}');
 
--- The team verifies D1 in the dashboard (runs as postgres, which the guard allows).
-UPDATE public.profiles SET verified = true WHERE id = '53333333-3333-4333-8333-333333333333';
+-- The team verifies D1 and L1 in the dashboard (runs as postgres, which the guard allows).
+UPDATE public.profiles SET verified = true WHERE id IN ('53333333-3333-4333-8333-333333333333','55555555-5555-4555-8555-555555555555');
 
 INSERT INTO public.appointments (id, doctor_id, patient_id, appointment_date, start_time, status) VALUES
  ('a1000000-0000-4000-8000-000000000001','53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 1,'10:00','scheduled'),

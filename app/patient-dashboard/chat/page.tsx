@@ -123,51 +123,13 @@ export default function PatientChatPage() {
         console.log('Authenticated patient user:', user.email)
         setUser(user)
         
-        // Get or create user record
-        const { data: userData, error: userError } = await supabase
-          .from('profile_directory')
-          .select('id')
+        // The profile row is created at signup
+        setCurrentUserId(user.id)
+        // Set user as online
+        await supabase
+          .from('profiles')
+          .update({ online: true })
           .eq('id', user.id)
-          .single()
-
-        if (userError) {
-          console.log('Creating new user record...')
-          const { data: newUser, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              name: user.user_metadata?.name || 'Patient',
-              email: user.email || '',
-              role: 'patient'
-            })
-            .select('id')
-            .single()
-
-          if (createError) {
-            console.error('Error creating user record:', createError)
-            console.error('Create error details:', {
-              code: createError.code,
-              message: createError.message,
-              details: createError.details
-            })
-          } else {
-            console.log('Created new user record with ID:', newUser.id)
-            setCurrentUserId(newUser.id)
-            // Set user as online
-            await supabase
-              .from('profiles')
-              .update({ online: true })
-              .eq('id', newUser.id)
-          }
-        } else {
-          console.log('Found existing user record with ID:', userData.id)
-          setCurrentUserId(userData.id)
-          // Set user as online
-          await supabase
-            .from('profiles')
-            .update({ online: true })
-            .eq('id', userData.id)
-        }
         
         setLoading(false)
       } catch (error) {
@@ -459,12 +421,8 @@ export default function PatientChatPage() {
     if (!selectedContact || !currentUserId) return
 
     try {
-      await supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('sender_id', selectedContact.id)
-        .eq('receiver_id', currentUserId)
-        .eq('is_read', false)
+      // Receivers can't update messages directly (RLS is sender-only); this only sets is_read.
+      await supabase.rpc('mark_messages_read', { p_sender_id: selectedContact.id })
     } catch (error) {
       console.error('Error marking messages as read:', error)
     }

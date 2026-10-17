@@ -69,7 +69,8 @@ export default function SignUpPage() {
       return
     }
 
-    if (formData.role === "doctor" && !formData.licenseNumber.trim()) {
+    const needsLicense = formData.role === "doctor" || formData.role === "lab"
+    if (needsLicense && !formData.licenseNumber.trim()) {
       setError(AUTH_ERRORS.MISSING_LICENSE)
       setLoading(false)
       return
@@ -85,7 +86,7 @@ export default function SignUpPage() {
           data: {
             name: formData.name,
             role: formData.role,
-            ...(formData.role === "doctor" && { license_number: formData.licenseNumber.trim() }),
+            ...(needsLicense && { license_number: formData.licenseNumber.trim() }),
           },
           emailRedirectTo: `${window.location.origin}/verify-email`
         },
@@ -265,15 +266,15 @@ export default function SignUpPage() {
                   </select>
                 </div>
 
-                {formData.role === "doctor" && (
+                {(formData.role === "doctor" || formData.role === "lab") && (
                   <div className="space-y-2">
                     <Label htmlFor="licenseNumber" className="text-sm font-mono uppercase tracking-wide text-black/60">
-                      Medical Registration Number
+                      {formData.role === "lab" ? "Lab Registration Number" : "Medical Registration Number"}
                     </Label>
                     <Input
                       id="licenseNumber"
                       type="text"
-                      placeholder="State or National Medical Council number"
+                      placeholder={formData.role === "lab" ? "NABL accreditation or state lab registration number" : "State or National Medical Council number"}
                       value={formData.licenseNumber}
                       onChange={(e) => setFormData((current) => ({ ...current, licenseNumber: e.target.value }))}
                       maxLength={64}
@@ -282,7 +283,9 @@ export default function SignUpPage() {
                       className="border-black/20 focus:border-black h-12"
                     />
                     <p id="licenseHelp" className="text-xs text-black/60">
-                      Our team verifies this before you can schedule appointments or see patients.
+                      {formData.role === "lab"
+                        ? "Our team verifies this before you can upload reports or see patients."
+                        : "Our team verifies this before you can schedule appointments or see patients."}
                     </p>
                   </div>
                 )}

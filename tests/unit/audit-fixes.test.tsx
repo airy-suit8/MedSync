@@ -113,4 +113,13 @@ describe('VerificationBanner', () => {
       expect(screen.queryByText(/Verification pending/)).toBeNull()
     }
   })
+
+  it('tells a pending lab what it cannot do yet', async () => {
+    createClientMock.mockReset().mockReturnValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'lab-1' } } }) },
+      from: () => query({ data: { verified: false } }),
+    })
+    render(<VerificationBanner role="lab" />)
+    expect(await screen.findByText(/can't upload reports/)).toBeTruthy()
+  })
 })

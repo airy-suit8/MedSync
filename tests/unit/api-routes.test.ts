@@ -47,6 +47,20 @@ describe('API authentication boundary', () => {
     expect(response.status).toBe(403)
     expect(createClient).not.toHaveBeenCalled()
   })
+
+  it.each([
+    ['lab upload', () => labUploadPost(post({}))],
+    ['simple upload', () => simpleUploadPost(post({}))],
+  ])('rejects labs the team has not verified from %s', async (_name, invoke) => {
+    verifySession.mockResolvedValue({ user: { id: 'lab-1', app_metadata: { role: 'lab' } } })
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://127.0.0.1:54321'
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-only-placeholder'
+    const maybeSingle = vi.fn().mockResolvedValue({ data: { verified: false } })
+    vi.mocked(createClient).mockReturnValueOnce({ from: () => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }) } as any)
+    const response = await invoke()
+    expect(response.status).toBe(403)
+    expect(maybeSingle).toHaveBeenCalled()
+  })
 })
 
 describe('chat API validation', () => {

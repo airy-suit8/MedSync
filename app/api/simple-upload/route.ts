@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    // The service role skips RLS, so check here that the team has verified this lab.
+    const { data: lab } = await supabase.from('profiles').select('verified').eq('id', user.id).maybeSingle()
+    if (!lab?.verified) {
+      return forbiddenResponse()
+    }
+
     // Get the request body
     const body = await request.json()
     const { 

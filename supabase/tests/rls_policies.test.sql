@@ -11,8 +11,9 @@ VALUES
  ('44444444-4444-4444-8444-444444444444','authenticated','authenticated','rls-lab@example.test','',now(),'{}','{"name":"Lab","role":"lab"}')
 ON CONFLICT (id) DO NOTHING;
 
--- The fixture doctor is a verified doctor (20261004121000_doctor_verification...).
-UPDATE public.profiles SET verified = true WHERE id = '33333333-3333-4333-8333-333333333333';
+-- The fixture doctor and lab are verified (20261004121000_doctor_verification...,
+-- 20261017120000_lab_verification_and_read_receipts.sql).
+UPDATE public.profiles SET verified = true WHERE id IN ('33333333-3333-4333-8333-333333333333','44444444-4444-4444-8444-444444444444');
 
 INSERT INTO public.doctor_patient_assignments (id, doctor_id, patient_id, is_active)
 VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111',true);

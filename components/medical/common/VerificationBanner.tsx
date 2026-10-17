@@ -4,9 +4,10 @@ import { useEffect, useState } from "react"
 import { ShieldAlert } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 
-// Unverified doctors can sign in but can't schedule or see patients until the team
-// checks their registration number (profiles.verified, set in the Supabase dashboard).
-export default function VerificationBanner() {
+// Unverified doctors and labs can sign in but can't see patients (or schedule / upload)
+// until the team checks their registration number (profiles.verified, set in the
+// Supabase dashboard).
+export default function VerificationBanner({ role = "doctor" }: { role?: "doctor" | "lab" }) {
   const [isPending, setIsPending] = useState(false)
 
   useEffect(() => {
@@ -27,7 +28,9 @@ export default function VerificationBanner() {
       <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <p>
         <strong className="font-mono uppercase text-xs tracking-wide">Verification pending.</strong>{" "}
-        We&apos;re checking your medical registration number. Until then you can&apos;t schedule appointments or see patient records.
+        {role === "lab"
+          ? <>We&apos;re checking your lab registration number. Until then you can&apos;t upload reports or see patient records.</>
+          : <>We&apos;re checking your medical registration number. Until then you can&apos;t schedule appointments or see patient records.</>}
       </p>
     </div>
   )

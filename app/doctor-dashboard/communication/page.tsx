@@ -155,44 +155,13 @@ export default function DoctorCommunicationPage() {
 
       setUser(user)
 
-      // Get or create user record
-      const { data: userData, error: userError } = await supabase
-        .from('profile_directory')
-        .select('id')
+      // The profile row is created at signup
+      setCurrentUserId(user.id)
+      // Set user as online
+      await supabase
+        .from('profiles')
+        .update({ online: true })
         .eq('id', user.id)
-        .single()
-
-      if (userError) {
-        console.log('Creating new user record...')
-        const { data: newUser, error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            name: user.user_metadata?.name || 'Doctor',
-            email: user.email || '',
-            role: 'doctor'
-          })
-          .select('id')
-          .single()
-
-        if (createError) {
-          console.error('Error creating user record:', createError)
-        } else {
-          setCurrentUserId(newUser.id)
-          // Set user as online
-          await supabase
-            .from('profiles')
-            .update({ online: true })
-            .eq('id', newUser.id)
-        }
-      } else {
-        setCurrentUserId(userData.id)
-        // Set user as online
-        await supabase
-          .from('profiles')
-          .update({ online: true })
-          .eq('id', userData.id)
-      }
 
       setLoading(false)
     }
@@ -421,12 +390,8 @@ export default function DoctorCommunicationPage() {
     if (!selectedContact || !currentUserId) return
 
     try {
-      await supabase
-        .from('messages')
-        .update({ is_read: true })
-        .eq('sender_id', selectedContact.id)
-        .eq('receiver_id', currentUserId)
-        .eq('is_read', false)
+      // Receivers can't update messages directly (RLS is sender-only); this only sets is_read.
+      await supabase.rpc('mark_messages_read', { p_sender_id: selectedContact.id })
     } catch (error) {
       console.error('Error marking messages as read:', error)
     }
