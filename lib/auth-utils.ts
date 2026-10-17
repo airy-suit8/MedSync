@@ -83,7 +83,8 @@ export const AUTH_ERRORS = {
 
     // Password reset errors
     PASSWORDS_MISMATCH: "Passwords do not match. Please try again.",
-    INVALID_RESET_LINK: "Invalid or expired reset link. Please request a new password reset.",
+    // Reset links only work in the browser that asked for them (and expire after an hour).
+    INVALID_RESET_LINK: "This reset link didn't work. Open it in the same browser where you asked for it, or ask for a new one with “Forgot password?” on the sign-in page.",
 
     // Network errors
     NETWORK_ERROR: "Network error. Please check your connection and try again.",

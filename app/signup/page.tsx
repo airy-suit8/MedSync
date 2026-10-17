@@ -103,6 +103,14 @@ export default function SignUpPage() {
 
       if (error) throw error
 
+      // For an email that is already registered, Supabase returns a user with no
+      // identities and sends no email (so nobody can probe which emails exist). Say so
+      // here instead of "Account created" followed by an email that never comes.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setError("An account with this email already exists. Sign in, or use “Forgot password?” on the sign-in page.")
+        return
+      }
+
       setSuccess(true)
 
       // Redirect to login after 5 seconds

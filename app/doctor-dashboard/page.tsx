@@ -208,12 +208,6 @@ export default function DoctorDashboard() {
           {/* Header */}
           <div className="mb-12 border-b border-black/10 pb-8 flex items-end justify-between">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-black/55">
-                  System Online
-                </span>
-              </div>
               <h1 className="text-4xl font-bold tracking-tight mb-2 uppercase">
                 {greeting}, Dr. {user?.user_metadata?.name?.split(' ').pop()}
               </h1>

@@ -304,22 +304,10 @@ export default function DoctorCommunicationPage() {
         .order('online', { ascending: false })
 
       if (error) {
-        console.warn('Users table query failed, using fallback data:', error)
-        const fallbackPatients = [
-          { id: '66666666-6666-6666-6666-666666666666', name: 'John Patient', role: 'patient', specialty: 'General', online: true },
-          { id: '77777777-7777-7777-7777-777777777777', name: 'Mary Wilson', role: 'patient', specialty: 'General', online: false }
-        ]
-        const fallbackLabTechs = [
-          { id: '44444444-4444-4444-4444-444444444444', name: 'Lab Tech Alex Chen', role: 'lab', specialty: 'Clinical Laboratory', online: true },
-          { id: '55555555-5555-5555-5555-555555555555', name: 'Lab Tech Maria Garcia', role: 'lab', specialty: 'Radiology', online: true }
-        ]
-
-        setPatients(fallbackPatients)
-        setLabTechs(fallbackLabTechs)
-
-        if (fallbackPatients.length > 0) {
-          setSelectedContact(fallbackPatients[0])
-        }
+        // No made-up contacts: an empty list is honest; messages to fake IDs went nowhere.
+        console.warn('Could not load contacts:', error)
+        setPatients([])
+        setLabTechs([])
         return
       }
 

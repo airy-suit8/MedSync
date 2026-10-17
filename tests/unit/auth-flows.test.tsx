@@ -1,0 +1,61 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+
+const { createClientMock, searchParams } = vi.hoisted(() => ({ createClientMock: vi.fn(), searchParams: { value: new URLSearchParams() } }))
+vi.mock('@/lib/supabase', () => ({ createClient: createClientMock }))
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => searchParams.value,
+}))
+
+import SignUpPage from '@/app/signup/page'
+import VerifyEmailPage from '@/app/verify-email/page'
+
+afterEach(cleanup)
+
+describe('sign-up with an email that already has an account', () => {
+  it('says so instead of "Account Created!"', async () => {
+    const signUp = vi.fn().mockResolvedValue({ data: { user: { id: 'x', identities: [] } }, error: null })
+    createClientMock.mockReturnValue({ auth: { signUp } })
+    render(<SignUpPage />)
+    fireEvent.click(screen.getByTestId('signup-role-patient'))
+    fireEvent.change(screen.getByLabelText('Full Name'), { target: { value: 'Ravi Kumar' } })
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ravi@example.com' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Str0ng!Passw0rd' } })
+    fireEvent.click(screen.getByRole('button', { name: /CREATE ACCOUNT/ }))
+    expect(await screen.findByText(/already exists/)).toBeTruthy()
+    expect(screen.queryByText('Account Created!')).toBeNull()
+  })
+})
+
+describe('email confirmation page', () => {
+  beforeEach(() => { window.location.hash = '' })
+
+  it('treats a link opened on another device as confirmed, not failed', async () => {
+    searchParams.value = new URLSearchParams()
+    createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } })
+    render(<VerifyEmailPage />)
+    expect(await screen.findByText('Email confirmed')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/login')
+  })
+
+  it('sends a signed-in user to their dashboard', async () => {
+    searchParams.value = new URLSearchParams()
+    createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { app_metadata: { role: 'doctor' } } } }) } })
+    render(<VerifyEmailPage />)
+    expect((await screen.findByRole('link', { name: 'Go to your dashboard' })).getAttribute('href')).toBe('/doctor-dashboard')
+  })
+
+  it('offers a new link when the old one expired', async () => {
+    searchParams.value = new URLSearchParams('error=access_denied&error_code=otp_expired')
+    const resend = vi.fn().mockResolvedValue({ error: null })
+    createClientMock.mockReturnValue({ auth: { resend } })
+    render(<VerifyEmailPage />)
+    expect(await screen.findByText(/expired/)).toBeTruthy()
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ravi@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send a new link' }))
+    expect(await screen.findByText(/new link is on its way/)).toBeTruthy()
+    expect(resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'ravi@example.com' }))
+  })
+})
