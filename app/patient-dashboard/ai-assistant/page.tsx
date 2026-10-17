@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Activity, Brain, Send, ArrowLeft, AlertTriangle, AlertCircle } from "lucide-react"
+import { Activity, Brain, Send, AlertTriangle, AlertCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -95,27 +95,14 @@ export default function PatientAIAssistantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">AI Health Assistant</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">AI Health Assistant</h1>
           <p className="text-black/60 font-light text-lg italic">
             Get instant guidance on medicines, side effects, and wellness
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Portal Status
-          </span>
-          <span className="text-xl font-mono border-b-2 border-indigo-600 inline-flex items-center gap-2">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-            ACTIVE
-          </span>
         </div>
       </header>
 

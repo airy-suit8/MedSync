@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import PrescriptionForm from "@/components/medical/PrescriptionForm"
 import PrescriptionList from "@/components/medical/PrescriptionList"
-import { Activity, Users, Video, Phone, MessageSquare, Calendar, ArrowLeft, CheckCircle, Clock } from "lucide-react"
+import { Activity, Users, Video, Phone, MessageSquare, Calendar, CheckCircle, Clock } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -347,27 +347,14 @@ export default function ConsultationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Patient Consultations</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Patient Consultations</h1>
           <p className="text-black/60 font-light text-lg">
             Conduct virtual consultations and patient assessments with real-time communication tools
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Portal Status
-          </span>
-          <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-            ACTIVE
-          </span>
         </div>
       </header>
 
@@ -420,7 +407,7 @@ export default function ConsultationsPage() {
           <div>
             <h2 className="text-xl font-bold uppercase flex items-center gap-2">
               <span className="h-2 w-2 bg-black rounded-full"></span>
-               Today&apos;s Consultations
+               Today and upcoming
             </h2>
           </div>
           <div className="flex space-x-2">
@@ -473,7 +460,7 @@ export default function ConsultationsPage() {
                       {format(parseISO(consultation.appointment_date), 'MMM d, yyyy')}
                     </p>
                     <p className="text-xs font-mono text-black/60 uppercase">
-                      {consultation.start_time} - {consultation.end_time}
+                      {consultation.start_time?.slice(0, 5)}–{consultation.end_time?.slice(0, 5)}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">

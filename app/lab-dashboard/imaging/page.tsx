@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Activity, Camera, ArrowLeft, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, Upload, Eye, X, Send } from "lucide-react"
+import { Activity, Camera, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, Upload, Eye, X, Send } from "lucide-react"
 import { createClient } from "@/lib/supabase"
+import { format, parseISO } from "date-fns"
 import { UUID_REGEX } from "@/lib/constants"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -253,36 +254,24 @@ export default function LabImagingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Return to Node</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Imaging Center</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Imaging</h1>
           <p className="text-black/60 font-light text-lg italic">
-            Telemetry capture and visualization systems
+            Schedule imaging studies, upload the images and send them to a doctor.
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            System Hash
-          </span>
-          <span className="text-xl font-mono border-b-2 border-indigo-600">
-            IMAGING_V1.0
-          </span>
         </div>
       </header>
 
       {/* Filters and Search - Brutalist */}
-      <div className="border border-black/10 bg-white p-10 relative mb-12">
+      <div className="border border-black/10 bg-white p-6 sm:p-10 relative mb-12">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-600"></div>
-        <div className="flex items-center justify-between mb-8 border-b border-black/10 pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-black/10 pb-6">
           <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
             <Filter className="h-5 w-5" />
-            Uplink Filters
+            Filters
           </h3>
           <Button
             className="bg-black text-white rounded-none hover:bg-indigo-600 h-10 px-6 font-mono text-[10px] uppercase tracking-widest transition-all"
@@ -332,12 +321,12 @@ export default function LabImagingPage() {
       </div>
 
       {/* Imaging Studies List */}
-      <div className="border border-black/10 bg-white p-10 relative">
+      <div className="border border-black/10 bg-white p-6 sm:p-10 relative">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-black/10"></div>
         <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
           <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
             <Camera className="h-6 w-6" />
-            Capture Logs
+            Studies
           </h3>
           <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{filteredStudies.length} STUDIES FOUND</span>
         </div>
@@ -346,30 +335,29 @@ export default function LabImagingPage() {
           {filteredStudies.length === 0 ? (
             <div className="text-center py-20 bg-black/[0.01] border border-dashed border-black/10">
               <Camera className="h-12 w-12 mx-auto mb-4 text-black/10" />
-              <p className="text-xs font-mono uppercase text-black/55">NO IMAGING DATA IN CURRENT NODE</p>
+              <p className="text-xs font-mono uppercase text-black/55">No studies yet</p>
             </div>
           ) : (
             filteredStudies.map((study) => (
-              <div key={study.id} className="border border-black/10 p-8 hover:border-indigo-600/30 transition-all group flex items-center justify-between">
-                <div className="flex items-center gap-10">
+              <div key={study.id} className="border border-black/10 p-5 sm:p-8 hover:border-indigo-600/30 transition-all group flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-x-10 gap-y-3">
                   <div className="flex items-center gap-4 min-w-[200px]">
                     <div className="p-3 bg-black/[0.03] group-hover:bg-black group-hover:text-white transition-colors">
                       {getStatusIcon(study.status)}
                     </div>
                     <div>
                       <p className="font-black text-lg uppercase tracking-tight">{study.patient_name}</p>
-                      <p className="text-[10px] font-mono text-black/55 uppercase">ID: {study.patient_id}</p>
                     </div>
                   </div>
                   <div>
                     <p className="font-bold text-sm uppercase">{study.study_type} - {study.body_part}</p>
                     <p className="text-[10px] font-mono text-black/55 uppercase">
-                      SCHEDULED: {new Date(study.scheduled_date).toLocaleDateString()}
+                      SCHEDULED: {format(parseISO(study.scheduled_date), "d MMM yyyy")}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 border uppercase tracking-tighter ${
                     study.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                     study.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
@@ -387,7 +375,7 @@ export default function LabImagingPage() {
                     {study.priority}
                   </span>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"
                       className="rounded-none border-black h-12 px-6 font-mono text-[10px] uppercase tracking-widest hover:bg-black/5 transition-all"
@@ -432,7 +420,7 @@ export default function LabImagingPage() {
             <div className="absolute top-0 left-0 w-full h-1 bg-black"></div>
             <div className="p-8">
               <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Schedule Capture</h3>
+                <h3 className="text-2xl font-black uppercase tracking-tighter">Schedule a study</h3>
                 <Button variant="ghost" className="hover:bg-black/5 rounded-none" onClick={() => setShowScheduleModal(false)}>
                   <X className="h-5 w-5" />
                 </Button>
@@ -552,7 +540,7 @@ export default function LabImagingPage() {
               <div className="grid md:grid-cols-2 gap-10 mb-10">
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Study Hash</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Study ID</p>
                     <p className="font-mono text-xl uppercase tracking-tighter">{selectedStudy.id}</p>
                   </div>
                   <div>
@@ -561,7 +549,7 @@ export default function LabImagingPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Scheduled Date</p>
-                    <p className="font-mono text-sm uppercase text-black/60">{new Date(selectedStudy.scheduled_date).toLocaleString()}</p>
+                    <p className="font-mono text-sm uppercase text-black/60">{format(parseISO(selectedStudy.scheduled_date), "d MMM yyyy")}</p>
                   </div>
                 </div>
                 <div className="space-y-6">
@@ -599,7 +587,7 @@ export default function LabImagingPage() {
                   }}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Initialize Image Upload
+                  Upload images
                 </Button>
                 <Button
                   variant="outline"
@@ -621,7 +609,7 @@ export default function LabImagingPage() {
             <div className="absolute top-0 left-0 w-full h-1 bg-black"></div>
             <div className="p-8">
               <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Capture Upload</h3>
+                <h3 className="text-2xl font-black uppercase tracking-tighter">Upload images</h3>
                 <Button variant="ghost" className="hover:bg-black/5 rounded-none" onClick={() => setShowUploadModal(false)}>
                   <X className="h-5 w-5" />
                 </Button>
@@ -631,7 +619,7 @@ export default function LabImagingPage() {
                 <div className="p-4 bg-black/[0.02] border border-black/5 mb-6">
                   <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Target Study</p>
                   <p className="font-bold text-sm uppercase">{selectedStudy.study_type} - {selectedStudy.body_part}</p>
-                  <p className="text-[10px] font-mono text-black/55 uppercase">NODE: {selectedStudy.patient_name}</p>
+                  <p className="text-[10px] font-mono text-black/55 uppercase">PATIENT: {selectedStudy.patient_name}</p>
                 </div>
 
                 <div className="border-2 border-dashed border-black/10 p-10 text-center hover:border-black/30 transition-all group cursor-pointer relative">
@@ -643,11 +631,11 @@ export default function LabImagingPage() {
                     onChange={e => setSelectedFiles(e.target.files)}
                   />
                   <Upload className="h-10 w-10 text-black/10 mx-auto mb-4 group-hover:text-black/55" />
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-black/55">Initialize Local Link or Drag Files</p>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-black/55">Choose files or drag them here</p>
 
                   {selectedFiles && selectedFiles.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-black/5 text-left">
-                      <p className="text-[10px] font-black uppercase tracking-widest mb-2">Pending Packets:</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest mb-2">Files to upload:</p>
                       <div className="space-y-1 max-h-[100px] overflow-y-auto">
                         {Array.from(selectedFiles).map(f => (
                           <div key={f.name} className="text-[9px] font-mono uppercase text-black/60 truncate bg-black/[0.02] p-1">
@@ -725,7 +713,7 @@ export default function LabImagingPage() {
                     }}
                   >
                     {uploading && <Activity className="h-4 w-4 mr-2 animate-spin" />}
-                    Confirm Uplink
+                    Upload
                   </Button>
                   <Button
                     variant="outline"

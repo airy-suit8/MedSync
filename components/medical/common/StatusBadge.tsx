@@ -36,6 +36,14 @@ const statusConfig = {
     label: 'Reviewed',
     className: 'border-indigo-600 text-indigo-600 bg-indigo-50'
   },
+  confirmed: {
+    label: 'Confirmed',
+    className: 'border-black text-black bg-white'
+  },
+  scheduled: {
+    label: 'To confirm',
+    className: 'border-amber-600 text-amber-700 bg-amber-50'
+  },
   new: {
     label: 'New',
     className: 'border-indigo-600 text-indigo-600 bg-indigo-50'

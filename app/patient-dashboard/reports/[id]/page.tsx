@@ -6,6 +6,7 @@ import { format, parseISO } from 'date-fns'
 import { ArrowLeft, Brain, Clock, Download, FileText, Stethoscope } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase'
+import { testLabel } from "@/lib/utils"
 import { ErrorLogger } from '@/lib/error-logger'
 import ClinicalNotice from "@/components/medical/common/ClinicalNotice"
 import { VERDICTS, type Review } from '@/lib/review'
@@ -114,7 +115,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
             <ArrowLeft className="h-3 w-3" aria-hidden="true" />
             <span>My reports</span>
           </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">{String(report.test_type || 'Report').replace(/_/g, ' ')}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">{testLabel(report.test_type)} report</h1>
           <p className="text-black/60 font-mono text-xs uppercase tracking-widest">
             Uploaded {report.uploaded_at ? format(parseISO(report.uploaded_at), 'd MMM yyyy') : ''}
             {' · '}{reviewed ? `Reviewed by ${reviews.length === 1 ? 'your doctor' : `${reviews.length} doctors`}` : 'Awaiting doctor review'}
@@ -218,7 +219,7 @@ export default function PatientReportDetail({ params }: { params: Promise<{ id: 
           <dl className="border border-black/10 bg-white p-8 space-y-6">
             <div>
               <dt className="text-[11px] font-mono uppercase text-black/60 mb-1">Test</dt>
-              <dd className="font-bold uppercase">{String(report.test_type || '').replace(/_/g, ' ')}</dd>
+              <dd className="font-bold uppercase">{testLabel(report.test_type)}</dd>
             </div>
             <div>
               <dt className="text-[11px] font-mono uppercase text-black/60 mb-1">Priority</dt>

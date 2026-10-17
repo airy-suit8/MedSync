@@ -10,11 +10,11 @@ import {
   Sparkles
 } from "lucide-react"
 import { createClient } from "@/lib/supabase"
+import { testLabel } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from "next/link"
 import { format, parseISO } from "date-fns"
-import Sidebar from "@/components/medical/navigation/Sidebar"
 import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
 import { pressable } from "@/lib/utils"
@@ -144,7 +144,7 @@ export default function DoctorDashboard() {
       const reviews = pendingReports.slice(0, 8).map((report: any) => ({
         id: report.id,
         patient_name: profileMap.get(report.patient_id) || report.patient_name || 'Unknown Patient',
-        report_type: report.report_type || report.test_type || 'Medical Report',
+        report_type: testLabel(report.report_type || report.test_type),
         description: report.description || 'Report requires review',
         priority: (report.priority as any) || 'normal',
         created_at: report.created_at || report.uploaded_at,
@@ -184,11 +184,6 @@ export default function DoctorDashboard() {
   }
 
 
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push("/")
-  }
 
   if (authLoading || dataLoading) {
     return <DashboardSkeleton />
@@ -200,15 +195,13 @@ export default function DoctorDashboard() {
   return (
     <ErrorBoundary componentName="Doctor Dashboard">
     <div className="min-h-screen bg-transparent flex">
-      <Sidebar userRole="doctor" userName={user?.user_metadata?.name} onLogout={handleLogout} />
-
       <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-12">
+        <div className="max-w-7xl mx-auto p-6 lg:p-12">
           
           {/* Header */}
-          <div className="mb-12 border-b border-black/10 pb-8 flex items-end justify-between">
+          <div className="mb-12 border-b border-black/10 pb-8 flex flex-wrap items-end justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight mb-2 uppercase">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2 uppercase">
                 {greeting}, Dr. {user?.user_metadata?.name?.split(' ').pop()}
               </h1>
               <p className="text-black/60 font-light text-lg">
@@ -229,12 +222,12 @@ export default function DoctorDashboard() {
 
           {/* Urgent Alert */}
           {urgentCount > 0 && (
-            <div className="border border-red-500/30 p-8 bg-red-50 mb-16 flex items-start gap-6 relative overflow-hidden">
+            <div className="border border-red-500/30 p-5 sm:p-8 bg-red-50 mb-16 flex flex-col sm:flex-row items-start gap-4 sm:gap-6 relative overflow-hidden">
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600"></div>
               <div className="p-3 bg-red-600 text-white inline-block">
                  <AlertCircle className="h-6 w-6" />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-bold text-red-900 mb-2 uppercase tracking-tight">
                   Urgent: {urgentCount} {urgentCount === 1 ? 'Report Requires' : 'Reports Require'} Immediate Attention
                 </h2>
@@ -462,7 +455,7 @@ export default function DoctorDashboard() {
                           <span className="font-bold text-sm">{review.patient_name}</span>
                           <span className={`text-xs font-mono font-bold uppercase px-2 py-0.5 border tracking-tighter ${
                             review.priority === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' : 
-                            'border-amber-600 text-amber-600 bg-amber-50'
+                            review.priority === 'high' ? 'border-amber-600 text-amber-700 bg-amber-50' : 'border-black/20 text-black/60'
                           }`}>
                             {review.priority}
                           </span>

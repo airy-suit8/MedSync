@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Activity, Users, Video, ArrowLeft } from "lucide-react"
+import { Activity, Users, Video } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -111,8 +111,8 @@ export default function PatientVideoConsultationsPage() {
       const { data: appointments, error } = await supabase
         .from('appointments')
         .select('*')
-        .or(`patient_id.eq.${actualPatientId},patient_id.eq.${patientId}`)
-        .gte('appointment_date', today)
+        .eq('patient_id', actualPatientId)
+        .or(`appointment_date.gte.${today},status.eq.completed`)
         .in('status', ['scheduled', 'confirmed', 'in-progress', 'completed'])
         .order('appointment_date', { ascending: true })
 
@@ -165,104 +165,110 @@ export default function PatientVideoConsultationsPage() {
       <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center">
           <Activity className="h-8 w-8 animate-spin mb-4 text-black" />
-          <span className="text-xs font-mono uppercase tracking-widest text-black/60">Establishing Secure Uplink...</span>
+          <span className="text-xs font-mono uppercase tracking-widest text-black/60">Loading…</span>
         </div>
       </div>
     )
   }
 
+  const upcoming = consultations.filter((c) => c.status !== 'completed')
+  const past = consultations.filter((c) => c.status === 'completed').reverse()
+  const card = (consultation: Consultation) => (
+    <div key={consultation.id} className="group border border-black/10 bg-white p-6 sm:p-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-black text-white"><Video className="h-6 w-6" aria-hidden="true" /></div>
+          <div>
+            <h3 className="text-2xl font-black uppercase tracking-tight">{consultation.doctor_name}</h3>
+            <p className="text-[11px] font-mono uppercase tracking-widest text-black/60 mt-1">
+              {getConsultationTypeLabel(consultation.consultation_type)}{consultation.symptoms ? ` • ${consultation.symptoms}` : ''}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="md:text-right md:mr-4">
+            <p className="text-sm font-bold uppercase tracking-tight">{format(parseISO(consultation.appointment_date), 'MMMM d, yyyy')}</p>
+            <p className="text-[11px] font-mono text-black/60 uppercase tracking-widest">{consultation.start_time?.slice(0, 5)}</p>
+          </div>
+          {consultation.status === 'completed' ? (
+            <span className="border border-black px-3 py-1 font-mono text-[11px] uppercase tracking-widest">Completed</span>
+          ) : consultation.awaitingConfirmation ? (
+            <Button asChild variant="outline" className="rounded-none border-black h-12 px-6 uppercase font-mono text-[11px] tracking-widest">
+              <Link href="/patient-dashboard">Confirm on your dashboard</Link>
+            </Button>
+          ) : consultation.status !== 'cancelled' ? (
+            <Button className="bg-black text-white rounded-none h-12 px-8 uppercase font-mono text-[11px] tracking-widest" onClick={() => startVideoCall(consultation)}>Join call</Button>
+          ) : null}
+        </div>
+      </div>
+
+      {consultation.status === 'completed' && (consultation.diagnosis || consultation.notes || consultation.prescription || user) && (
+        <div className="mt-8 grid gap-6 border-t border-black/10 pt-6 md:grid-cols-2">
+          {consultation.diagnosis && (
+            <div>
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Diagnosis</h4>
+              <p>{consultation.diagnosis}</p>
+            </div>
+          )}
+          {consultation.notes && (
+            <div>
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Doctor&apos;s notes</h4>
+              <p className="whitespace-pre-line">{consultation.notes}</p>
+            </div>
+          )}
+          {consultation.prescription && (
+            <div>
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Prescription notes</h4>
+              <p className="whitespace-pre-line">{consultation.prescription}</p>
+            </div>
+          )}
+          {user && (
+            <div className="md:col-span-2">
+              <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-2">Prescriptions</h4>
+              <PrescriptionList patientId={user.id} appointmentId={consultation.id} emptyText="No printable prescription for this consultation." />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Portal Exit</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Video Consultations</h1>
-          <p className="text-black/60 font-light text-lg italic">Virtual clinical encounters and synchronous healthcare support</p>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Video Consultations</h1>
+          <p className="text-black/60 font-light text-lg italic">Your video appointments with your doctors.</p>
         </div>
       </header>
 
       <div className="container mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-black uppercase tracking-tighter">Scheduled Encounters</h2>
+          <h2 className="text-xl font-black uppercase tracking-tighter">Upcoming consultations</h2>
           <Button variant="outline" className="rounded-none border-black/10 h-10 uppercase font-mono text-[10px] tracking-widest px-6" onClick={() => loadConsultations(user?.id || '')} disabled={isLoading}>
             <Activity className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh Node
+            Refresh
           </Button>
         </div>
 
         <div className="space-y-6">
           {loadError && <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700 font-mono">{loadError}</div>}
-          {consultations.length > 0 ? (
-            consultations.map((consultation) => (
-              <div key={consultation.id} className="group border border-black/10 bg-white p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                  <div className="flex items-center gap-6">
-                    <div className="p-4 bg-black text-white"><Video className="h-6 w-6" aria-hidden="true" /></div>
-                    <div>
-                      <h3 className="text-2xl font-black uppercase tracking-tight">{consultation.doctor_name}</h3>
-                      <p className="text-[11px] font-mono uppercase tracking-widest text-black/60 mt-1">
-                        {getConsultationTypeLabel(consultation.consultation_type)} • SYMPTOMS: {consultation.symptoms || 'NOT SPECIFIED'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-right mr-4">
-                      <p className="text-sm font-bold uppercase tracking-tight">{format(parseISO(consultation.appointment_date), 'MMMM d, yyyy')}</p>
-                      <p className="text-[11px] font-mono text-black/60 uppercase tracking-widest">{consultation.start_time?.slice(0, 5)}</p>
-                    </div>
-                    {consultation.status === 'completed' ? (
-                      <span className="border border-black px-3 py-1 font-mono text-[11px] uppercase tracking-widest">Completed</span>
-                    ) : consultation.awaitingConfirmation ? (
-                      <Button asChild variant="outline" className="rounded-none border-black h-12 px-6 uppercase font-mono text-[11px] tracking-widest">
-                        <Link href="/patient-dashboard">Confirm on your dashboard</Link>
-                      </Button>
-                    ) : consultation.status !== 'cancelled' ? (
-                      <Button className="bg-black text-white rounded-none h-12 px-8 uppercase font-mono text-[11px] tracking-widest" onClick={() => startVideoCall(consultation)}>Establish Link</Button>
-                    ) : null}
-                  </div>
-                </div>
-
-                {consultation.status === 'completed' && (consultation.diagnosis || consultation.notes || consultation.prescription || user) && (
-                  <div className="mt-8 grid gap-6 border-t border-black/10 pt-6 md:grid-cols-2">
-                    {consultation.diagnosis && (
-                      <div>
-                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Diagnosis</h4>
-                        <p>{consultation.diagnosis}</p>
-                      </div>
-                    )}
-                    {consultation.notes && (
-                      <div>
-                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Doctor&apos;s notes</h4>
-                        <p className="whitespace-pre-line">{consultation.notes}</p>
-                      </div>
-                    )}
-                    {consultation.prescription && (
-                      <div>
-                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-1">Prescription notes</h4>
-                        <p className="whitespace-pre-line">{consultation.prescription}</p>
-                      </div>
-                    )}
-                    {user && (
-                      <div className="md:col-span-2">
-                        <h4 className="font-mono text-[11px] uppercase tracking-widest text-black/60 mb-2">Prescriptions</h4>
-                        <PrescriptionList patientId={user.id} appointmentId={consultation.id} emptyText="No printable prescription for this consultation." />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="border border-black/10 bg-white p-24 text-center">
-              <Users className="h-12 w-12 text-black/20 mx-auto mb-6" />
-              <h3 className="text-2xl font-black uppercase tracking-tight mb-2">No Active Links</h3>
+          {upcoming.length > 0 ? upcoming.map(card) : (
+            <div className="border border-dashed border-black/20 bg-white p-12 text-center">
+              <Users className="h-10 w-10 text-black/20 mx-auto mb-4" />
+              <p className="font-bold">No upcoming consultations</p>
+              <p className="mt-1 text-sm text-black/60">Ask one of your doctors for a consultation from <Link href="/patient-dashboard/doctors" className="underline underline-offset-4">My Doctors</Link>.</p>
             </div>
           )}
         </div>
+
+        {past.length > 0 && (
+          <>
+            <h2 className="mt-16 mb-8 text-xl font-black uppercase tracking-tighter">Past consultations</h2>
+            <div className="space-y-6">{past.map(card)}</div>
+          </>
+        )}
       </div>
 
       {selectedConsultationForCall && (

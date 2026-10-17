@@ -6,7 +6,7 @@ import { Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import type { Role } from "@/lib/notifications"
 
-// Bell with the unread count, in every dashboard's sidebar; updates live.
+// Bell with the unread count, in every dashboard's sidebar and phone top bar; updates live.
 export default function NotificationBell({ role }: { role: Role }) {
   const [count, setCount] = useState(0)
 
@@ -24,7 +24,8 @@ export default function NotificationBell({ role }: { role: Role }) {
         if (!cancelled) setCount(unread ?? 0)
       }
       await refresh()
-      channel = supabase.channel(`notifications-bell-${user.id}`)
+      // unique per bell: the phone top bar and the sidebar each have one
+      channel = supabase.channel(`notifications-bell-${user.id}-${Math.random().toString(36).slice(2)}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, refresh)
         .subscribe()
     }

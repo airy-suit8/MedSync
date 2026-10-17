@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Activity, FlaskConical, ArrowLeft, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, X } from "lucide-react"
+import { Activity, FlaskConical, Plus, Search, Filter, Clock, CheckCircle, AlertTriangle, X } from "lucide-react"
 import { createClient } from "@/lib/supabase"
+import { format, parseISO } from "date-fns"
 import { UUID_REGEX } from "@/lib/constants"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -85,7 +86,7 @@ export default function LabSamplesPage() {
     if (!user || !addForm.patient_id.trim() || !addForm.sample_type || !addForm.collection_date) {
       toast({
         title: "Missing fields",
-        description: "Enter a patient, specimen type, and collection time.",
+        description: "Enter a patient, sample type and collection time.",
         variant: "destructive",
       })
       return
@@ -128,7 +129,7 @@ export default function LabSamplesPage() {
       console.error('Could not register lab sample:', error)
       toast({
         title: "Registration failed",
-        description: "Specimen registration failed. Please try again.",
+        description: "The sample could not be saved. Please try again.",
         variant: "destructive",
       })
       return
@@ -136,7 +137,7 @@ export default function LabSamplesPage() {
 
     toast({
       title: "Success",
-      description: "Specimen successfully registered.",
+      description: "Sample saved.",
     })
 
     setSamples((current) => [sample as Sample, ...current])
@@ -163,7 +164,7 @@ export default function LabSamplesPage() {
       console.error('Could not update lab sample:', error)
       toast({
         title: "Update failed",
-        description: "Could not update specimen status. Please try again.",
+        description: "Could not update the sample's status. Please try again.",
         variant: "destructive",
       })
       return
@@ -171,7 +172,7 @@ export default function LabSamplesPage() {
     
     toast({
       title: "Status updated",
-      description: `Specimen status changed to ${newStatus}.`,
+      description: `Sample status changed to ${newStatus}.`,
     })
     setSamples((current) => current.map((row) => row.id === sampleId ? sample as Sample : row))
     setSelectedSample(sample as Sample)
@@ -229,22 +230,18 @@ export default function LabSamplesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Return to Node</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Specimen Inventory</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Samples</h1>
           <p className="text-black/60 font-light text-lg italic">
-            Management and tracking of biological telemetry
+            Log samples and update their status as they move through the lab.
           </p>
         </div>
         <div className="text-right hidden md:block">
           <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Active Technician
+            Lab
           </span>
           <span className="text-xl font-mono border-b-2 border-indigo-600">
             {user?.user_metadata?.name?.toUpperCase() || 'ROOT_USER'}
@@ -253,19 +250,19 @@ export default function LabSamplesPage() {
       </header>
 
       {/* Filters and Search - Brutalist */}
-      <div className="border border-black/10 bg-white p-10 relative mb-12">
+      <div className="border border-black/10 bg-white p-6 sm:p-10 relative mb-12">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-600"></div>
-        <div className="flex items-center justify-between mb-8 border-b border-black/10 pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8 border-b border-black/10 pb-6">
            <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-3">
              <Filter className="h-5 w-5" />
-             Uplink Filters
+             Filters
            </h3>
            <Button 
             className="bg-black text-white rounded-none hover:bg-indigo-600 h-10 px-6 font-mono text-[10px] uppercase tracking-widest transition-all"
             onClick={() => setShowAddModal(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Register Specimen
+            Log a sample
           </Button>
         </div>
         
@@ -273,7 +270,7 @@ export default function LabSamplesPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black/20" />
             <Input
-              placeholder="SEARCH BY HASH / NAME..."
+              placeholder="Search by patient or sample type"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 rounded-none border-black h-12 font-mono text-xs uppercase focus-visible:ring-0"
@@ -307,44 +304,43 @@ export default function LabSamplesPage() {
       </div>
 
       {/* Samples List */}
-      <div className="border border-black/10 bg-white p-10 relative">
+      <div className="border border-black/10 bg-white p-6 sm:p-10 relative">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-black/10"></div>
         <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
            <h3 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
              <FlaskConical className="h-6 w-6" />
-             Registry Logs
+             All samples
            </h3>
-           <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{filteredSamples.length} PACKETS FOUND</span>
+           <span className="text-[10px] font-mono text-black/55 uppercase tracking-widest">{filteredSamples.length} {filteredSamples.length === 1 ? 'sample' : 'samples'}</span>
         </div>
 
         <div className="space-y-6">
           {filteredSamples.length === 0 ? (
             <div className="text-center py-20 bg-black/[0.01] border border-dashed border-black/10">
               <FlaskConical className="h-12 w-12 mx-auto mb-4 text-black/10" />
-              <p className="text-xs font-mono uppercase text-black/55">NO SPECIMEN DETECTED IN CURRENT NODE</p>
+              <p className="text-xs font-mono uppercase text-black/55">No samples yet</p>
             </div>
           ) : (
             filteredSamples.map((sample) => (
-              <div key={sample.id} className="border border-black/10 p-8 hover:border-indigo-600/30 transition-all group flex items-center justify-between">
-                <div className="flex items-center gap-10">
+              <div key={sample.id} className="border border-black/10 p-5 sm:p-8 hover:border-indigo-600/30 transition-all group flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-x-10 gap-y-3">
                   <div className="flex items-center gap-4 min-w-[200px]">
                     <div className="p-3 bg-black/[0.03] group-hover:bg-black group-hover:text-white transition-colors">
                       {getStatusIcon(sample.status)}
                     </div>
                     <div>
                       <p className="font-black text-lg uppercase tracking-tight">{sample.patient_name}</p>
-                      <p className="text-[10px] font-mono text-black/55 uppercase">ID: {sample.patient_id}</p>
                     </div>
                   </div>
                   <div>
                     <p className="font-bold text-sm uppercase">{sample.sample_type}</p>
                     <p className="text-[10px] font-mono text-black/55 uppercase">
-                      COLLECTED: {new Date(sample.collection_date).toLocaleDateString()}
+                      COLLECTED: {format(parseISO(sample.collection_date), "d MMM yyyy")}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6">
                   <span className={`text-[10px] font-mono font-bold px-2 py-0.5 border uppercase tracking-tighter ${
                     sample.status === 'urgent' ? 'border-red-600 text-red-600 bg-red-50' :
                     sample.status === 'completed' ? 'border-emerald-600 text-emerald-600 bg-emerald-50' :
@@ -366,7 +362,7 @@ export default function LabSamplesPage() {
                     className="bg-black text-white rounded-none h-12 px-6 font-mono text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all"
                     onClick={() => handleViewSample(sample)}
                   >
-                    ACCESS DATA
+                    Details
                   </Button>
                 </div>
               </div>
@@ -382,7 +378,7 @@ export default function LabSamplesPage() {
             <div className="absolute top-0 left-0 w-full h-1 bg-black"></div>
             <div className="p-8">
               <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Specimen Registration</h3>
+                <h3 className="text-2xl font-black uppercase tracking-tighter">Log a sample</h3>
                 <Button variant="ghost" className="hover:bg-black/5 rounded-none" onClick={() => setShowAddModal(false)}>
                   <X className="h-5 w-5" />
                 </Button>
@@ -390,11 +386,11 @@ export default function LabSamplesPage() {
               
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Patient Node Hash</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Patient ID</label>
                   <Input
                     value={addForm.patient_id}
                     onChange={(e) => setAddForm({...addForm, patient_id: e.target.value})}
-                    placeholder="ENTER ID..."
+                    placeholder="e.g. PAT-1043"
                     className="rounded-none border-black h-12 font-mono text-sm uppercase focus-visible:ring-0"
                   />
                 </div>
@@ -408,7 +404,7 @@ export default function LabSamplesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Biological Type</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/55">Sample type</label>
                   <Select value={addForm.sample_type} onValueChange={(value) => setAddForm({...addForm, sample_type: value})}>
                     <SelectTrigger className="rounded-none border-black h-12 font-mono text-sm uppercase focus:ring-0">
                       <SelectValue placeholder="SELECT TYPE..." />
@@ -469,7 +465,7 @@ export default function LabSamplesPage() {
              <div className="absolute top-0 left-0 w-full h-1 bg-black"></div>
              <div className="p-10">
                 <div className="flex items-center justify-between mb-10 border-b border-black/10 pb-6">
-                  <h3 className="text-3xl font-black uppercase tracking-tighter">Specimen Data: {selectedSample.patient_name}</h3>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter">Sample: {selectedSample.patient_name}</h3>
                   <Button variant="ghost" className="hover:bg-black/5 rounded-none" onClick={() => setShowViewModal(false)}>
                     <X className="h-6 w-6" />
                   </Button>
@@ -478,16 +474,16 @@ export default function LabSamplesPage() {
                 <div className="grid md:grid-cols-2 gap-10 mb-10">
                   <div className="space-y-6">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Packet Hash</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Sample ID</p>
                       <p className="font-mono text-xl uppercase tracking-tighter">{selectedSample.id}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Biological Type</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Sample type</p>
                       <p className="font-mono text-xl uppercase tracking-tighter">{selectedSample.sample_type}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Collection Node</p>
-                      <p className="font-mono text-sm uppercase text-black/60">{new Date(selectedSample.collection_date).toLocaleString()}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/55 mb-1">Collected</p>
+                      <p className="font-mono text-sm uppercase text-black/60">{format(parseISO(selectedSample.collection_date), "d MMM yyyy, HH:mm")}</p>
                     </div>
                   </div>
                   <div className="space-y-6">

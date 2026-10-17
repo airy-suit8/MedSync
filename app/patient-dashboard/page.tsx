@@ -4,10 +4,10 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Activity, FileText, MessageSquare, Calendar, Brain, Video, ArrowRight, Stethoscope } from "lucide-react"
 import { createClient } from "@/lib/supabase"
+import { testLabel } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { format, parseISO } from "date-fns"
-import Sidebar from "@/components/medical/navigation/Sidebar"
 import StatusBadge from "@/components/medical/common/StatusBadge"
 import { useAuthCheck } from "@/hooks/use-auth-check"
 import ErrorBoundary from "@/components/error-boundary"
@@ -85,7 +85,7 @@ export default function PatientDashboard() {
           activities.push({
             id: apt.id,
             type: 'appointment',
-            title: apt.appointment_type || 'Consultation',
+            title: apt.appointment_type === 'video' ? 'Video consultation' : 'Consultation',
             description: `Scheduled with ${apt.doctor_name || 'Doctor'}`,
             date: apt.appointment_date,
             status: apt.status || 'scheduled',
@@ -94,15 +94,22 @@ export default function PatientDashboard() {
         })
       }
 
+      // Results are the doctor's review; until then the report is waiting for it.
+      const reportIds = (reports || []).map((r: any) => r.id)
+      const { data: reviews } = reportIds.length
+        ? await supabase.from('report_reviews').select('report_id').in('report_id', reportIds)
+        : { data: [] }
+      const reviewed = new Set((reviews || []).map((r: any) => r.report_id))
+
       if (reports) {
         reports.forEach((report: any) => {
           activities.push({
             id: report.id,
             type: 'report',
-            title: report.test_type || 'Medical Report',
-            description: 'New results available',
+            title: testLabel(report.test_type),
+            description: reviewed.has(report.id) ? 'Reviewed by your doctor' : "Waiting for your doctor's review",
             date: report.created_at || report.uploaded_at,
-            status: 'completed',
+            status: reviewed.has(report.id) ? 'reviewed' : 'pending',
             icon: 'file-text'
           })
         })
@@ -115,7 +122,7 @@ export default function PatientDashboard() {
       setStats({
         recentReports: reports?.length || 0,
         upcomingAppointments: appointments?.length || 0,
-        unreadMessages: messages?.filter((m: any) => m.read === false).length || 0,
+        unreadMessages: messages?.filter((m: any) => m.receiver_id === patientId && !m.is_read).length || 0,
       })
 
     } catch (error) {
@@ -126,11 +133,6 @@ export default function PatientDashboard() {
   }
 
 
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push("/")
-  }
 
   const getActivityIcon = (icon: string) => {
     switch (icon) {
@@ -149,12 +151,10 @@ export default function PatientDashboard() {
   return (
     <ErrorBoundary componentName="Patient Dashboard">
     <div className="min-h-screen bg-transparent flex">
-      <Sidebar userRole="patient" userName={user?.user_metadata?.name} onLogout={handleLogout} />
-
       <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-12">
+        <div className="max-w-7xl mx-auto p-6 lg:p-12">
           {/* Header */}
-          <div className="mb-12 border-b border-black/10 pb-8 flex items-end justify-between">
+          <div className="mb-12 border-b border-black/10 pb-8 flex flex-wrap items-end justify-between gap-6">
             <div>
               <h1 className="text-4xl font-bold tracking-tight mb-2">
                 HELLO, {user?.user_metadata?.name?.split(' ')[0].toUpperCase() || 'PATIENT'}

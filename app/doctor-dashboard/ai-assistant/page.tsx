@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Activity, Brain, Send, ArrowLeft, AlertTriangle, Stethoscope, FileText, Users, AlertCircle } from "lucide-react"
+import { Activity, Brain, Send, AlertTriangle, Stethoscope, FileText, Users, AlertCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -138,30 +138,17 @@ export default function DoctorAIAssistantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <ClinicalNotice>Messages are sent to Google Gemini; do not include names or other identifying details.</ClinicalNotice>
       </div>
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Back to Dashboard</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">AI Diagnostic Assistant</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">AI Diagnostic Assistant</h1>
           <p className="text-black/60 font-light text-lg">
             Powered by Gemini AI - Get AI-powered diagnostic insights and clinical decision support
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Portal Status
-          </span>
-          <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-            ACTIVE
-          </span>
         </div>
       </header>
 

@@ -702,7 +702,7 @@ export default function MedicalVideoCall({
 
       setIsConnected(true)
       isConnectedRef.current = true // Update ref synchronously to avoid race conditions
-      addChatMessage('System', `Secure link established (ID: ${activeMeeting.meeting_id}).`)
+      addChatMessage('System', `Connected (call ${activeMeeting.meeting_id}).`)
       
       await sendSignal({ type: 'ready' })
       if (shouldHost) await createAndSendOffer()
@@ -938,30 +938,30 @@ export default function MedicalVideoCall({
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Identity Check</label>
+                      <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Your name</label>
                       <Input value={participantName} onChange={e => setParticipantName(e.target.value)} placeholder="ENTER YOUR FULL NAME" className="rounded-none border-black/10 focus:border-black" />
                     </div>
 
                     <Button onClick={() => void joinOrStartMeeting()} className="w-full bg-black hover:bg-black/90 text-white rounded-none h-12 uppercase font-mono text-[10px] tracking-widest" disabled={!participantName.trim() || !isChannelReady}>
-                      Establish Secure Uplink →
+                      Join call →
                     </Button>
                   </div>
                 </div>
               ) : userRole === 'doctor' ? (
                 <div className="bg-white border border-black/10 p-8 space-y-6">
                   <div className="space-y-1">
-                    <h3 className="font-bold uppercase tracking-tight">Initialize Encounter</h3>
-                    <p className="text-xs text-muted-foreground font-mono">NODE: PROVIDER_PRIMARY</p>
+                    <h3 className="font-bold uppercase tracking-tight">Start the consultation</h3>
+                    <p className="text-xs text-muted-foreground">Your patient can join once you start the call.</p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Identity Check</label>
+                      <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Your name</label>
                       <Input value={participantName} onChange={e => setParticipantName(e.target.value)} placeholder="DR. NAME" className="rounded-none border-black/10 focus:border-black" />
                     </div>
 
                     <Button onClick={() => void joinOrStartMeeting()} className="w-full bg-black hover:bg-black/90 text-white rounded-none h-12 uppercase font-mono text-[10px] tracking-widest" disabled={!participantName.trim() || !isChannelReady}>
-                      Create Secure Node →
+                      Start call →
                     </Button>
                   </div>
                 </div>
@@ -969,9 +969,9 @@ export default function MedicalVideoCall({
                 <div className="bg-white border border-black/10 p-12 text-center space-y-6">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto text-black/20" />
                   <div className="space-y-2">
-                    <h3 className="font-bold uppercase tracking-tight">Waiting for Provider</h3>
+                    <h3 className="font-bold uppercase tracking-tight">Waiting for your doctor</h3>
                     <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest leading-relaxed">
-                      The clinical node has not been initialized. <br/> Please standby for connection.
+                      Your doctor hasn&apos;t started the call yet. <br/> This window connects you when they do.
                     </p>
                   </div>
                   <Button variant="outline" className="rounded-none border-black/10 font-mono text-[10px] tracking-widest uppercase px-8" onClick={() => void loadMeetingDetailsRef.current()}>Refresh Status</Button>
@@ -983,7 +983,7 @@ export default function MedicalVideoCall({
           {isConnecting && (
             <div className="flex flex-col items-center justify-center h-64 space-y-6">
               <Loader2 className="h-12 w-12 animate-spin text-black/20" />
-              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Establishing Peer-to-Peer Tunnel...</p>
+              <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Connecting…</p>
             </div>
           )}
 
@@ -1069,7 +1069,7 @@ export default function MedicalVideoCall({
           {isConnected && (
             <div className="bg-black text-white p-4 font-mono text-[9px] uppercase tracking-[0.2em] flex justify-between items-center">
               <div className="flex gap-6">
-                <span>NODE_ID: {meetingId}</span>
+                <span>Call ID: {meetingId}</span>
                 <span>CIPHER: AES_GCM_256</span>
                 <span>STATUS: STABLE</span>
               </div>

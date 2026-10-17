@@ -13,23 +13,12 @@ import DashboardShell from "@/components/medical/common/DashboardShell"
 import { createClient } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
 import { UUID_REGEX } from "@/lib/constants"
+import { TEST_TYPES, testLabel } from "@/lib/utils"
 import { doctorsOfPatient, submitReport, type LinkedDoctor } from "@/lib/submit-report"
 
 const LABEL = "font-mono text-[11px] uppercase tracking-widest text-black/60"
 const FIELD = "h-12 rounded-none border-black/20 focus:border-black"
 const SELECT = "h-12 w-full border border-black/20 bg-white px-3 text-sm focus:border-black focus:outline-none"
-
-// Which tests the AI can read (scan models for X-ray/MRI, lab-value reader for blood/urine).
-const TEST_TYPES: { value: string; label: string; ai: boolean }[] = [
-  { value: "x_ray", label: "X-ray", ai: true },
-  { value: "mri", label: "MRI", ai: true },
-  { value: "blood_test", label: "Blood test", ai: true },
-  { value: "urine_test", label: "Urine test", ai: true },
-  { value: "ct_scan", label: "CT scan", ai: false },
-  { value: "ultrasound", label: "Ultrasound", ai: false },
-  { value: "ecg", label: "ECG", ai: false },
-  { value: "other", label: "Other", ai: false },
-]
 
 const AI_STATUS: Record<string, string> = {
   pending: "Sending to doctor", running: "AI reading", done: "AI reading ready",
@@ -236,7 +225,7 @@ function UploadForm({ labId }: { labId: string }) {
                 <div>
                   <p className="font-bold">{names.get(r.patient_id) || "Patient"}</p>
                   <p className="font-mono text-xs uppercase text-black/60">
-                    {r.test_type.replace(/_/g, " ")} · {format(parseISO(r.uploaded_at), "d MMM, HH:mm")}
+                    {testLabel(r.test_type)} · {format(parseISO(r.uploaded_at), "d MMM, HH:mm")}
                   </p>
                 </div>
                 <span className="border border-black/20 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider">{AI_STATUS[r.ai_status] || r.ai_status}</span>

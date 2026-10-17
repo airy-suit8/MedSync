@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Activity, Users, MessageSquare, Send, ArrowLeft, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck, Brain, AlertTriangle, Lightbulb, Eye, EyeOff } from "lucide-react"
+import { Activity, Users, MessageSquare, Send, Stethoscope, FlaskConical, User, Check, CheckCheck, Brain, AlertTriangle, Lightbulb, Eye, EyeOff } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -538,33 +538,20 @@ export default function PatientChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto flex flex-col h-screen">
+    <div className="bg-transparent p-6 lg:p-12 max-w-7xl mx-auto flex flex-col lg:h-screen">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between flex-shrink-0">
         <div>
-          <Link href="/patient-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Dashboard Node</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Secure Communications</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Messages</h1>
           <p className="text-black/60 font-light text-lg italic">
-            Direct clinical messaging with your healthcare providers
+            Message your doctors and labs.
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Link Status
-          </span>
-          <span className="text-xl font-mono border-b-2 border-green-500 inline-flex items-center gap-2">
-            <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-            ENCRYPTED
-          </span>
         </div>
       </header>
 
-      <div className="flex-1 flex gap-12 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:gap-12 min-h-0">
         {/* Sidebar - Contacts */}
-        <div className="w-80 flex flex-col gap-8 flex-shrink-0">
+        <div className="w-full lg:w-80 max-h-80 lg:max-h-none flex flex-col gap-8 flex-shrink-0">
           <div className="border border-black/10 bg-white flex flex-col min-h-0 h-full">
             <div className="p-6 border-b border-black/10 bg-black/[0.02]">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black/55 mb-4 flex items-center gap-2">
@@ -594,7 +581,7 @@ export default function PatientChatPage() {
                   </div>
                 ) : getActiveContacts().length === 0 ? (
                   <div className="p-8 text-center text-[10px] font-mono uppercase text-black/55">
-                    No active nodes found
+                    No conversations yet
                   </div>
                 ) : (
                   getActiveContacts().map((contact) => (
@@ -633,7 +620,7 @@ export default function PatientChatPage() {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col border border-black/10 bg-white min-w-0 relative">
+        <div className="flex-1 flex flex-col border border-black/10 bg-white min-w-0 relative min-h-[520px] lg:min-h-0">
           {selectedContact ? (
             <>
               {/* Chat Header */}
@@ -646,15 +633,9 @@ export default function PatientChatPage() {
                   <div>
                     <h3 className="text-xl font-black uppercase tracking-tight">{selectedContact.name}</h3>
                     <p className="text-[10px] font-mono uppercase tracking-widest text-black/55">
-                      Channel active • {selectedContact.role}
+                      {selectedContact.specialty || selectedContact.role}
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                   <span className="text-[10px] font-mono text-black/55 uppercase">E2EE ACTIVE</span>
-                   <div className="h-8 w-8 border border-black/10 flex items-center justify-center hover:border-black cursor-pointer transition-colors">
-                     <Clock className="h-4 w-4 text-black/55" />
-                   </div>
                 </div>
               </div>
 
@@ -728,7 +709,7 @@ export default function PatientChatPage() {
                  <MessageSquare className="h-16 w-16 text-black/10 mx-auto mb-6" />
                  <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Comms Offline</h3>
                  <p className="text-xs font-mono uppercase tracking-widest text-black/55 leading-loose">
-                   Select a clinical node from the directory to establish a secure uplink.
+                   Choose a doctor to start a conversation.
                  </p>
                </div>
             </div>

@@ -129,10 +129,6 @@ export default function DoctorSchedulePage() {
       {/* Header */}
       <header className="border-b border-black/10 pb-6 mb-8 flex-shrink-0 flex items-end justify-between">
         <div>
-          <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Back to Dashboard</span>
-          </Link>
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-bold tracking-tight uppercase">Your Schedule</h1>
           </div>
@@ -145,15 +141,6 @@ export default function DoctorSchedulePage() {
             <Plus className="h-4 w-4 mr-2" />
             New Appointment
           </Button>
-          <div className="text-right">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-              System Status
-            </span>
-            <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
-              <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-              ACTIVE
-            </span>
-          </div>
         </div>
       </header>
 
@@ -178,7 +165,7 @@ export default function DoctorSchedulePage() {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-black" />
-                          <span className="text-sm font-mono font-bold">{apt.start_time}</span>
+                          <span className="text-sm font-mono font-bold">{apt.start_time?.slice(0, 5)}</span>
                         </div>
                         <span className={`text-[10px] font-mono uppercase px-2 py-0.5 ${getStatusColor(apt.status)}`}>
                           {apt.status}
@@ -212,7 +199,7 @@ export default function DoctorSchedulePage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold uppercase truncate group-hover:underline underline-offset-4">{apt.patient_name}</p>
                       <p className="text-[10px] font-mono text-black/60 uppercase mt-1">
-                        {format(new Date(apt.appointment_date), 'dd MMM')} • {apt.start_time}
+                        {format(new Date(apt.appointment_date), 'dd MMM')} • {apt.start_time?.slice(0, 5)}
                       </p>
                     </div>
                     <span className={`text-[10px] font-mono uppercase px-2 py-0.5 ${getStatusColor(apt.status)}`}>
@@ -283,7 +270,7 @@ export default function DoctorSchedulePage() {
                         }`}
                       >
                         <p className={`text-[10px] font-mono mb-1 ${apt.status === 'confirmed' ? 'text-white/60' : 'text-black/60'}`}>
-                          {apt.start_time}
+                          {apt.start_time?.slice(0, 5)}
                         </p>
                         <p className="text-xs font-bold uppercase truncate">{apt.patient_name}</p>
                       </div>

@@ -12,6 +12,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  X,
   LayoutDashboard,
   Users,
   Stethoscope,
@@ -24,6 +25,9 @@ interface SidebarProps {
   userRole: 'doctor' | 'patient' | 'lab'
   userName?: string
   onLogout?: () => void
+  /** Phones and tablets: the sidebar slides in over the page while open. */
+  mobileOpen?: boolean
+  onClose?: () => void
 }
 
 const menuItems = {
@@ -53,8 +57,9 @@ const menuItems = {
   ]
 }
 
-export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+export default function Sidebar({ userRole, userName, onLogout, mobileOpen = false, onClose }: SidebarProps) {
+  const [narrow, setCollapsed] = useState(false)
+  const collapsed = narrow && !mobileOpen // the slide-in menu always shows labels
   const pathname = usePathname()
   const items = menuItems[userRole]
 
@@ -65,7 +70,9 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
   }
 
   return (
-    <div className={`${collapsed ? 'w-20' : 'w-72'} bg-black text-white h-screen sticky top-0 flex flex-col transition-all duration-300 border-r border-white/10 relative z-50`}>
+    <div className={`${collapsed ? 'lg:w-20' : 'lg:w-72'} w-72 shrink-0 bg-black text-white h-screen flex flex-col border-r border-white/10 z-50
+      fixed inset-y-0 left-0 transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full invisible'}
+      lg:visible lg:sticky lg:top-0 lg:translate-x-0 lg:transition-[width]`}>
       {/* Header */}
       <div className="p-6 border-b border-white/10 flex-shrink-0">
         <div className={`flex items-center justify-between mb-4 ${collapsed ? "justify-center" : ""}`}>
@@ -75,15 +82,19 @@ export default function Sidebar({ userRole, userName, onLogout }: SidebarProps) 
             </div>
           )}
           <div className={`flex items-center gap-1 ${collapsed ? "flex-col" : ""}`}>
-            <NotificationBell role={userRole} />
+            <span className="hidden lg:inline-flex"><NotificationBell role={userRole} /></span>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setCollapsed(!narrow)}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+              className="hidden lg:inline-flex text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close menu"
+              className="lg:hidden text-white/60 hover:text-white hover:bg-white/10 h-10 w-10">
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </div>

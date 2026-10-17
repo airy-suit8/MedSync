@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Activity, Users, MessageSquare, Send, ArrowLeft, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck, Brain, AlertTriangle, Lightbulb, Eye, EyeOff } from "lucide-react"
+import { Activity, Users, MessageSquare, Send, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck, Brain, AlertTriangle, Lightbulb, Eye, EyeOff } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -578,10 +578,6 @@ Severity: ${suggestion.severity}`
         {/* Header */}
         <header className="border-b border-black/10 pb-4 flex items-end justify-between">
           <div>
-            <Link href="/doctor-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-              <ArrowLeft className="h-3 w-3" />
-              <span>Back to Dashboard</span>
-            </Link>
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-bold tracking-tight uppercase">Communications</h1>
             </div>
@@ -595,15 +591,6 @@ Severity: ${suggestion.severity}`
               {showSuggestions ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
               {showSuggestions ? 'Hide' : 'Show'} AI
             </Button>
-            <div className="text-right">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-                Portal Status
-              </span>
-              <span className="text-xl font-mono border-b border-black inline-flex items-center gap-2">
-                <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                ACTIVE
-              </span>
-            </div>
           </div>
         </header>
       </div>

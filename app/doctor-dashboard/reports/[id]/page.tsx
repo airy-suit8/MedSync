@@ -12,8 +12,15 @@ import AiStatusNotice from "@/components/medical/AiStatusNotice"
 import LabValuesTable from "@/components/medical/LabValuesTable"
 import PrescriptionForm from "@/components/medical/PrescriptionForm"
 import PrescriptionList from "@/components/medical/PrescriptionList"
+import { differenceInYears, format, parseISO } from 'date-fns'
+import { testLabel } from '@/lib/utils'
 
-async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null, reviewed?: boolean }> {
+type PatientRecord = {
+  name: string | null; short_id: string | null; date_of_birth: string | null; gender: string | null; phone: string | null
+  allergies: string | null; current_medications: string | null; chronic_conditions: string | null
+}
+
+async function getReport(id: string): Promise<{ report: Report | null, mlSuggestion: any, userId: string | null, reviewed?: boolean, patient?: PatientRecord | null }> {
   const { supabase, user } = await verifySession()
   if (!user) return { report: null, mlSuggestion: null, userId: null }
   
@@ -60,17 +67,21 @@ async function getReport(id: string): Promise<{ report: Report | null, mlSuggest
     .select('id', { count: 'exact', head: true })
     .eq('report_id', id)
 
+  // The patient's current health profile (allergies, medicines), for prescribing from here.
+  const { data: record } = await supabase.rpc('get_patient_record', { p_patient_id: report.patient_id })
+
   return {
     report,
     mlSuggestion: mlSuggestion || null,
     userId: user.id,
     reviewed: (reviewCount ?? 0) > 0,
+    patient: (Array.isArray(record) ? record[0] : record) || null,
   }
 }
 
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { report, mlSuggestion, userId, reviewed } = await getReport(id)
+  const { report, mlSuggestion, userId, reviewed, patient } = await getReport(id)
   
   if (!report) {
     return (
@@ -125,13 +136,13 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   }
 
   // Extract patient details with proper fallbacks
-  const patientId = report.patient_id || patientInfo.patientId || 'Unknown'
-  const fullName = cleanValue(patientInfo.fullName, 'Not provided')
-  const dateOfBirth = cleanValue(patientInfo.dateOfBirth, 'Not provided')
-  const age = cleanValue(patientInfo.age, 'Not provided')
-  const gender = cleanValue(patientInfo.gender, 'Not specified')
-  const phoneNumber = cleanValue(patientInfo.phoneNumber, 'Not provided')
-  const address = cleanValue(patientInfo.address, 'Not provided')
+  const fullName = cleanValue(patient?.name || patientInfo.fullName, 'Not provided')
+  const dob = patient?.date_of_birth || patientInfo.dateOfBirth
+  const age = dob ? `${differenceInYears(new Date(), parseISO(dob))}` : cleanValue(patientInfo.age, 'Not provided')
+  const gender = testLabel(cleanValue(patient?.gender || patientInfo.gender, 'Not specified'))
+  const phoneNumber = cleanValue(patient?.phone || patientInfo.phoneNumber, 'Not provided')
+  const allergies = cleanValue(patient?.allergies || patientInfo.allergies, 'Not given by the patient')
+  const hasAllergy = allergies !== 'Not given by the patient' && !/^none$/i.test(allergies.trim())
   
   // Only show relevant fields based on test type
   const testType = report.test_type || patientInfo.testType || 'Unknown'
@@ -144,14 +155,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
     normalizedTestType.includes('bone')
   const eyeSide = isEyeTest ? cleanValue(patientInfo.eyeSide, 'Not specified') : null
   
-  // Medical history (only show if not "None" or placeholder)
-  const familyHistory = cleanValue(patientInfo.familyHistoryOfCancer, undefined)
-  const previousDiagnosis = cleanValue(patientInfo.previousDiagnosis, undefined)
-  const ongoingTreatments = cleanValue(patientInfo.ongoingTreatments, undefined)
-  
-  // Timestamps
-  const recordCreated = patientInfo.recordCreated ? new Date(patientInfo.recordCreated).toLocaleDateString() : 'Not available'
-  const lastUpdated = patientInfo.lastUpdated ? new Date(patientInfo.lastUpdated).toLocaleDateString() : 'Not available'
+  // Medical history: hidden when empty ('' — passing undefined would fall back to 'Not provided')
+  const familyHistory = cleanValue(patientInfo.familyHistoryOfCancer, '')
+  const previousDiagnosis = cleanValue(patient?.chronic_conditions || patientInfo.previousDiagnosis, '')
+  const ongoingTreatments = cleanValue(patient?.current_medications || patientInfo.ongoingTreatments, '')
+  const when = (iso?: string | null, withTime = false) => (iso ? format(parseISO(iso), withTime ? 'd MMM yyyy, HH:mm' : 'd MMM yyyy') : 'Unknown')
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -183,10 +191,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             <span>Back to Reports</span>
           </Link>
           <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold tracking-tight uppercase">Medical Report Analysis</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase">{testLabel(report.test_type)} report</h1>
           </div>
           <p className="text-sm font-mono text-black/60 uppercase mt-2">
-            AI-powered analysis for medical imaging
+            {fullName !== 'Not provided' ? fullName : 'Patient'}{patient?.short_id ? ` · ${patient.short_id}` : ''} · {when(report.uploaded_at)}
           </p>
         </div>
         <div className="text-right hidden md:block">
@@ -301,12 +309,12 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 <div className="flex flex-wrap gap-6 pt-4 border-t border-black/10 text-[11px] font-mono uppercase text-black/60">
                   <p>
                     <span className="font-bold text-black border-b border-black/10 pb-0.5 mr-2">Processed</span> 
-                    {new Date(mlSuggestion.processed_at).toLocaleString()}
+                    {when(mlSuggestion.processed_at, true)}
                   </p>
                   {mlSuggestion.reviewed_at && (
                     <p>
                       <span className="font-bold text-black border-b border-black/10 pb-0.5 mr-2">Reviewed</span> 
-                      {new Date(mlSuggestion.reviewed_at).toLocaleString()}
+                      {when(mlSuggestion.reviewed_at, true)}
                     </p>
                   )}
                 </div>
@@ -343,7 +351,12 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 <div className="grid grid-cols-1 divide-y divide-black/10">
                   <div className="flex justify-between p-3 bg-white">
                     <span className="text-[11px] font-mono uppercase text-black/55">Patient ID</span>
-                    <span className="text-xs font-bold uppercase">{patientId}</span>
+                    <span className="text-xs font-bold uppercase">{patient?.short_id || '—'}</span>
+                  </div>
+
+                  <div className={`p-3 flex flex-col gap-1 ${hasAllergy ? 'bg-red-50 border-l-2 border-red-700' : 'bg-white'}`}>
+                    <span className={`text-[10px] font-mono uppercase ${hasAllergy ? 'text-red-800' : 'text-black/55'}`}>Allergies</span>
+                    <span className={`text-xs font-bold ${hasAllergy ? 'text-red-800' : ''}`}>{allergies}</span>
                   </div>
                   
                   {fullName !== 'Not provided' && (
@@ -383,14 +396,14 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
                   {previousDiagnosis && (
                     <div className="p-3 bg-white flex flex-col gap-1 border-t-2 border-black/10">
-                      <span className="text-[10px] font-mono uppercase text-black/55">Previous Diagnosis</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Long-term conditions</span>
                       <span className="text-xs font-mono">{previousDiagnosis}</span>
                     </div>
                   )}
                   
                   {ongoingTreatments && (
                     <div className="p-3 bg-white flex flex-col gap-1">
-                      <span className="text-[10px] font-mono uppercase text-black/55">Ongoing Treatments</span>
+                      <span className="text-[10px] font-mono uppercase text-black/55">Current medicines</span>
                       <span className="text-xs font-mono">{ongoingTreatments}</span>
                     </div>
                   )}
@@ -406,7 +419,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 <div className="grid grid-cols-1 divide-y divide-black/10">
                   <div className="flex justify-between p-3 bg-white">
                     <span className="text-[10px] font-mono uppercase text-black/55">Test Type</span>
-                    <span className="text-xs font-bold uppercase">{testType}</span>
+                    <span className="text-xs font-bold uppercase">{testLabel(testType)}</span>
                   </div>
                   <div className="flex justify-between p-3 bg-white">
                     <span className="text-[10px] font-mono uppercase text-black/55">Priority</span>
@@ -418,7 +431,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   </div>
                   <div className="flex justify-between p-3 bg-white">
                     <span className="text-[10px] font-mono uppercase text-black/55">Uploaded</span>
-                    <span className="text-[10px] font-mono">{report.uploaded_at ? new Date(report.uploaded_at).toLocaleDateString() : 'Unknown'}</span>
+                    <span className="text-[10px] font-mono">{when(report.uploaded_at)}</span>
                   </div>
                   <div className="flex flex-col gap-1 p-3 bg-white">
                     <span className="text-[10px] font-mono uppercase text-black/55">Report ID</span>

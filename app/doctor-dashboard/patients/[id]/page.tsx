@@ -12,6 +12,7 @@ import HealthTimeline from "@/components/medical/HealthTimeline"
 import PrescriptionForm from "@/components/medical/PrescriptionForm"
 import PrescriptionList from "@/components/medical/PrescriptionList"
 import { createClient } from "@/lib/supabase"
+import { testLabel } from "@/lib/utils"
 
 type Record = {
   id: string; name: string | null; short_id: string | null; email: string | null; phone: string | null; address: string | null
@@ -72,7 +73,7 @@ function PatientRecord({ patientId, doctorId }: { patientId: string; doctorId: s
   const age = record.date_of_birth ? differenceInYears(new Date(), parseISO(record.date_of_birth)) : null
   const facts: [string, string | null][] = [
     ["Age", age !== null ? `${age}` : null],
-    ["Gender", record.gender ? record.gender.replace(/_/g, " ") : null],
+    ["Gender", record.gender ? testLabel(record.gender) : null],
     ["Blood group", record.blood_type],
     ["Height", record.height_cm ? `${record.height_cm} cm` : null],
     ["Weight", record.weight_kg ? `${record.weight_kg} kg` : null],
@@ -121,7 +122,7 @@ function PatientRecord({ patientId, doctorId }: { patientId: string; doctorId: s
           </dl>
           <dl className="grid grid-cols-2 gap-px border border-black/10 bg-black/10">
             {facts.map(([label, value]) => (
-              <div key={label} className="bg-white p-4">
+              <div key={label} className="bg-white p-4 last:odd:col-span-2">
                 <dt className="font-mono text-[11px] uppercase tracking-widest text-black/60">{label}</dt>
                 <dd className="mt-1 font-medium">{value || "—"}</dd>
               </div>
@@ -138,9 +139,9 @@ function PatientRecord({ patientId, doctorId }: { patientId: string; doctorId: s
               <ul className="divide-y divide-black/10 border-y border-black/10">
                 {reports.map((r) => (
                   <li key={r.id}>
-                    <Link href={`/doctor-dashboard/reports/${r.id}`} className="flex items-center justify-between gap-4 py-4 hover:bg-black/[0.02]">
+                    <Link href={`/doctor-dashboard/reports/${r.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-4 hover:bg-black/[0.02]">
                       <span>
-                        <span className="block font-bold capitalize">{r.test_type.replace(/_/g, " ")}</span>
+                        <span className="block font-bold">{testLabel(r.test_type)}</span>
                         <span className="block font-mono text-xs uppercase text-black/60">
                           {format(parseISO(r.uploaded_at), "d MMM yyyy")}{r.doctor_id && r.doctor_id !== doctorId ? " · sent to another doctor" : ""}
                         </span>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Activity, Users, MessageSquare, Send, ArrowLeft, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck } from "lucide-react"
+import { Activity, Users, MessageSquare, Send, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -333,32 +333,20 @@ export default function LabCommunicationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent p-12 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-transparent p-6 lg:p-12 max-w-7xl mx-auto">
       {/* Header */}
       <header className="border-b border-black/10 pb-8 mb-12 flex items-end justify-between">
         <div>
-          <Link href="/lab-dashboard" className="inline-flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-black/55 hover:text-black mb-4 transition-colors">
-            <ArrowLeft className="h-3 w-3" />
-            <span>Return to Node</span>
-          </Link>
-          <h1 className="text-4xl font-bold tracking-tight uppercase mb-2">Diagnostic Comms</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight uppercase mb-2">Messages</h1>
           <p className="text-black/60 font-light text-lg italic">
-            Direct uplink to physicians and patient nodes
+            Message doctors and patients.
           </p>
-        </div>
-        <div className="text-right hidden md:block">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-black/55 block mb-1">
-            Uplink Status
-          </span>
-          <span className="text-xl font-mono border-b-2 border-emerald-500">
-            ENCRYPTED_LINK
-          </span>
         </div>
       </header>
 
-      <div className="grid lg:grid-cols-4 gap-12 h-[calc(100vh-280px)]">
+      <div className="grid lg:grid-cols-4 gap-6 lg:gap-12 lg:h-[calc(100vh-280px)]">
         {/* Contacts Sidebar */}
-        <div className="lg:col-span-1 flex flex-col border border-black/10 bg-white relative overflow-hidden">
+        <div className="lg:col-span-1 flex flex-col border border-black/10 bg-white relative overflow-hidden max-h-96 lg:max-h-none">
           <div className="absolute top-0 left-0 w-full h-0.5 bg-black/10"></div>
           
           <div className="p-6 border-b border-black/10">
@@ -444,7 +432,7 @@ export default function LabCommunicationPage() {
                         </div>
                         <div>
                           <p className="font-black text-xs uppercase tracking-tight">{patient.name}</p>
-                          <p className="text-[10px] font-mono text-black/55 uppercase">{patient.specialty || 'NODE'}</p>
+                          <p className="text-[10px] font-mono text-black/55 uppercase">{patient.specialty || 'Patient'}</p>
                         </div>
                       </div>
                       {getUnreadCount(patient.id) > 0 && (
@@ -461,7 +449,7 @@ export default function LabCommunicationPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="lg:col-span-3 flex flex-col border border-black/10 bg-white relative overflow-hidden">
+        <div className="lg:col-span-3 flex flex-col border border-black/10 bg-white relative overflow-hidden min-h-[520px] lg:min-h-0">
           {selectedContact ? (
             <>
               <div className="absolute top-0 left-0 w-full h-0.5 bg-indigo-600"></div>
@@ -533,7 +521,7 @@ export default function LabCommunicationPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="TYPE MESSAGE TO UPLINK..."
+                    placeholder="Type a message…"
                     className="flex-1 rounded-none border-black h-14 font-mono text-sm uppercase focus-visible:ring-0 focus-visible:border-indigo-600"
                     disabled={sending}
                   />
@@ -557,7 +545,7 @@ export default function LabCommunicationPage() {
                 <div className="p-6 bg-black/[0.03] inline-block mb-6">
                   <MessageSquare className="h-12 w-12 text-black/10" />
                 </div>
-                <p className="text-xs font-mono uppercase text-black/55 tracking-[0.3em]">Select node to initialize comms</p>
+                <p className="text-xs font-mono uppercase text-black/55 tracking-[0.3em]">Choose someone to message</p>
               </div>
             </div>
           )}
