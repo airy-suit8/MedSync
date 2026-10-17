@@ -6,6 +6,8 @@ DROP POLICY IF EXISTS "Authenticated users can read files" ON storage.objects;
 DROP POLICY IF EXISTS "auth_read_reports" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can upload files" ON storage.objects;
 DROP POLICY IF EXISTS "auth_upload_reports" ON storage.objects;
+DROP POLICY IF EXISTS "reports_objects_select_visible_report" ON storage.objects;
+DROP POLICY IF EXISTS "reports_objects_insert_lab" ON storage.objects;
 
 -- A file is readable by whoever may read the report it belongs to (reports RLS applies
 -- inside the subquery): the patient, their assigned verified doctor, the uploading lab.
