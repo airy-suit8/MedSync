@@ -27,7 +27,7 @@ type State =
 const FRAME: Record<State["kind"], { title: string; subtitle: string }> = {
   checking: { title: "CHECKING.", subtitle: "Reading the link from your email." },
   error: { title: "LINK EXPIRED.", subtitle: "Confirmation links work once, for a limited time." },
-  confirmed: { title: "YOU'RE CONFIRMED.", subtitle: "Your email address is verified." },
+  confirmed: { title: "YOU’RE CONFIRMED.", subtitle: "Your email address is verified." },
   inbox: { title: "CHECK YOUR INBOX.", subtitle: "We sent you a link to confirm your email." },
 }
 
@@ -104,7 +104,7 @@ function Confirmed({ role, signedIn }: { role: Role | null; signedIn: boolean })
           <li key={s.label} className="flex items-start gap-4 py-4">
             <span className="w-6 pt-0.5 font-mono text-xs text-black/50">{String(i + 1).padStart(2, "0")}</span>
             <span className="min-w-0 flex-1">
-              <span className={`block font-bold ${s.done ? "text-black/50 line-through decoration-black/30" : ""}`}>{s.label}</span>
+              <span className={`block font-bold ${s.done ? "text-black/45" : ""}`}>{s.label}</span>
               {s.detail && <span className="mt-1 block text-sm text-black/60">{s.detail}</span>}
             </span>
             <span aria-label={s.done ? "Done" : i === next ? "Next" : "Later"}

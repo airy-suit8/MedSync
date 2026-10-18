@@ -39,7 +39,7 @@ describe('email confirmation page', () => {
     searchParams.value = new URLSearchParams('code=abc')
     createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } })
     render(<VerifyEmailPage />)
-    expect(await screen.findByText("YOU'RE CONFIRMED.")).toBeTruthy()
+    expect(await screen.findByText('YOU’RE CONFIRMED.')).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/login')
   })
 
@@ -57,7 +57,7 @@ describe('email confirmation page', () => {
     createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } })
     render(<VerifyEmailPage />)
     expect(await screen.findByText('CHECK YOUR INBOX.')).toBeTruthy()
-    expect(screen.queryByText("YOU'RE CONFIRMED.")).toBeNull()
+    expect(screen.queryByText('YOU’RE CONFIRMED.')).toBeNull()
   })
 
   it('offers a new link when the old one expired', async () => {
