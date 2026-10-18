@@ -34,6 +34,14 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 }
 
 export async function middleware(request: NextRequest) {
+  // Supabase sends a confirmation link to the Site URL's root when the address it should
+  // return to isn't on its allow-list. Send that visitor to the page that explains the result.
+  if (request.nextUrl.pathname === "/" && (request.nextUrl.searchParams.has("code") || request.nextUrl.searchParams.has("error_code"))) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/verify-email"
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })

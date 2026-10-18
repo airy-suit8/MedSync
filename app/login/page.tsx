@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Mail, Lock, CheckCircle, AlertCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase"
-import { validateEmail, parseAuthError, getRoleDashboard } from "@/lib/auth-utils"
+import { validateEmail, parseAuthError, getRoleDashboard, AUTH_ERRORS } from "@/lib/auth-utils"
 import AuthFrame from "@/components/auth/AuthFrame"
 
 const INPUT_CLASS = "bg-transparent border-black/20 focus:border-black h-12 rounded-none font-mono placeholder:text-black/55 transition-all pl-10"
@@ -27,8 +27,23 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false)
   const [resetSuccess, setResetSuccess] = useState(false)
   const [resetError, setResetError] = useState("")
+  const [resend, setResend] = useState<"idle" | "sending" | "sent">("idle")
 
   useEffect(() => setIsHydrated(true), [])
+
+  // Signing in before confirming the email: send a fresh confirmation link to that address.
+  const resendConfirmation = async () => {
+    setResend("sending")
+    const { error } = await createClient().auth.resend({
+      type: "signup",
+      email: formData.email.trim(),
+      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    })
+    if (error) {
+      setResend("idle")
+      setError(parseAuthError(error))
+    } else setResend("sent")
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,6 +117,18 @@ export default function LoginPage() {
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
+        )}
+        {error === AUTH_ERRORS.EMAIL_NOT_VERIFIED && (
+          resend === "sent" ? (
+            <p role="status" className="border border-black px-4 py-3 text-sm">
+              A new link is on its way to {formData.email.trim()}. Opening it confirms your email on any device; then sign in here.
+            </p>
+          ) : (
+            <Button type="button" variant="outline" onClick={resendConfirmation} disabled={resend === "sending"}
+              className="h-12 w-full rounded-none border-black font-mono text-xs uppercase tracking-widest">
+              {resend === "sending" ? "Sending…" : "Send a new confirmation link"}
+            </Button>
+          )
         )}
 
         <div className="space-y-2">

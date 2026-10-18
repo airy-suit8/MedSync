@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
 import SignUpPage from '@/app/signup/page'
 import VerifyEmailPage from '@/app/verify-email/page'
 import ConfirmPage from '@/app/confirm/page'
+import LoginPage from '@/app/login/page'
 
 afterEach(cleanup)
 
@@ -33,19 +34,30 @@ describe('sign-up with an email that already has an account', () => {
 describe('email confirmation page', () => {
   beforeEach(() => { window.location.hash = '' })
 
+  // Supabase confirms the address when the link is opened, then redirects here with ?code=.
   it('treats a link opened on another device as confirmed, not failed', async () => {
-    searchParams.value = new URLSearchParams()
+    searchParams.value = new URLSearchParams('code=abc')
     createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } })
     render(<VerifyEmailPage />)
-    expect(await screen.findByText('Email confirmed')).toBeTruthy()
+    expect(await screen.findByText("YOU'RE CONFIRMED.")).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/login')
   })
 
-  it('sends a signed-in user to their dashboard', async () => {
-    searchParams.value = new URLSearchParams()
+  it('sends a signed-in doctor to their dashboard and explains the registration check', async () => {
+    searchParams.value = new URLSearchParams('code=abc')
     createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { app_metadata: { role: 'doctor' } } } }) } })
     render(<VerifyEmailPage />)
     expect((await screen.findByRole('link', { name: 'Go to your dashboard' })).getAttribute('href')).toBe('/doctor-dashboard')
+    expect(screen.getByText('Registration check')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Fill in your public profile' }).getAttribute('href')).toBe('/doctor-dashboard/profile')
+  })
+
+  it("doesn't claim a confirmation when the page is opened without a link", async () => {
+    searchParams.value = new URLSearchParams()
+    createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) } })
+    render(<VerifyEmailPage />)
+    expect(await screen.findByText('CHECK YOUR INBOX.')).toBeTruthy()
+    expect(screen.queryByText("YOU'RE CONFIRMED.")).toBeNull()
   })
 
   it('offers a new link when the old one expired', async () => {
@@ -53,11 +65,27 @@ describe('email confirmation page', () => {
     const resend = vi.fn().mockResolvedValue({ error: null })
     createClientMock.mockReturnValue({ auth: { resend } })
     render(<VerifyEmailPage />)
-    expect(await screen.findByText(/expired/)).toBeTruthy()
+    expect((await screen.findByRole('alert')).textContent).toMatch(/expired/)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ravi@example.com' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send a new link' }))
     expect(await screen.findByText(/new link is on its way/)).toBeTruthy()
     expect(resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'ravi@example.com' }))
+  })
+})
+
+describe('signing in before confirming the email', () => {
+  it('offers to send a new confirmation link to that address', async () => {
+    searchParams.value = new URLSearchParams()
+    const resend = vi.fn().mockResolvedValue({ error: null })
+    const signInWithPassword = vi.fn().mockResolvedValue({ data: {}, error: { message: 'Email not confirmed' } })
+    createClientMock.mockReturnValue({ auth: { signInWithPassword, resend } })
+    render(<LoginPage />)
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'meera@example.com' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Str0ng!Passw0rd' } })
+    fireEvent.submit(screen.getByTestId('login-form'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Send a new confirmation link' }))
+    expect(await screen.findByText(/A new link is on its way to meera@example.com/)).toBeTruthy()
+    expect(resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'meera@example.com' }))
   })
 })
 
