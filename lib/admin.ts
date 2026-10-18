@@ -18,11 +18,14 @@ export type Account = {
   created_at: string | null
   last_sign_in_at: string | null
   invite_code: string | null
+  closed_at: string | null
+  delete_after: string | null   // closed patients: when their records may be deleted
 }
 
 export type Overview = {
   patients: number; doctors: number; labs: number; pending: number; turned_down: number
   unconfirmed: number; reports_week: number; ai_failed_week: number; open_invites: number
+  closed: number; due_for_deletion: number
 }
 
 export type SignupCode = {
@@ -38,17 +41,19 @@ export type SignupCode = {
   revoked_at: string | null
 }
 
-// Doctors and labs need verifying; patients and admins are simply active.
-export type AccountStatus = "verified" | "pending" | "turned_down" | "active"
+// Doctors and labs need verifying; patients and admins are simply active. Anyone can
+// close their account.
+export type AccountStatus = "closed" | "verified" | "pending" | "turned_down" | "active"
 
-export function accountStatus(a: Pick<Account, "role" | "verified" | "verification_reviewed_at">): AccountStatus {
+export function accountStatus(a: Pick<Account, "role" | "verified" | "verification_reviewed_at"> & { closed_at?: string | null }): AccountStatus {
+  if (a.closed_at) return "closed"
   if (a.role !== "doctor" && a.role !== "lab") return "active"
   if (a.verified) return "verified"
   return a.verification_reviewed_at ? "turned_down" : "pending"
 }
 
 export const STATUS_LABEL: Record<AccountStatus, string> = {
-  verified: "Verified", pending: "Waiting for approval", turned_down: "Turned down", active: "Active",
+  closed: "Closed", verified: "Verified", pending: "Waiting for approval", turned_down: "Turned down", active: "Active",
 }
 
 export type CodeStatus = "open" | "used" | "expired" | "revoked"
@@ -61,3 +66,11 @@ export function codeStatus(c: Pick<SignupCode, "used_at" | "revoked_at" | "expir
 
 // The public register an admin checks a doctor's number against.
 export const NMC_REGISTER_URL = "https://www.nmc.org.in/information-desk/indian-medical-register/"
+
+// Closed patients' records are kept 3 years after their last report, consultation or
+// prescription (IMC Regulations 2002, reg. 1.3.1); then an admin deletes them.
+export const RETENTION_YEARS = 3
+
+export function dueForDeletion(a: Pick<Account, "role" | "closed_at" | "delete_after">, now = new Date()): boolean {
+  return a.role === "patient" && !!a.closed_at && !!a.delete_after && new Date(a.delete_after) <= now
+}

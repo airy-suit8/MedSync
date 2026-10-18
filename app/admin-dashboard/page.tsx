@@ -45,6 +45,7 @@ function AdminOverview() {
   if (data.pending) attention.push({ text: `${data.pending} ${data.pending === 1 ? "doctor or lab is" : "doctors and labs are"} waiting for approval.`, href: "/admin-dashboard/approvals", action: "Review" })
   if (data.unconfirmed) attention.push({ text: `${data.unconfirmed} ${data.unconfirmed === 1 ? "account hasn't" : "accounts haven't"} confirmed their email. If the email never arrived, you can confirm it for them.`, href: "/admin-dashboard/accounts?show=unconfirmed", action: "See who" })
   if (data.turned_down) attention.push({ text: `${data.turned_down} turned down, waiting for them to fix their details.`, href: "/admin-dashboard/approvals" , action: "See them" })
+  if (data.due_for_deletion) attention.push({ text: `${data.due_for_deletion} closed ${data.due_for_deletion === 1 ? "patient account has" : "patient accounts have"} passed the 3-year retention period and should be deleted for good.`, href: "/admin-dashboard/accounts?show=closed", action: "Delete" })
   if (data.ai_failed_week) attention.push({ text: `The AI couldn't read ${data.ai_failed_week} ${data.ai_failed_week === 1 ? "report" : "reports"} this week. Doctors can run it again from the report; if this keeps happening, check the ML service.` })
 
   return (

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import Image from "next/image"
+import Logo from "@/components/brand/Logo"
 import AnimatedHero from "@/components/landing/AnimatedHero"
 import ScanPreview from "@/components/landing/ScanPreview"
 
@@ -45,14 +45,7 @@ export default function HomePage() {
       <header className="border-b border-black/10 sticky top-0 z-50 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-6 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Image
-              src="/medi.png"
-              alt=""
-              width={32}
-              height={32}
-              className="rounded"
-              priority
-            />
+            <Logo className="h-8 w-8" />
             <span className="text-lg sm:text-xl font-bold tracking-tight">MedSync</span>
           </Link>
           <div className="flex items-center gap-1 sm:gap-4">
@@ -198,7 +191,7 @@ export default function HomePage() {
 
       <footer className="bg-black text-white">
         <div className="container mx-auto px-6 lg:px-12 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
             <div>
               <div className="text-xs font-mono text-white/60 mb-4 tracking-widest uppercase">
                 About MedSync
@@ -208,7 +201,7 @@ export default function HomePage() {
                 technicians together around every scan, with AI that gives each one a first read.
               </p>
             </div>
-            <div className="md:text-right">
+            <div>
               <div className="text-xs font-mono text-white/60 mb-4 tracking-widest uppercase">
                 Platform
               </div>
@@ -217,17 +210,20 @@ export default function HomePage() {
                 <li><Link href="/signup" className="hover:text-white transition-colors">Create account</Link></li>
               </ul>
             </div>
+            <div>
+              <div className="text-xs font-mono text-white/60 mb-4 tracking-widest uppercase">
+                Project
+              </div>
+              <ul className="space-y-3 text-sm text-white/80">
+                <li><a href="mailto:reach.medsync@gmail.com" className="hover:text-white transition-colors">reach.medsync@gmail.com</a></li>
+                <li><a href="https://github.com/EvanGregor/MedSync" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Source code on GitHub</a></li>
+              </ul>
+            </div>
           </div>
 
           <div className="border-t border-white/10 pt-8 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
-              <Image
-                src="/medi.png"
-                alt=""
-                width={24}
-                height={24}
-                className="rounded"
-              />
+              <Logo className="h-6 w-6" inverted />
               <span className="font-bold tracking-tight">MedSync</span>
             </div>
             <nav aria-label="Legal" className="flex gap-6 text-[11px] font-mono uppercase tracking-[0.2em] text-white/70">

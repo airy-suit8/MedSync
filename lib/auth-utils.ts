@@ -128,6 +128,10 @@ export const parseAuthError = (error: any): string => {
     if (message.includes("Email not confirmed") || message.includes("email_not_confirmed")) {
         return AUTH_ERRORS.EMAIL_NOT_VERIFIED
     }
+    // A closed account (close_my_account bans it from signing in).
+    if (/banned/i.test(message) || message.includes("user_banned")) {
+        return "This account is closed. To reopen it, email reach.medsync@gmail.com."
+    }
     if (message.includes("Invalid login credentials") || message.includes("invalid_credentials")) {
         return AUTH_ERRORS.INVALID_CREDENTIALS
     }

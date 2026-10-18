@@ -19,7 +19,8 @@ import {
   UserCircle,
   ShieldCheck,
   KeyRound,
-  Bell
+  Bell,
+  Settings
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import NotificationBell from "@/components/medical/NotificationBell"
@@ -42,6 +43,7 @@ const menuItems = {
     { id: 'schedule', label: 'Schedule', icon: Calendar, href: '/doctor-dashboard/schedule' },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, href: '/doctor-dashboard/ai-assistant' },
     { id: 'profile', label: 'Public Profile', icon: UserCircle, href: '/doctor-dashboard/profile' },
+    { id: 'account', label: 'Account', icon: Settings, href: '/doctor-dashboard/account' },
   ],
   patient: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/patient-dashboard' },
@@ -50,6 +52,7 @@ const menuItems = {
     { id: 'reports', label: 'My Reports', icon: FileText, href: '/patient-dashboard/reports' },
     { id: 'chat', label: 'Messages', icon: MessageSquare, href: '/patient-dashboard/chat' },
     { id: 'ai-assistant', label: 'AI Assistant', icon: Brain, href: '/patient-dashboard/ai-assistant' },
+    { id: 'account', label: 'Account', icon: Settings, href: '/patient-dashboard/account' },
   ],
   lab: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/lab-dashboard' },
@@ -57,6 +60,7 @@ const menuItems = {
     { id: 'imaging', label: 'Imaging', icon: Activity, href: '/lab-dashboard/imaging' },
     { id: 'samples', label: 'Samples', icon: Calendar, href: '/lab-dashboard/samples' },
     { id: 'communication', label: 'Messages', icon: MessageSquare, href: '/lab-dashboard/communication' },
+    { id: 'account', label: 'Account', icon: Settings, href: '/lab-dashboard/account' },
   ],
   admin: [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, href: '/admin-dashboard' },

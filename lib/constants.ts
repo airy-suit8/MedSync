@@ -17,3 +17,6 @@ export const MEDICAL_COUNCILS = [
   "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim",
   "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
 ]
+
+// Where people reach the MedSync team (privacy requests, complaints, closed accounts).
+export const CONTACT_EMAIL = "reach.medsync@gmail.com"

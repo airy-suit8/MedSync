@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import LegalPage from "@/components/legal/LegalPage"
+import { CONTACT_EMAIL } from "@/lib/constants"
 
 export const metadata: Metadata = { title: "Terms of Service - MedSync" }
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Terms of Service" updated="4 October 2026">
+    <LegalPage title="Terms of Service" updated="18 October 2026">
       <section>
         <h2>What MedSync is</h2>
         <p>
@@ -39,6 +40,17 @@ export default function TermsPage() {
           <li>Register with your real identity and role. Do not pose as a doctor, lab or another person.</li>
           <li>Only upload or share medical information you are authorised to share.</li>
           <li>Keep your password private; you are responsible for activity on your account.</li>
+          <li>You can close your account at any time from Account, in your dashboard. See the <Link href="/privacy">Privacy Policy</Link> for what is kept and for how long.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Doctors and labs</h2>
+        <ul>
+          <li>Doctors must hold a valid registration with a State Medical Council or the National Medical Commission, and labs a valid lab registration. Give your real registration details at sign-up.</li>
+          <li>A MedSync admin checks them before you can see patients, unless you sign up with an invite code from the MedSync team. Your name, qualification and registration number are shown to patients, as the Telemedicine Practice Guidelines 2020 require.</li>
+          <li>You remain responsible for your clinical decisions, your prescriptions and following the rules of your profession, including the Telemedicine Practice Guidelines.</li>
+          <li>We may withdraw verification if registration details turn out to be wrong.</li>
         </ul>
       </section>
 
@@ -52,7 +64,7 @@ export default function TermsPage() {
 
       <section>
         <h2>Contact</h2>
-        <p>Questions about these terms: <strong>[contact email to be added]</strong>.</p>
+        <p>Questions about these terms: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
       </section>
 
       <p>See also the <Link href="/privacy">Privacy Policy</Link>.</p>

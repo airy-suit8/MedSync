@@ -28,7 +28,7 @@ const doctor: Account = {
   id: 'd1', name: 'Dr Meera Iyer', email: 'meera@example.com', role: 'doctor', short_id: 'abc', verified: false,
   license_number: 'MMC-2019-1', medical_council: 'Maharashtra', qualification: 'MBBS, MD', specialty: null,
   verification_note: null, verification_reviewed_at: null, email_confirmed: true, created_at: '2026-10-18T10:00:00Z',
-  last_sign_in_at: null, invite_code: null,
+  last_sign_in_at: null, invite_code: null, closed_at: null, delete_after: null,
 }
 
 describe('account and code status', () => {
