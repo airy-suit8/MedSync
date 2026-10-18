@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { createClient } from "@/lib/supabase"
 import { useRouter, usePathname } from "next/navigation"
 
-export type UserRole = "doctor" | "patient" | "lab"
+export type UserRole = "doctor" | "patient" | "lab" | "admin"
 
 interface AuthCheckResult {
   user: any | null

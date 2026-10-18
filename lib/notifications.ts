@@ -1,4 +1,4 @@
-export type Role = "doctor" | "patient" | "lab"
+export type Role = "doctor" | "patient" | "lab" | "admin"
 
 export type AppNotification = {
   id: string

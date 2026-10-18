@@ -9,7 +9,7 @@ import NotificationBell from "@/components/medical/NotificationBell"
 import VerificationBanner from "@/components/medical/common/VerificationBanner"
 import { createClient } from "@/lib/supabase"
 
-type Role = "doctor" | "patient" | "lab"
+type Role = "doctor" | "patient" | "lab" | "admin"
 
 // Every dashboard page sits in this frame (app/<role>-dashboard/layout.tsx): the sidebar on
 // large screens, a top bar with a menu button on phones and tablets. It stays mounted while
@@ -55,7 +55,7 @@ export default function DashboardFrame({ role, children }: { role: Role; childre
               </button>
             </div>
           </header>
-          {role !== "patient" && <VerificationBanner role={role} />}
+          {(role === "doctor" || role === "lab") && <VerificationBanner role={role} />}
           <main className="min-w-0 flex-1">{children}</main>
         </div>
       </div>

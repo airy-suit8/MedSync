@@ -45,10 +45,15 @@ describe('email confirmation page', () => {
 
   it('sends a signed-in doctor to their dashboard and explains the registration check', async () => {
     searchParams.value = new URLSearchParams('code=abc')
-    createClientMock.mockReturnValue({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { app_metadata: { role: 'doctor' } } } }) } })
+    const maybeSingle = vi.fn().mockResolvedValue({ data: { verified: false } })
+    createClientMock.mockReturnValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'd1', app_metadata: { role: 'doctor' } } } }) },
+      from: () => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }),
+    })
     render(<VerifyEmailPage />)
     expect((await screen.findByRole('link', { name: 'Go to your dashboard' })).getAttribute('href')).toBe('/doctor-dashboard')
     expect(screen.getByText('Registration check')).toBeTruthy()
+    expect(screen.getByText(/An admin checks your medical registration number/)).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Fill in your public profile' }).getAttribute('href')).toBe('/doctor-dashboard/profile')
   })
 

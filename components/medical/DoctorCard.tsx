@@ -8,6 +8,13 @@ export default function DoctorCard({ doctor, children }: { doctor: DirectoryDoct
     <article className="flex h-full flex-col bg-white p-6 lg:p-8">
       <h3 className="text-xl font-bold">{doctor.name || "Doctor"}</h3>
       <p className="mt-1 font-mono text-xs uppercase tracking-widest text-black/60">{doctor.specialty || "General practice"}</p>
+      {(doctor.qualification || doctor.license_number) && (
+        <p className="mt-2 text-xs text-black/60">
+          {doctor.qualification}
+          {doctor.qualification && doctor.license_number && " · "}
+          {doctor.license_number && <>Reg. no. {doctor.license_number}{doctor.medical_council ? ` (${doctor.medical_council})` : ""}</>}
+        </p>
+      )}
 
       <dl className="mt-6 flex-1 space-y-4 text-sm">
         <div>

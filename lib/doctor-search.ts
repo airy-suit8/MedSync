@@ -4,6 +4,10 @@ export type DirectoryDoctor = {
   specialty: string | null
   expertise: string | null
   share_before: string | null
+  // shown to patients, as the Telemedicine Practice Guidelines ask
+  qualification?: string | null
+  license_number?: string | null
+  medical_council?: string | null
 }
 
 // A patient's search matches the doctor's name, specialty or what they treat; every word

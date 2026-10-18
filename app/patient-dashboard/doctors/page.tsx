@@ -48,7 +48,7 @@ function Doctors({ patientId }: { patientId: string }) {
       supabase.from("doctor_patient_assignments").select("doctor_id, assigned_at").eq("patient_id", patientId).eq("is_active", true),
       supabase.from("appointments").select("id, doctor_id, appointment_date, start_time, symptoms")
         .eq("patient_id", patientId).eq("status", "requested").order("appointment_date", { ascending: true }),
-      supabase.from("profile_directory").select("id, name, specialty, expertise, share_before").eq("role", "doctor").order("name"),
+      supabase.from("profile_directory").select("id, name, specialty, expertise, share_before, qualification, license_number, medical_council").eq("role", "doctor").order("name"),
     ])
     setLinks(linkRows || [])
     setPending(pendingRows || [])

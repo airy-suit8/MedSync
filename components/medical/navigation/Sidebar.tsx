@@ -16,13 +16,16 @@ import {
   LayoutDashboard,
   Users,
   Stethoscope,
-  UserCircle
+  UserCircle,
+  ShieldCheck,
+  KeyRound,
+  Bell
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import NotificationBell from "@/components/medical/NotificationBell"
 
 interface SidebarProps {
-  userRole: 'doctor' | 'patient' | 'lab'
+  userRole: 'doctor' | 'patient' | 'lab' | 'admin'
   userName?: string
   onLogout?: () => void
   /** Phones and tablets: the sidebar slides in over the page while open. */
@@ -54,6 +57,13 @@ const menuItems = {
     { id: 'imaging', label: 'Imaging', icon: Activity, href: '/lab-dashboard/imaging' },
     { id: 'samples', label: 'Samples', icon: Calendar, href: '/lab-dashboard/samples' },
     { id: 'communication', label: 'Messages', icon: MessageSquare, href: '/lab-dashboard/communication' },
+  ],
+  admin: [
+    { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, href: '/admin-dashboard' },
+    { id: 'approvals', label: 'Approvals', icon: ShieldCheck, href: '/admin-dashboard/approvals' },
+    { id: 'accounts', label: 'Accounts', icon: Users, href: '/admin-dashboard/accounts' },
+    { id: 'invites', label: 'Invite Codes', icon: KeyRound, href: '/admin-dashboard/invites' },
+    { id: 'notifications', label: 'Notifications', icon: Bell, href: '/admin-dashboard/notifications' },
   ]
 }
 
@@ -66,7 +76,8 @@ export default function Sidebar({ userRole, userName, onLogout, mobileOpen = fal
   const roleLabels = {
     doctor: 'DOCTOR',
     patient: 'PATIENT',
-    lab: 'LABORATORY'
+    lab: 'LABORATORY',
+    admin: 'ADMIN'
   }
 
   return (

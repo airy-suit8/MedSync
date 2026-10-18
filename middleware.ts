@@ -120,6 +120,9 @@ export async function middleware(request: NextRequest) {
     if (requestedDashboard === "lab-dashboard" && userRole !== "lab") {
       return NextResponse.redirect(new URL("/login", request.url))
     }
+    if (requestedDashboard === "admin-dashboard" && userRole !== "admin") {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
   }
 
   // 3. Security Headers

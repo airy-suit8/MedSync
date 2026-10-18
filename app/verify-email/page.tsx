@@ -21,7 +21,7 @@ type Role = "doctor" | "patient" | "lab"
 type State =
   | { kind: "checking" }
   | { kind: "error"; expired: boolean }
-  | { kind: "confirmed"; role: Role | null; signedIn: boolean }
+  | { kind: "confirmed"; role: Role | null; signedIn: boolean; verified?: boolean }
   | { kind: "inbox" }
 
 const FRAME: Record<State["kind"], { title: string; subtitle: string }> = {
@@ -42,17 +42,24 @@ function VerifyEmailContent() {
       return
     }
     const fromLink = !!(searchParams.get("code") || hash.get("access_token"))
-    createClient().auth.getUser().then(({ data: { user } }: { data: { user: { app_metadata?: { role?: string } } | null } }) => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }: { data: { user: { id: string; app_metadata?: { role?: string } } | null } }) => {
       const role = (user?.app_metadata?.role as Role | undefined) || null
-      if (user) setState({ kind: "confirmed", role, signedIn: true })
-      else setState(fromLink ? { kind: "confirmed", role: null, signedIn: false } : { kind: "inbox" })
+      if (!user) return setState(fromLink ? { kind: "confirmed", role: null, signedIn: false } : { kind: "inbox" })
+      // A doctor or lab with an invite code is verified already.
+      let verified: boolean | undefined
+      if (role === "doctor" || role === "lab") {
+        const { data } = await supabase.from("profiles").select("verified").eq("id", user.id).maybeSingle()
+        verified = data?.verified === true
+      }
+      setState({ kind: "confirmed", role, signedIn: true, verified })
     })
   }, [searchParams])
 
   return (
     <AuthFrame label="EMAIL" title={FRAME[state.kind].title} subtitle={FRAME[state.kind].subtitle}>
       {state.kind === "checking" && <p role="status" className="text-sm text-black/60">Checking your link…</p>}
-      {state.kind === "confirmed" && <Confirmed role={state.role} signedIn={state.signedIn} />}
+      {state.kind === "confirmed" && <Confirmed role={state.role} signedIn={state.signedIn} verified={state.verified} />}
       {state.kind === "error" && (
         <div className="space-y-6">
           <p role="alert" className="flex items-start gap-3">
@@ -78,7 +85,7 @@ function VerifyEmailContent() {
 }
 
 // What's done and what's next, so a new account knows where it stands.
-function Confirmed({ role, signedIn }: { role: Role | null; signedIn: boolean }) {
+function Confirmed({ role, signedIn, verified }: { role: Role | null; signedIn: boolean; verified?: boolean }) {
   const steps: { label: string; detail?: string; done: boolean }[] = [
     { label: "Create your account", done: true },
     { label: "Confirm your email", done: true },
@@ -87,10 +94,12 @@ function Confirmed({ role, signedIn }: { role: Role | null; signedIn: boolean })
   if (role === "doctor" || role === "lab") {
     steps.push({
       label: "Registration check",
-      detail: role === "doctor"
-        ? "We check your medical registration number. Until it's verified, patients can't find you and you can't schedule appointments."
-        : "We check your lab registration number. Until it's verified, you can't upload reports.",
-      done: false,
+      detail: verified
+        ? "Done: your invite code verified your account."
+        : role === "doctor"
+          ? "An admin checks your medical registration number. Until it's verified, patients can't find you and you can't schedule appointments."
+          : "An admin checks your lab registration number. Until it's verified, you can't upload reports.",
+      done: !!verified,
     })
   } else if (role === "patient") {
     steps.push({ label: "Choose a doctor", detail: "Find doctors by what they treat and send a consultation request.", done: false })

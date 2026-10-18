@@ -98,7 +98,7 @@ export const AUTH_ERRORS = {
 // ROLE-BASED ROUTING
 // ============================================
 
-export type UserRole = "doctor" | "patient" | "lab"
+export type UserRole = "doctor" | "patient" | "lab" | "admin"
 
 export const getRoleDashboard = (role: UserRole | null | undefined): string => {
     switch (role) {
@@ -108,6 +108,8 @@ export const getRoleDashboard = (role: UserRole | null | undefined): string => {
             return "/patient-dashboard"
         case "lab":
             return "/lab-dashboard"
+        case "admin":
+            return "/admin-dashboard"
         default:
             return "/"
     }

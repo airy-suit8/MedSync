@@ -11,9 +11,11 @@ import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { validateEmail, validatePassword, parseAuthError, AUTH_ERRORS } from "@/lib/auth-utils"
 import AuthFrame from "@/components/auth/AuthFrame"
+import { MEDICAL_COUNCILS } from "@/lib/constants"
 
 const INPUT_CLASS = "bg-transparent border-black/20 focus:border-black h-12 rounded-none font-mono placeholder:text-black/55"
 const LABEL_CLASS = "text-xs font-mono uppercase tracking-widest text-black/60"
+const SELECT_CLASS = "h-12 w-full border border-black/20 bg-white px-3 font-mono text-sm focus:border-black focus:outline-none"
 
 const ROLES = [
   { value: "patient", label: "Patient", hint: "See your reports and talk to your doctor" },
@@ -28,11 +30,14 @@ export default function SignUpPage() {
     password: "",
     role: "",
     licenseNumber: "",
+    medicalCouncil: "",
+    qualification: "",
+    inviteCode: "",
   })
   const [loading, setLoading] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState<null | { invited: boolean }>(null)
   const [passwordValidation, setPasswordValidation] = useState({
     isValid: false,
     score: 0,
@@ -84,9 +89,28 @@ export default function SignUpPage() {
       setLoading(false)
       return
     }
+    if (formData.role === "doctor" && (!formData.medicalCouncil || !formData.qualification.trim())) {
+      setError("Choose your medical council and enter your qualification.")
+      setLoading(false)
+      return
+    }
+    const inviteCode = needsLicense ? formData.inviteCode.trim() : ""
 
     try {
       const supabase = createClient()
+
+      // Check an invite code first, so a typo doesn't quietly create an account that waits
+      // for an admin.
+      if (inviteCode) {
+        const { data: valid, error: codeError } = await supabase.rpc("signup_code_is_valid", {
+          p_code: inviteCode, p_role: formData.role, p_email: formData.email.trim(),
+        })
+        if (codeError) throw codeError
+        if (!valid) {
+          setError(`This invite code won't work. It may be mistyped, already used, expired, or meant for another email or for a ${formData.role === "lab" ? "doctor" : "lab"} account.`)
+          return
+        }
+      }
 
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
@@ -96,6 +120,8 @@ export default function SignUpPage() {
             name: formData.name,
             role: formData.role,
             ...(needsLicense && { license_number: formData.licenseNumber.trim() }),
+            ...(formData.role === "doctor" && { medical_council: formData.medicalCouncil, qualification: formData.qualification.trim() }),
+            ...(inviteCode && { invite_code: inviteCode }),
           },
           emailRedirectTo: `${window.location.origin}/verify-email`
         },
@@ -111,7 +137,7 @@ export default function SignUpPage() {
         return
       }
 
-      setSuccess(true)
+      setSuccess({ invited: !!inviteCode })
 
       // Redirect to login after 5 seconds
       setTimeout(() => {
@@ -135,6 +161,13 @@ export default function SignUpPage() {
           <p className="text-black/60 mb-2">
             Check your email and click the verification link to activate your account.
           </p>
+          {(formData.role === "doctor" || formData.role === "lab") && (
+            <p className="text-black/60 mb-2">
+              {success.invited
+                ? "Your invite code is accepted, so your account is ready as soon as you confirm."
+                : "Then an admin checks your registration number. You'll get a notification when it's done."}
+            </p>
+          )}
           <p className="text-sm text-black/60 mb-8">Taking you to sign in…</p>
           <Button className="w-full bg-black hover:bg-black/90 text-white h-14 rounded-none text-sm font-mono uppercase tracking-widest" asChild>
             <Link href="/login">Go to sign in</Link>
@@ -178,6 +211,17 @@ export default function SignUpPage() {
           </div>
         </fieldset>
 
+        {formData.role === "doctor" && (
+          <div className="space-y-2">
+            <Label htmlFor="medicalCouncil" className={LABEL_CLASS}>Medical Council</Label>
+            <select id="medicalCouncil" value={formData.medicalCouncil} required className={SELECT_CLASS}
+              onChange={(e) => setFormData((current) => ({ ...current, medicalCouncil: e.target.value }))}>
+              <option value="">Choose where you are registered</option>
+              {MEDICAL_COUNCILS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        )}
+
         {(formData.role === "doctor" || formData.role === "lab") && (
           <div className="space-y-2">
             <Label htmlFor="licenseNumber" className={LABEL_CLASS}>
@@ -196,7 +240,29 @@ export default function SignUpPage() {
             <p id="licenseHelp" className="text-xs text-black/60">
               {formData.role === "lab"
                 ? "Your NABL accreditation or state lab registration number. Our team verifies it before you can upload reports or see patients."
-                : "Your State or National Medical Council number. Our team verifies it before you can schedule appointments or see patients."}
+                : "Your registration number with that council. Patients see it on your profile and prescriptions."}
+            </p>
+          </div>
+        )}
+
+        {formData.role === "doctor" && (
+          <div className="space-y-2">
+            <Label htmlFor="qualification" className={LABEL_CLASS}>Qualification</Label>
+            <Input id="qualification" type="text" value={formData.qualification} maxLength={120} required
+              placeholder="e.g. MBBS, MD (Radiology)" className={INPUT_CLASS}
+              onChange={(e) => setFormData((current) => ({ ...current, qualification: e.target.value }))} />
+          </div>
+        )}
+
+        {(formData.role === "doctor" || formData.role === "lab") && (
+          <div className="space-y-2">
+            <Label htmlFor="inviteCode" className={LABEL_CLASS}>Invite code (optional)</Label>
+            <Input id="inviteCode" type="text" value={formData.inviteCode} maxLength={20} autoComplete="off"
+              placeholder="XXXX-XXXX-XXXX" aria-describedby="inviteHelp" className={`${INPUT_CLASS} uppercase`}
+              onChange={(e) => setFormData((current) => ({ ...current, inviteCode: e.target.value }))} />
+            <p id="inviteHelp" className="text-xs text-black/60">
+              From the MedSync team. With a code, your account is active as soon as you confirm your email.
+              Without one, an admin checks your registration first.
             </p>
           </div>
         )}

@@ -29,6 +29,7 @@ export default function DoctorProfilePage() {
 
 function ProfileForm({ doctorId }: { doctorId: string }) {
   const [name, setName] = useState("")
+  const [registration, setRegistration] = useState<{ qualification: string | null; license_number: string | null; medical_council: string | null }>({ qualification: null, license_number: null, medical_council: null })
   const [verified, setVerified] = useState(true)
   const [form, setForm] = useState({ specialty: "", expertise: "", share_before: "" })
   const [saving, setSaving] = useState(false)
@@ -38,12 +39,13 @@ function ProfileForm({ doctorId }: { doctorId: string }) {
     const load = async () => {
       const { data } = await createClient()
         .from("profiles")
-        .select("name, verified, specialty, expertise, share_before")
+        .select("name, verified, specialty, expertise, share_before, qualification, license_number, medical_council")
         .eq("id", doctorId)
         .maybeSingle()
       if (!data) return
       setName(data.name || "")
       setVerified(data.verified !== false)
+      setRegistration({ qualification: data.qualification, license_number: data.license_number, medical_council: data.medical_council })
       setForm({ specialty: data.specialty || "", expertise: data.expertise || "", share_before: data.share_before || "" })
     }
     load()
@@ -110,7 +112,7 @@ function ProfileForm({ doctorId }: { doctorId: string }) {
       <aside aria-label="Preview" className="lg:col-span-5">
         <p className={`${LABEL} mb-3`}>How patients see you</p>
         <div className="border border-black/10">
-          <DoctorCard doctor={{ id: doctorId, name, specialty: form.specialty || null, expertise: form.expertise || null, share_before: form.share_before || null }} />
+          <DoctorCard doctor={{ id: doctorId, name, specialty: form.specialty || null, expertise: form.expertise || null, share_before: form.share_before || null, ...registration }} />
         </div>
       </aside>
     </div>
