@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import Logo from "@/components/brand/Logo"
+import Image from "next/image"
 import AnimatedHero from "@/components/landing/AnimatedHero"
 import ScanPreview from "@/components/landing/ScanPreview"
 
@@ -45,7 +45,14 @@ export default function HomePage() {
       <header className="border-b border-black/10 sticky top-0 z-50 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-6 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Logo className="h-8 w-8" />
+            <Image
+              src="/medi.png"
+              alt=""
+              width={32}
+              height={32}
+              className="rounded"
+              priority
+            />
             <span className="text-lg sm:text-xl font-bold tracking-tight">MedSync</span>
           </Link>
           <div className="flex items-center gap-1 sm:gap-4">
@@ -223,7 +230,13 @@ export default function HomePage() {
 
           <div className="border-t border-white/10 pt-8 flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
-              <Logo className="h-6 w-6" inverted />
+              <Image
+                src="/medi.png"
+                alt=""
+                width={24}
+                height={24}
+                className="rounded"
+              />
               <span className="font-bold tracking-tight">MedSync</span>
             </div>
             <nav aria-label="Legal" className="flex gap-6 text-[11px] font-mono uppercase tracking-[0.2em] text-white/70">

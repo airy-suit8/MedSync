@@ -1,7 +1,7 @@
 # 🏥 MedSync
 
 <div align="center">
-  <img src="app/icon.svg" alt="MedSync logo" width="96" height="96" />
+  <img src="public/medi.png" alt="MedSync Logo" width="120" height="120" />
   <h3>AI-Powered Clinical Collaboration Platform</h3>
   <p><i>Bridging the gap between patients, doctors, and lab technicians through real-time intelligence.</i></p>
 
