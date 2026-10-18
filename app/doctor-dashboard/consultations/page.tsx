@@ -77,7 +77,6 @@ export default function ConsultationsPage() {
     const checkUser = async () => {
       // Prevent multiple simultaneous loads
       if (loadingRef.current) {
-        console.log('🔄 Already loading, skipping...')
         return
       }
 
@@ -132,7 +131,6 @@ export default function ConsultationsPage() {
   // Add focus listener to refresh consultations when page becomes visible
   useEffect(() => {
     const handleFocus = () => {
-      console.log('🔄 Page focused, refreshing consultations...')
       if (user && !loading) {
         loadConsultations(user.id)
       }
@@ -146,7 +144,6 @@ export default function ConsultationsPage() {
     const supabase = createClient()
 
     try {
-      console.log('🔍 Loading consultations for doctor ID:', doctorId)
       setIsLoading(true)
       setLoadError(null)
 
@@ -157,12 +154,8 @@ export default function ConsultationsPage() {
         .eq('id', doctorId)
         .maybeSingle()
 
-      console.log('🔍 Doctor lookup result:', { doctorData, doctorError })
 
-      if (doctorData) {
-        console.log('✅ Found doctor record:', doctorData)
-      } else {
-        console.log('⚠️ No doctor record found for this authenticated user:', doctorId)
+      if (!doctorData) {
         setConsultations([])
         setLoadError('Doctor profile not found for this account. Please contact support to link your doctor profile.')
         return
@@ -172,7 +165,6 @@ export default function ConsultationsPage() {
 
       // Load today's and upcoming consultations (including confirmed appointments)
       const today = format(new Date(), 'yyyy-MM-dd')
-      console.log('🔍 Loading appointments for doctor:', actualDoctorId, 'from date:', today)
 
       const { data: appointments, error } = await supabase
         .from('appointments')
@@ -183,20 +175,18 @@ export default function ConsultationsPage() {
         .order('appointment_date', { ascending: true })
         .order('start_time', { ascending: true })
 
-      console.log('🔍 Appointments query result:', { appointments, error })
 
       if (error) {
         console.error('❌ Error loading consultations:', error)
 
         // Check if table doesn't exist
         if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
-          console.log('📋 Appointments table not found')
           setConsultations([])
-          setLoadError('Appointments table is missing. Please run the database setup scripts.')
+          setLoadError('Consultations are not available right now. Please try again later.')
           return
         }
 
-        // For other errors, show error and use demo data as fallback
+        // Any other error: say so
         console.error('❌ Database error details:', {
           message: error.message,
           details: error.details,
@@ -209,7 +199,6 @@ export default function ConsultationsPage() {
       }
 
       if (appointments && appointments.length > 0) {
-        console.log('✅ Found', appointments.length, 'appointments')
         const consultationsData: Consultation[] = appointments.map((apt: any) => ({
           id: apt.id,
           call_secret: apt.call_secret,
@@ -230,7 +219,6 @@ export default function ConsultationsPage() {
         }))
         setConsultations(consultationsData)
       } else {
-        console.log('ℹ️ No appointments found for doctor', actualDoctorId)
         setConsultations([])
       }
     } catch (error) {
@@ -244,7 +232,6 @@ export default function ConsultationsPage() {
 
   const refreshConsultations = async () => {
     if (user) {
-      console.log('🔄 Refreshing consultations...')
       await loadConsultations(user.id)
     }
   }
@@ -288,7 +275,6 @@ export default function ConsultationsPage() {
         ))
 
         // Use a more user-friendly notification instead of alert
-        console.log('✅ Consultation completed:', result.message)
       } else {
         console.error('❌ Error updating consultation:', result.error)
         // Use a more user-friendly error notification

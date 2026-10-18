@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Activity, Users, MessageSquare, Send, Stethoscope, FlaskConical, User, Clock, Check, CheckCheck, Brain, AlertTriangle, Lightbulb, Eye, EyeOff } from "lucide-react"
+import { format } from "date-fns"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -851,7 +852,7 @@ Severity: ${suggestion.severity}`
                             </span>
                           </div>
                           <span className="text-[10px] font-mono text-black/55 uppercase">
-                            {new Date(suggestion.processed_at).toLocaleDateString()}
+                            {format(new Date(suggestion.processed_at), "d MMM yyyy")}
                           </span>
                         </div>
                         <p className="text-sm font-bold uppercase mb-1">

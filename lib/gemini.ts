@@ -37,7 +37,6 @@ export async function callGeminiAPI(prompt: string, context: string = ""): Promi
     }
 
     const data = await response.json()
-    console.log('Gemini API Response Data (via proxy):', JSON.stringify(data, null, 2))
 
     // Check for nested error in the response from Gemini
     if (data.error) {

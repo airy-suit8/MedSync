@@ -188,7 +188,6 @@ export default function ScheduleAppointmentModal({
                 notes: notes.trim() || null,
             }
 
-            console.log('Creating appointment:', appointmentData)
 
             const { data, error: insertError } = await supabase
                 .from('appointments')
@@ -198,8 +197,9 @@ export default function ScheduleAppointmentModal({
 
             if (insertError) {
                 console.error('Error creating appointment:', insertError)
-                // RLS rejects inserts from doctors whose registration isn't verified yet.
-                setError(insertError.code === '42501'
+                // RLS rejects inserts from doctors whose registration isn't verified yet; the
+                // insert guard also refuses closed accounts, with its own message.
+                setError(insertError.code === '42501' && !/closed/i.test(insertError.message)
                     ? "Your account is awaiting verification, so you can't schedule appointments yet."
                     : `Failed to create appointment: ${insertError.message}`)
                 return
@@ -207,7 +207,6 @@ export default function ScheduleAppointmentModal({
 
             // The patient is assigned to this doctor only when they confirm the request
             // (respond_to_appointment), which is what lets labs upload their reports.
-            console.log('Appointment created successfully:', data)
 
             toast({
                 title: "Appointment requested",

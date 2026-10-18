@@ -109,18 +109,15 @@ export default function PatientChatPage() {
         } = await supabase.auth.getUser()
 
         if (!user) {
-          console.log('No authenticated user, redirecting to login')
           router.push("/login")
           return
         }
 
         if (user.app_metadata?.role !== "patient") {
-          console.log('User is not a patient, redirecting to login')
           router.push("/login")
           return
         }
 
-        console.log('Authenticated patient user:', user.email)
         setUser(user)
         
         // The profile row is created at signup
@@ -213,144 +210,29 @@ export default function PatientChatPage() {
     try {
       // First, check if we have the current user ID
       if (!currentUserId) {
-        console.log('No current user ID, skipping contact load')
         return
       }
 
       // Prevent multiple simultaneous calls
       if (loadingContacts) {
-        console.log('Already loading contacts, skipping')
         return
       }
 
       if (doctors.length > 0 || labTechs.length > 0) {
-        console.log('Contacts already loaded, skipping')
         return
       }
 
       setLoadingContacts(true)
-      console.log('Loading contacts for user:', currentUserId)
-
-      // Validate Supabase client
-      if (!supabase) {
-        console.error('Supabase client is not available')
-        return
-      }
-
-      // Test Supabase connection first
-      console.log('Testing Supabase connection...')
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError) {
-        console.error('Supabase auth connection failed:', sessionError)
-        console.error('Session error details:', {
-          code: sessionError.code,
-          message: sessionError.message
-        })
-        return
-      }
-
-      console.log('Supabase auth connection successful')
-
-      // First, let's test if we can connect to the database
-      console.log('Testing database connection...')
-      const { data: testData, error: testError } = await supabase
-        .from('profile_directory')
-        .select('id')
-        .limit(1)
-
-      if (testError) {
-        console.error('Database connection test failed:', testError)
-        console.error('Connection error details:', {
-          code: testError.code,
-          message: testError.message,
-          details: testError.details,
-          hint: testError.hint
-        })
-        
-        // Check if it's a table structure issue
-        if (testError.code === '42P01') {
-          console.error('Table "users" does not exist!')
-        } else if (testError.code === '42703') {
-          console.error('Column "count" does not exist in users table!')
-        }
-        
-        return
-      }
-
-      console.log('Database connection successful, proceeding with contact load...')
-
-      // Let's check what columns actually exist in the users table
-      console.log('Checking users table structure...')
-      const { data: structureData, error: structureError } = await supabase
-        .from('profile_directory')
-        .select('id, name, role, specialty, online')
-        .limit(1)
-
-      if (structureError) {
-        console.error('Structure check failed:', structureError)
-        console.error('Structure error details:', {
-          code: structureError.code,
-          message: structureError.message,
-          details: structureError.details,
-          hint: structureError.hint
-        })
-        return
-      }
-
-      console.log('Users table structure check successful, sample data:', structureData)
-
-      // Now try to load the actual contacts with a very simple query first
-      console.log('Attempting to load contacts with simple query...')
-      let { data: usersData, error } = await supabase
-        .from('profile_directory')
-        .select('id, name, role')
-        .limit(10)
-
-      if (error) {
-        console.error('Simple query failed:', error)
-        console.error('Simple query error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        })
-        return
-      }
-
-      console.log('Simple query successful, data:', usersData)
-
-      // Now try the complex query
-      console.log('Attempting complex query with role filtering...')
-      const { data: complexData, error: complexError } = await supabase
+      const { data: usersData, error } = await supabase
         .from('profile_directory')
         .select('id, name, role, specialty, online')
         .in('role', ['doctor', 'lab'])
         .order('online', { ascending: false })
-
-      if (complexError) {
-        console.error('Complex query failed:', complexError)
-        console.error('Complex query error details:', {
-          code: complexError.code,
-          message: complexError.message,
-          details: complexError.details,
-          hint: complexError.hint
-        })
-        
-        // Use simple query data if complex query fails
-        usersData = complexData || usersData
-      } else {
-        console.log('Complex query successful, data:', complexData)
-        usersData = complexData
-      }
-
-      if (!usersData) {
-        console.error('No user data received from either query')
+      if (error) {
+        console.error('Could not load contacts:', error.message)
         return
       }
-
       const usersList = usersData || []
-      console.log('Final loaded users:', usersList)
       
       // Map users to Contact interface with default values
       const mapToContact = (user: any): Contact => ({
@@ -378,8 +260,6 @@ export default function PatientChatPage() {
       }
     } catch (error) {
       console.error('Unexpected error loading contacts:', error)
-      console.error('Error type:', typeof error)
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     } finally {
       setLoadingContacts(false)
     }
@@ -397,7 +277,6 @@ export default function PatientChatPage() {
     if (!selectedContact || !currentUserId) return
 
     try {
-      console.log('Loading messages between:', currentUserId, 'and', selectedContact.id)
 
       const { data: messagesData, error } = await supabase
         .from('messages')
@@ -410,7 +289,6 @@ export default function PatientChatPage() {
         return
       }
 
-      console.log('Loaded messages:', messagesData?.length || 0)
       setMessages(messagesData || [])
     } catch (error) {
       console.error('Error loading messages:', error)

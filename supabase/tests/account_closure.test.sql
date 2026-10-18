@@ -25,7 +25,7 @@ VALUES ('ac900000-0000-4000-8000-000000000002','ac222222-2222-4222-8222-22222222
 CREATE FUNCTION pg_temp.as_user(uid text) RETURNS void
 LANGUAGE sql AS $$ SELECT set_config('request.jwt.claim.sub', uid, true); $$;
 
-SELECT plan(18);
+SELECT plan(19);
 
 SET LOCAL ROLE authenticated;
 
@@ -79,8 +79,10 @@ SELECT is(public.close_my_account(), NULL::timestamptz, 'a doctor account is clo
 SELECT ok(NOT public.is_verified_doctor(), 'a closed doctor no longer counts as verified');
 SELECT pg_temp.as_user('ac444444-4444-4444-8444-444444444444');
 SELECT is((SELECT count(*)::int FROM public.profile_directory WHERE id = 'ac222222-2222-4222-8222-222222222222'), 0,
-  'patients no longer find the doctor')
-  ;
+  'patients no longer find the doctor');
+-- 20261022120000: nor can they ask the closed doctor for a consultation by id.
+SELECT throws_ok($$SELECT public.request_consultation('ac222222-2222-4222-8222-222222222222', current_date + 2, '11:00', 'Cough')$$,
+  '42501', 'This doctor is not taking requests', 'a closed doctor gets no new requests');
 
 SELECT * FROM finish();
 ROLLBACK;

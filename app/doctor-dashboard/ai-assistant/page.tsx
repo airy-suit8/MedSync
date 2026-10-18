@@ -57,9 +57,7 @@ export default function DoctorAIAssistantPage() {
       setIsLoading(true)
       
       try {
-        console.log('Attempting Gemini API call...')
         const response = await callGeminiAPI(currentMessage, DOCTOR_PROMPT_CONTEXT)
-        console.log('Gemini response success:', response.success)
         
         if (!response.success) {
           throw new Error(response.error || 'API failed')

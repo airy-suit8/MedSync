@@ -58,8 +58,6 @@ interface DoctorStats {
   aiInsights: number
 }
 
-const PENDING_REVIEW_STATUSES = ['pending', 'pending_review', 'uploaded', 'in_review']
-
 export default function DoctorDashboard() {
   const { user, shortId, loading: authLoading } = useAuthCheck("doctor")
   const [dataLoading, setDataLoading] = useState(true)
@@ -88,9 +86,9 @@ export default function DoctorDashboard() {
     try {
       const today = format(new Date(), 'yyyy-MM-dd')
 
-      // Today's appointments, the doctor's reports and pending AI insights don't depend
-      // on each other, so they load in one round trip.
-      const [{ data: appts }, { data: reports }, suggestionsResult] = await Promise.all([
+      // Today's appointments, the doctor's reports, pending AI insights and the doctor's
+      // current patients don't depend on each other, so they load in one round trip.
+      const [{ data: appts }, { data: reports }, suggestionsResult, { data: myPatients }] = await Promise.all([
         supabase
           .from('appointments')
           .select('*')
@@ -109,47 +107,43 @@ export default function DoctorDashboard() {
           .eq('status', 'pending_review')
           .order('processed_at', { ascending: false })
           .limit(5),
+        supabase.rpc('get_doctor_patients_bulletproof', { doctor_uuid: authUserId }),
       ])
 
       setTodayAppointments(appts || [])
 
-      // 4. Keep only truly pending reports for dashboard review widgets
-      const pendingReports = (reports || []).filter((report: any) =>
-        PENDING_REVIEW_STATUSES.includes((report.status || 'pending').toLowerCase())
-      )
+      // Reports still waiting for this doctor's review (a review row means it's done).
+      const reportIds = (reports || []).map((r: any) => r.id)
+      const { data: myReviews } = reportIds.length
+        ? await supabase.from('report_reviews').select('report_id').eq('doctor_id', authUserId).in('report_id', reportIds)
+        : { data: [] }
+      const reviewed = new Set((myReviews || []).map((r: any) => r.report_id))
+      const pendingReports = (reports || []).filter((report: any) => !reviewed.has(report.id))
 
-      // 5. Calculate Stats
-      // Active patients = unique patients from appointments + reports
-      const patientIds = new Set([
-        ...(appts?.map((a: any) => a.patient_id) || []),
-        ...(reports?.map((r: any) => r.patient_id) || [])
-      ].filter(Boolean))
-
-      // Fetch patient profiles for mapping names (using profile_directory view)
-      const patientIdArray = Array.from(patientIds)
-      const { data: profiles } = await supabase
-        .from('profile_directory')
-        .select('id, name')
-        .in('id', patientIdArray.length > 0 ? patientIdArray : ['dummy'])
-
-      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.name]))
+      // Names: the doctor's current patients, then the directory for anyone else.
+      const profileMap = new Map<string, string>((myPatients || []).map((p: any) => [p.patient_id, p.patient_name]))
+      const unknownIds = Array.from(new Set(pendingReports.map((r: any) => r.patient_id).filter((id: string) => id && !profileMap.has(id))))
+      if (unknownIds.length) {
+        const { data: profiles } = await supabase.from('profile_directory').select('id, name').in('id', unknownIds)
+        for (const p of profiles || []) profileMap.set(p.id, p.name)
+      }
 
       setStats({
-        activePatients: patientIds.size,
+        activePatients: myPatients?.length || 0,
         pendingReviews: pendingReports.length,
         consultations: appts?.length || 0,
-        aiInsights: 0 // Placeholder until AI insights table exists
+        aiInsights: 0 // set from the AI readings below
       })
 
       const reviews = pendingReports.slice(0, 8).map((report: any) => ({
         id: report.id,
-        patient_name: profileMap.get(report.patient_id) || report.patient_name || 'Unknown Patient',
+        patient_name: profileMap.get(report.patient_id) || report.patient_name || 'Patient',
         report_type: testLabel(report.report_type || report.test_type),
         description: report.description || 'Report requires review',
         priority: (report.priority as any) || 'normal',
         created_at: report.created_at || report.uploaded_at,
-        status: report.status || 'pending'
-      })) || []
+        status: 'pending'
+      }))
       
       setUrgentReviews(reviews)
 
@@ -162,7 +156,7 @@ export default function DoctorDashboard() {
           setAiInsights(suggestions.map((s: any) => ({
             id: s.id,
             type: s.test_type || 'analysis',
-            title: `${(s.test_type || 'scan').toUpperCase()} Analysis — ${Math.round((s.confidence || 0) * 100)}% confidence`,
+            title: `${testLabel(s.test_type)} reading${typeof s.confidence === 'number' ? ` — ${Math.round(s.confidence * 100)}% confidence` : ''}`,
             description: s.findings || 'Analysis complete. Review recommended.',
             created_at: s.processed_at || today,
             priority: s.severity === 'critical' || s.severity === 'severe' ? 'high' : 'normal',

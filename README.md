@@ -8,7 +8,7 @@
   [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
   [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
   [![Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
-  [![Zoom](https://img.shields.io/badge/Zoom-Video-2D8CFF?style=for-the-badge&logo=zoom)](https://zoom.us/)
+  [![WebRTC](https://img.shields.io/badge/WebRTC-Video-333333?style=for-the-badge&logo=webrtc)](https://webrtc.org/)
 </div>
 
 ---
@@ -22,20 +22,31 @@ From automated **MRI Brain Tumor detection** to **X-ray fracture analysis**, Med
 ## ✨ Key Features
 
 ### 🤖 Clinical Intelligence (AI/ML)
-- **Advanced X-ray Ensemble**: Combines **EfficientNet-v4** and **YOLOv8** for high-precision bone fracture detection with confidence scoring.
+- **Advanced X-ray Ensemble**: Combines **EfficientNet** and **YOLOv8** for bone fracture detection with confidence scoring and a box around the finding.
 - **MRI Brain Tumor Detection**: Keras-based deep learning model for rapid identification of neural abnormalities.
-- **Medical Report Synthesis**: Google Gemini-powered analysis that translates complex lab results into patient-friendly explanations.
-- **Smart Prescriptions**: AI-driven drug information and alternative suggestions.
+- **Lab Value Reading**: Google Gemini reads blood and urine reports into a table of values with their reference ranges for the doctor.
+- **Doctor in the Loop**: Every AI reading goes to the patient's doctor first; patients see it only with the doctor's review.
 
 ### 🔄 Real-time Ecosystem
-- **Instant Messaging**: Secure, end-to-end encrypted chat for Doctors, Patients, and Lab Technicians.
-- **Live Sync Dashboards**: Role-specific interfaces that update in real-time via Supabase WebSockets.
-- **Video Consultations**: Integrated **Zoom Meeting SDK** for high-quality, secure telehealth appointments.
+- **Instant Messaging**: Chat between Doctors, Patients, and Lab Technicians, encrypted in transit.
+- **Live Sync Dashboards**: Role-specific interfaces that update in real-time via Supabase WebSockets, with a notifications inbox for every role.
+- **Video Consultations**: Peer-to-peer **WebRTC** calls, signalled over Supabase Realtime and never recorded.
+
+### 🩺 Care Workflow
+- **Find a Doctor**: Patients search doctors by what they treat and send consultation requests; a patient can have several doctors and end care at any time.
+- **Doctor Reviews**: A verdict on the AI reading, a note for the patient (with dictation), a photo of a handwritten note, and a private note for the patient's other doctors.
+- **Digital Prescriptions**: Written by the doctor from a review, a consultation or the patient record; printable, with the doctor's registration number.
+- **Health Record**: The patient's health profile (allergies, medicines, conditions) and a timeline of reports, reviews, prescriptions and consultations.
+
+### 🗂️ Administration
+- **Verified Doctors and Labs**: Doctors give their medical council, registration number and qualification at sign-up; an admin approves them, or they join with a single-use invite code.
+- **Admin Dashboard**: Approvals, every account and its status, and invite codes. Admins never see medical records.
+- **Closing an Account**: Anyone can close their account; medical records are kept for 3 years after the last activity, as Indian medical record rules require, then deleted.
 
 ### 🛡️ Enterprise-Grade Security
 - **Role-Based Access Control (RBAC)**: Strict permission boundaries for different user types.
 - **Secure Architecture**: Row Level Security (RLS) and JWT authentication ensure data privacy.
-- **Comprehensive Audit Trails**: Detailed logging of all clinical interactions and data access.
+- **Audit Trails**: Every time a doctor opens a report, and every admin decision, is logged.
 
 ---
 
@@ -43,11 +54,11 @@ From automated **MRI Brain Tumor detection** to **X-ray fracture analysis**, Med
 
 | Category | Technology |
 | --- | --- |
-| **Frontend** | Next.js 15, React 19, TypeScript, Framer Motion |
+| **Frontend** | Next.js 15, React 19, TypeScript |
 | **Styling** | Tailwind CSS, shadcn/ui |
 | **Backend** | Supabase (PostgreSQL, Auth, Real-time, Storage) |
-| **AI/ML** | Google Gemini API, Vertex AI, PyTorch, YOLOv8, Keras |
-| **Video/Comm** | Zoom Meeting SDK |
+| **AI/ML** | Google Gemini API, PyTorch, YOLOv8, Keras |
+| **Video/Comm** | WebRTC (peer-to-peer), Supabase Realtime signalling |
 | **ML Serving** | FastAPI, Uvicorn, SlowAPI (Rate Limiting) |
 
 ---
@@ -74,8 +85,8 @@ graph TD
         YT[YOLO + EffNet Ensemble]
     end
 
-    subgraph "Video Engine"
-        ZM[Zoom SDK]
+    subgraph "Video"
+        RTC[WebRTC peer-to-peer]
     end
 
     P <--> RT
@@ -84,8 +95,8 @@ graph TD
     
     RT <--> SB
     
-    D -- Video Call --> ZM
-    P -- Video Call --> ZM
+    D -- Video Call --> RTC
+    P -- Video Call --> RTC
     
     D -- Analysis Request --> ML
     L -- Upload Report --> SB
@@ -157,8 +168,8 @@ pnpm test:e2e         # Playwright; run pnpm exec playwright install first
 Built in 36 hours for **Parul University AI/ML Hackathon 2.0**.
 
 - **Infra**: Supabase, Vercel
-- **AI**: Google Gemini, Vertex AI
-- **Video**: Zoom Meeting SDK
+- **AI**: Google Gemini
+- **Video**: WebRTC
 
 ---
 
