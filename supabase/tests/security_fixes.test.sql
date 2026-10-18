@@ -15,11 +15,11 @@ VALUES
 -- The team verifies D1 and L1 in the dashboard (runs as postgres, which the guard allows).
 UPDATE public.profiles SET verified = true WHERE id IN ('53333333-3333-4333-8333-333333333333','55555555-5555-4555-8555-555555555555');
 
-INSERT INTO public.appointments (id, doctor_id, patient_id, appointment_date, start_time, status) VALUES
- ('a1000000-0000-4000-8000-000000000001','53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 1,'10:00','scheduled'),
- ('a1000000-0000-4000-8000-000000000002','53333333-3333-4333-8333-333333333333','52222222-2222-4222-8222-222222222222',current_date + 1,'11:00','scheduled'),
- ('a1000000-0000-4000-8000-000000000003','53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 2,'10:00','scheduled'),
- ('a1000000-0000-4000-8000-000000000004','54444444-4444-4444-8444-444444444444','52222222-2222-4222-8222-222222222222',current_date + 1,'12:00','scheduled');
+INSERT INTO public.appointments (id, doctor_id, patient_id, appointment_date, start_time, end_time, status) VALUES
+ ('a1000000-0000-4000-8000-000000000001','53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 1,'10:00','10:30','scheduled'),
+ ('a1000000-0000-4000-8000-000000000002','53333333-3333-4333-8333-333333333333','52222222-2222-4222-8222-222222222222',current_date + 1,'11:00','11:30','scheduled'),
+ ('a1000000-0000-4000-8000-000000000003','53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 2,'10:00','10:30','scheduled'),
+ ('a1000000-0000-4000-8000-000000000004','54444444-4444-4444-8444-444444444444','52222222-2222-4222-8222-222222222222',current_date + 1,'12:00','12:30','scheduled');
 
 INSERT INTO public.messages (id, content, sender_id, sender_name, sender_role, receiver_id, receiver_name, receiver_role)
 VALUES ('a2000000-0000-4000-8000-000000000001','private','53333333-3333-4333-8333-333333333333','D1','doctor','51111111-1111-4111-8111-111111111111','P1','patient');
@@ -118,7 +118,7 @@ SELECT is((SELECT count(*)::int FROM public.get_doctor_patients_bulletproof('544
 SELECT set_config('request.jwt.claim.sub','53333333-3333-4333-8333-333333333333',true);
 SELECT is((SELECT diagnosis FROM public.appointments WHERE id = 'a1000000-0000-4000-8000-000000000001'), NULL, 'rejected updates left the diagnosis untouched');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000001','{"diagnosis":"ok"}')->>'success','true','the appointment''s doctor can update it');
-SELECT lives_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time) VALUES ('53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 3,'09:00')$$,'verified doctor can schedule');
+SELECT lives_ok($$INSERT INTO public.appointments (doctor_id, patient_id, appointment_date, start_time, end_time) VALUES ('53333333-3333-4333-8333-333333333333','51111111-1111-4111-8111-111111111111',current_date + 3,'09:00','09:30')$$,'verified doctor can schedule');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"confirmed"}')->>'success','false','doctor cannot confirm on the patient''s behalf');
 SELECT is(public.safe_appointment_update('a1000000-0000-4000-8000-000000000002','{"status":"completed"}')->>'success','true','doctor can still complete an appointment');
 SELECT throws_ok($$UPDATE public.profiles SET name = 'Another Doctor' WHERE id = '53333333-3333-4333-8333-333333333333'$$,'42501',NULL,'a verified doctor cannot change the name patients confirm against');
