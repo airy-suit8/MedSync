@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
+import { SITE_URL as baseUrl } from '@/lib/constants'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://medsync.vercel.app'
   
   // Public routes
   const routes = [

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
+import { SITE_URL } from '@/lib/constants'
 
 const geist = localFont({
   src: './fonts/geist-latin.woff2',
@@ -17,7 +18,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://medsync.health'),
+  metadataBase: new URL(SITE_URL),
   title: 'MedSync - Healthcare Collaboration Platform',
   description: 'AI-powered healthcare collaboration platform connecting patients, doctors, and laboratory technicians through real-time communication and intelligent insights.',
   keywords: 'healthcare, AI, medical collaboration, patient portal, doctor dashboard, lab management',
@@ -43,7 +44,7 @@ const jsonLd = {
   '@type': 'WebApplication',
   name: 'MedSync',
   description: 'AI-powered healthcare collaboration platform connecting patients, doctors, and laboratory technicians.',
-  url: 'https://medsync.health',
+  url: SITE_URL,
   applicationCategory: 'HealthApplication',
   operatingSystem: 'Web',
 }
