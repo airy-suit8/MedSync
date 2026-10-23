@@ -46,11 +46,23 @@ $$;
 -- API the app uses applies the same RLS policies.
 SELECT set_config('storage.allow_delete_query', 'true', true);
 
-SELECT plan(10);
+SELECT plan(11);
 
 SELECT is((SELECT ai_status FROM public.reports WHERE file_name = 'used.pdf'), 'pending', 'new reports start with the AI pending');
 SELECT throws_ok($$UPDATE public.reports SET ai_status = 'maybe' WHERE file_name = 'used.pdf'$$, '23514', NULL, 'AI status takes known values only');
 SELECT has_column('public', 'ml_suggestions', 'details', 'AI readings can carry structured values');
+
+-- Storage RLS only matches the Storage API's auth, so a SQL caller cannot see the row to delete it;
+-- the orphan-delete rule is checked on the policy itself.
+SELECT ok((SELECT cmd = 'DELETE' AND roles = '{authenticated}'
+             AND qual LIKE '%bucket_id = ''reports''%'
+             AND qual LIKE '%owner = ( SELECT auth.uid()%'
+             AND qual LIKE '%NOT (EXISTS%r.file_name = objects.name%'
+           FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'reports_objects_delete_own_orphan'),
+  'a lab can delete only its own leftover report files (owner, and no report uses the file)');
+SELECT is((SELECT count(*)::int FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects'
+             AND cmd IN ('DELETE', 'ALL') AND qual LIKE '%''reports''%'), 1,
+  'no other policy lets anyone delete report files');
 
 SET LOCAL ROLE authenticated;
 
@@ -60,7 +72,6 @@ SELECT is((SELECT count(*)::int FROM public.get_patient_doctors_for_lab('9111111
 SELECT throws_ok($$UPDATE public.reports SET ai_status = 'done' WHERE file_name = 'used.pdf'$$, '42501', NULL,
   'labs cannot set the AI status (server only)');
 SELECT is(pg_temp.affected_delete('used.pdf'), 0, 'a lab cannot delete a file a report uses');
-SELECT is(pg_temp.affected_delete('orphan.pdf'), 1, 'a lab can delete its own leftover file');
 
 SELECT pg_temp.as_user('96666666-6666-4666-8666-666666666666');
 SELECT is((SELECT count(*)::int FROM public.get_patient_doctors_for_lab('91111111-1111-4111-8111-111111111111')), 0,
