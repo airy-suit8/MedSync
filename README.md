@@ -120,8 +120,6 @@ sequenceDiagram
 
 ## The AI
 
-<img src=".github/readme/doctor-ai-review.jpg" alt="AI first reading with a bounding box, next to the doctor's review form" align="right" width="44%" />
-
 **X-ray fracture detection.** Two models read every radiograph, and the service combines their scores:
 
 ```mermaid
@@ -144,13 +142,20 @@ flowchart LR
 
 An X-ray reading takes **0.20 s** (median) on a CPU, with no GPU.
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
 **Brain MRI.** A Keras CNN at 150 × 150 px flags likely tumours.
 
 **Blood and urine reports.** Gemini 2.5 Flash (falling back to 2.0 Flash) turns the report into a table of every test value, with its reference range, a low/high flag and a plain-language summary.
 
 **The doctor is always in the loop.** Every AI reading goes to the patient's doctor first. The patient sees it only together with the doctor's review.
 
-<br clear="right"/>
+</td>
+<td width="50%" valign="top"><img src=".github/readme/doctor-ai-review.jpg" alt="AI first reading with a bounding box, next to the doctor's review form" /><p align="center"><sub><b>Doctor</b> · the AI's box on the radiograph, beside the review form</sub></p></td>
+</tr>
+</table>
 
 ## Security and privacy
 
