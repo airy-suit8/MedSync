@@ -50,6 +50,7 @@ jobs:
             echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
           } >> "$GITHUB_ENV"
       - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm build  # after Supabase start: the public Supabase values are baked into the build
       - run: pnpm test:e2e
 
   local-supabase:

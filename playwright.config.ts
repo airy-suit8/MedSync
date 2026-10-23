@@ -19,7 +19,9 @@ export default defineConfig({
     { name: 'mobile-chromium', use: { ...devices['iPhone 13'] } },
     { name: 'mobile-webkit', use: { ...devices['iPhone 13'] } },
   ],
+  // CI tests the production build from its own `pnpm build` step: under load the dev server serves
+  // half-compiled pages ("Expected clientReferenceManifest to be defined") and sign-in never starts.
   webServer: process.env.PLAYWRIGHT_BASE_URL ? undefined : {
-    command: 'pnpm dev', url: baseURL, reuseExistingServer: !process.env.CI, timeout: 180_000,
+    command: process.env.CI ? 'pnpm start' : 'pnpm dev', url: baseURL, reuseExistingServer: !process.env.CI, timeout: 180_000,
   },
 })
