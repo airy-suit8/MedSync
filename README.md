@@ -156,7 +156,7 @@ An X-ray reading takes **0.20 s** (median) on a CPU, with no GPU.
 
 | | |
 |---|---|
-| **Row-level security everywhere** | All 26 tables have row-level security, enforced by 50 policies. **339 pgTAP assertions** check who can read and write what. |
+| **Row-level security everywhere** | All 26 tables have row-level security, enforced by 50 policies. **340 pgTAP assertions** check who can read and write what. |
 | **Private files** | Reports, imaging and handwritten notes live in private storage buckets and are served through signed links that expire after 5 minutes. |
 | **Roles the user cannot change** | A database trigger writes the role to `app_metadata` at sign-up. Users cannot edit that field, and the middleware authorizes every dashboard from it. |
 | **Verified practitioners** | Doctors and labs give their registration details at sign-up and are approved by an admin, following India's Telemedicine Practice Guidelines (2020). |
@@ -286,7 +286,7 @@ tests/          Unit, integration and Playwright end-to-end tests
 
 | Layer | Tool | Size | Command |
 |---|---|---|---|
-| Database security | pgTAP | 339 assertions in 14 files | `pnpm test:pgtap` |
+| Database security | pgTAP | 340 assertions in 14 files | `pnpm test:pgtap` |
 | Unit | Vitest | 169 tests in 21 files | `pnpm test:unit` |
 | ML service | pytest | 27 tests | `pnpm test:ml` |
 | Integration | Vitest against local Supabase | 2 tests | `pnpm test:integration` |
