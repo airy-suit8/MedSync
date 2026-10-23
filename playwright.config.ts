@@ -10,13 +10,14 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   workers: 1,
+  retries: process.env.CI ? 1 : 0, // a WebKit crash on the runner gets one more try; a real failure still fails twice
   timeout: 90_000,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-    { name: 'mobile-chromium', use: { ...devices['iPhone 13'] } },
+    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
     { name: 'mobile-webkit', use: { ...devices['iPhone 13'] } },
   ],
   // CI tests the production build from its own `pnpm build` step: under load the dev server serves
