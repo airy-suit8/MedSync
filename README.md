@@ -214,7 +214,7 @@ flowchart LR
 
 ## Run it locally
 
-**You need** Node.js 20+, pnpm 10 (`corepack enable`), Docker (for local Supabase) and Python 3.12 (for the ML service).
+**You need** Node.js 22+, pnpm 10 (`corepack enable`), Docker (for local Supabase) and Python 3.12 (for the ML service).
 
 ```bash
 git clone https://github.com/airy-suit8/MedSync.git
