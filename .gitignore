@@ -116,6 +116,8 @@ venv/
 .pytest_cache/
 .coverage
 htmlcov/
+__pycache__/
+*.pyc
 ml-service/models/
 ml-service/bone_fracture_model.pkl
 ml-service/brain_tumor_model.pkl
