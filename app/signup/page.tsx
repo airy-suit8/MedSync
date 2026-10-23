@@ -4,6 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { CheckCircle, AlertCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -303,17 +304,18 @@ export default function SignUpPage() {
           <Label htmlFor="password" className={LABEL_CLASS}>
             Password
           </Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={(e) => handlePasswordChange(e.target.value)}
-            required
-            aria-describedby={formData.password ? "passwordHelp" : undefined}
-            className={INPUT_CLASS}
-          />
+          <div className="relative">
+            <PasswordInput
+              id="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => handlePasswordChange(e.target.value)}
+              required
+              aria-describedby={formData.password ? "passwordHelp" : undefined}
+              className={INPUT_CLASS}
+            />
+          </div>
           {formData.password && (
             <div id="passwordHelp" className="mt-3">
               <div className="flex gap-1 mb-2" aria-hidden="true">

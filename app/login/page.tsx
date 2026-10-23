@@ -4,6 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Mail, Lock, CheckCircle, AlertCircle, ArrowRight } from "lucide-react"
@@ -166,9 +167,8 @@ export default function LoginPage() {
             </Button>
           </div>
           <div className="relative group">
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="current-password"
               placeholder="••••••••"
               value={formData.password}

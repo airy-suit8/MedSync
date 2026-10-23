@@ -27,7 +27,8 @@ export default function ReportReviewPanel({ reportId, doctorId, hasAi, children 
   hasAi: boolean
   children?: React.ReactNode
 }) {
-  const [verdict, setVerdict] = useState<Verdict | "">("")
+  // With no AI reading, "reviewed" is the only verdict; preselect it so Save works before load() finishes.
+  const [verdict, setVerdict] = useState<Verdict | "">(hasAi ? "" : "reviewed")
   const [patientNote, setPatientNote] = useState("")
   const [privateNote, setPrivateNote] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)

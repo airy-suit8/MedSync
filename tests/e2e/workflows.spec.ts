@@ -86,7 +86,7 @@ test('lab report upload, ML suggestion, doctor review, and patient result visibi
     const note = `Values look fine ${runId}`
     await signIn(page, doctor)
     await page.goto(`/doctor-dashboard/reports/${report!.id}`, { waitUntil: 'domcontentloaded', timeout: 90_000 })
-    await page.getByLabel('Note for the patient').fill(note)
+    await page.getByLabel('Note for the patient', { exact: true }).fill(note)
     await page.getByRole('button', { name: 'Save review' }).click()
     await expect(page.getByText(/^Saved /)).toBeVisible({ timeout: 20_000 })
 
@@ -171,6 +171,9 @@ test('doctor and patient join and end the same video consultation from separate 
     const patient = await createAccount(admin, runId, 'patient')
     const doctor = await createAccount(admin, runId, 'doctor')
     accounts.push(patient, doctor)
+    // A doctor-scheduled appointment only becomes joinable once the patient confirms it,
+    // which also links them; seed that confirmed state directly.
+    await admin.from('doctor_patient_assignments').insert({ doctor_id: doctor.id, patient_id: patient.id, is_active: true })
     const { data: appointment, error } = await admin.from('appointments').insert({
       patient_id: patient.id,
       doctor_id: doctor.id,
@@ -181,7 +184,7 @@ test('doctor and patient join and end the same video consultation from separate 
       end_time: '23:59:00',
       appointment_type: 'consultation',
       consultation_type: 'video',
-      status: 'scheduled',
+      status: 'confirmed',
       symptoms: `E2E video ${runId}`,
     }).select('id').single()
     if (error || !appointment) throw new Error(`Could not seed video appointment: ${error?.message}`)
@@ -191,10 +194,22 @@ test('doctor and patient join and end the same video consultation from separate 
       const context = await browser.newContext()
       contexts.push(context)
       await context.grantPermissions(['camera', 'microphone'])
+      // RTCPeerConnection.addTrack only accepts real MediaStreamTracks, so build a genuine
+      // stream from a canvas (video) and an oscillator (audio) instead of plain objects.
       await context.addInitScript(() => {
-        const fakeTrack = { stop() {}, enabled: true, kind: 'video', readyState: 'live' }
-        const fakeStream = { getTracks: () => [fakeTrack], getVideoTracks: () => [fakeTrack], getAudioTracks: () => [fakeTrack] }
-        Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia: async () => fakeStream } })
+        const getUserMedia = async () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = 320
+          canvas.height = 240
+          canvas.getContext('2d')?.fillRect(0, 0, 320, 240)
+          const stream = canvas.captureStream(5)
+          const audio = new AudioContext()
+          const destination = audio.createMediaStreamDestination()
+          audio.createOscillator().connect(destination)
+          destination.stream.getAudioTracks().forEach((track) => stream.addTrack(track))
+          return stream
+        }
+        Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia } })
       })
     }
     const doctorPage = await contexts[0].newPage()
@@ -225,10 +240,12 @@ test('doctor and patient join and end the same video consultation from separate 
     await expect(patientDialog).toBeHidden()
   } finally {
     if (appointmentId) {
-      await admin.from('video_call_logs').delete().eq('appointment_id', appointmentId)
+      await admin.from('video_call_logs').delete().in('user_id', accounts.map((a) => a.id))
       await admin.from('consultation_meetings').delete().eq('appointment_id', appointmentId)
       await admin.from('appointments').delete().eq('id', appointmentId)
     }
+    const doctorIds = accounts.filter((a) => a.role === 'doctor').map((a) => a.id)
+    if (doctorIds.length) await admin.from('doctor_patient_assignments').delete().in('doctor_id', doctorIds)
     for (const context of contexts) {
       await context.close()
     }

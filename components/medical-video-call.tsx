@@ -172,8 +172,11 @@ export default function MedicalVideoCall({
 
     if (previewStream) {
       localVideoRef.current.srcObject = previewStream
-      localVideoRef.current.style.transform = 'none'
-      localVideoRef.current.style.webkitTransform = 'none'
+      // Mirror the self-view like a mirror (as Meet/Zoom do); a shared screen stays unflipped
+      // so its text reads correctly. The stream sent to the other person is never flipped.
+      const previewTransform = isScreenSharing ? 'none' : 'scaleX(-1)'
+      localVideoRef.current.style.transform = previewTransform
+      localVideoRef.current.style.webkitTransform = previewTransform
       void localVideoRef.current.play().catch(() => {})
       setHasLocalStream(true)
     }
@@ -882,11 +885,11 @@ export default function MedicalVideoCall({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl border-none">
+      <Card role="dialog" aria-modal="true" aria-labelledby="video-call-title" className="w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl border-none">
         <CardHeader className="flex-shrink-0 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <CardTitle className="text-xl font-bold uppercase tracking-tight">MedSync Secure Meet</CardTitle>
+              <CardTitle id="video-call-title" className="text-xl font-bold uppercase tracking-tight">MedSync Secure Meet</CardTitle>
               <div className="flex items-center space-x-2">
                 <Badge variant={isConnected ? 'default' : 'secondary'} className={isConnected ? 'bg-green-600' : ''}>
                   {isConnected ? 'ENCRYPTED' : 'OFFLINE'}

@@ -61,6 +61,8 @@ test('file upload adversarial cells reach local Storage and record actual accept
     patient = await createAccount(admin, patientEmail, 'patient', `Upload Patient ${runId.slice(-5)}`)
     doctor = await createAccount(admin, doctorEmail, 'doctor', `Upload Doctor ${runId.slice(-5)}`)
     lab = await createAccount(admin, labEmail, 'lab', `Upload Lab ${runId.slice(-5)}`)
+    // A lab can only upload for one of the patient's linked doctors.
+    await admin.from('doctor_patient_assignments').insert({ doctor_id: doctor.id, patient_id: patient.id, is_active: true })
 
     await login(page, labEmail, 'lab')
     for (const file of files) {
@@ -91,6 +93,7 @@ test('file upload adversarial cells reach local Storage and record actual accept
     expect(accepted, 'unsafe file cells accepted by the live upload flow').toEqual([])
   } finally {
     if (lab) await admin.from('reports').delete().eq('uploaded_by', lab.id)
+    if (doctor) await admin.from('doctor_patient_assignments').delete().eq('doctor_id', doctor.id)
     const { data: after } = await admin.storage.from('reports').list('', { limit: 1000 })
     const createdObjects = (after || []).filter((file) => !existingStorage.has(file.name)).map((file) => file.name)
     if (createdObjects.length) await admin.storage.from('reports').remove(createdObjects)
