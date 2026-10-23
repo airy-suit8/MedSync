@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <section>
         <h2>Who we are</h2>
         <p>
-          MedSync is an academic software prototype built by a student team at Parul University. It is not a
+          MedSync is an academic software prototype built by a student team. It is not a
           hospital, clinic or healthcare provider. For questions, corrections, a copy of your data, deletion requests or
           complaints, email {mail}. We reply within 90 days, as the Digital Personal Data Protection Rules, 2025 require.
         </p>

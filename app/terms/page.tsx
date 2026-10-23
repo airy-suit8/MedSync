@@ -11,7 +11,7 @@ export default function TermsPage() {
       <section>
         <h2>What MedSync is</h2>
         <p>
-          MedSync is an academic software prototype built by a student team at Parul University to connect patients,
+          MedSync is an academic software prototype built by a student team to connect patients,
           doctors and laboratory technicians. It is not a hospital, clinic or healthcare provider, and it is provided
           as is, without guarantees of availability or fitness for clinical use.
         </p>

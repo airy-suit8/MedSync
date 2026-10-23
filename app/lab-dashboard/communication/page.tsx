@@ -111,15 +111,18 @@ export default function LabCommunicationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContact, currentUserId])
 
-  const setupRealtimeSubscriptions = () => {
+  const setupRealtimeSubscriptions = async () => {
+    // Join with the signed-in user's token. A channel that joins before the session token is loaded keeps
+    // the anon key, and RLS then strips every row from its events ("Error 401: Unauthorized").
+    await supabase.realtime.setAuth()
     // Subscribe to user online status changes
     const userStatusSubscription = supabase
       .channel('user_status')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'users',
-        filter: `role.in.(doctor,patient)`
+        table: 'profiles',
+        filter: `role=in.(doctor,patient)`
       }, (payload: any) => {
         if (payload.eventType === 'UPDATE') {
           const updatedUser = payload.new as any

@@ -145,6 +145,11 @@ test('signup, login, and dashboard access work for each local role', async ({ br
       await expect(roleInput).toBeChecked()
       // Doctors and labs enter a registration number (verified by the team later).
       if (role !== 'patient') await page.locator('#licenseNumber').fill(`TEST-${runId}`)
+      // Doctors also name their medical council and qualification, which an admin checks before approval.
+      if (role === 'doctor') {
+        await page.locator('#medicalCouncil').selectOption({ index: 1 })
+        await page.locator('#qualification').fill('MBBS')
+      }
       await expect(page.locator('#name')).toHaveValue(`Test ${role}`)
       await expect(page.locator('#email')).toHaveValue(email)
       await expect(page.locator('#password')).toHaveValue(password)
@@ -182,6 +187,10 @@ test('signup, login, and dashboard access work for each local role', async ({ br
         const doctor = users.find((candidate) => candidate.email === `medsync-${runId}-doctor@example.com`)
         const lab = users.find((candidate) => candidate.email === email)
         expect(patient && doctor && lab).toBeTruthy()
+        // A lab must be approved before it can look up patients, and it uploads only for a patient's linked
+        // doctor: do the admin's approval and link the patient to the doctor first.
+        await admin.from('profiles').update({ verified: true }).in('id', [doctor!.id, lab!.id])
+        await admin.from('doctor_patient_assignments').insert({ doctor_id: doctor!.id, patient_id: patient!.id, is_active: true })
 
         await page.goto('/lab-dashboard/upload', { waitUntil: 'domcontentloaded', timeout: 90_000 })
         const fileInput = page.locator('input[type="file"]')
@@ -219,6 +228,8 @@ test('signup, login, and dashboard access work for each local role', async ({ br
     }
   } finally {
     const { data } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+    const linkedDoctor = data.users.find((candidate) => candidate.email === `medsync-${runId}-doctor@example.com`)
+    if (linkedDoctor) await admin.from('doctor_patient_assignments').delete().eq('doctor_id', linkedDoctor.id)
     for (const email of createdEmails) {
       const user = data.users.find((candidate) => candidate.email === email)
       if (user) await admin.auth.admin.deleteUser(user.id)

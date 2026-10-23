@@ -24,10 +24,19 @@ export default function NotificationsInbox({ userId, role }: { userId: string; r
   useEffect(() => {
     load()
     const supabase = createClient()
-    const channel = supabase.channel(`notifications-inbox-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => load())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let cancelled = false
+    // Join with the user's token, not the anon key, or RLS hides every event from this channel.
+    supabase.realtime.setAuth().then(() => {
+      if (cancelled) return
+      channel = supabase.channel(`notifications-inbox-${userId}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => load())
+        .subscribe()
+    })
+    return () => {
+      cancelled = true
+      if (channel) supabase.removeChannel(channel)
+    }
   }, [userId, load])
 
   const markRead = async (ids: string[]) => {

@@ -24,6 +24,7 @@ export default function NotificationBell({ role }: { role: Role }) {
         if (!cancelled) setCount(unread ?? 0)
       }
       await refresh()
+      await supabase.realtime.setAuth() // join with the user's token, not the anon key
       // unique per bell: the phone top bar and the sidebar each have one
       channel = supabase.channel(`notifications-bell-${user.id}-${Math.random().toString(36).slice(2)}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, refresh)
