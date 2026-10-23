@@ -3,7 +3,7 @@
 // GEMINI_API_KEY). The doctor reviews the result before the patient sees it.
 //
 // Privacy: on Gemini's free tier Google may use submitted content to improve its
-// products. Real patient reports need the paid tier (see docs/AUDIT_REPORT.md, D7).
+// products. Real patient reports need the paid tier.
 
 export type LabFlag = "low" | "high" | "normal" | "unknown"
 export type LabValue = { name: string; value: string; unit: string | null; range: string | null; flag: LabFlag }

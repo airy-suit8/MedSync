@@ -127,7 +127,7 @@ debug-output.json
 medsync-flow.*
 middleware-fixed.ts
 
-# Archify scratch files (the finished diagram is in docs/architecture/)
+# Archify scratch files
 .archify/
 
 # Paste-ready production SQL (copies of the migrations above them; run in the SQL editor)
@@ -139,7 +139,11 @@ supabase/migrations/MedSync-prod-update-*.sql
 /archive/
 /*.zip
 
-# Report build tooling (deliverables in Report/ stay; dependencies and local env do not)
-/Report/_build/node_modules/
-/Report/_build/.env.local-demo
-/Report/_build/e2e-results/
+# Personal material kept on this machine only (project report, weekly reports, audit notes, local tooling)
+/Report/
+/Weekly Report/
+/docs/
+/phases.md
+/.claude/
+/.impeccable/
+/tests/phase5-closure-report.md
